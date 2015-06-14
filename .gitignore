@@ -2,5 +2,6 @@
 /*.egg-info
 /.tox
 /doc/build
+/doc/source/api
 /MANIFEST
 /dist
