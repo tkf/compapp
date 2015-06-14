@@ -9,6 +9,7 @@ simple_types = (
     long,
     str,
     unicode,
+    bool,
 )
 
 basic_types = simple_types + (tuple, list, dict, set)
