@@ -10,6 +10,7 @@ Contents:
 
 .. toctree::
 
+   examples/index.rst
    api.rst
    api/compapp.rst
    inheritance-diagram.rst
