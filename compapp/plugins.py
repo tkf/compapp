@@ -167,6 +167,7 @@ class AutoDump(Plugin):
 
     Example
     -------
+    ::
 
       class MyApp(Application):
           # Note: Application includes AutoDump by default
