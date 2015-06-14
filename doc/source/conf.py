@@ -31,6 +31,10 @@ sys.path.insert(0, os.path.abspath(os.path.join('..', '..')))
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
+    'sphinx.ext.autosummary',
+    'sphinx.ext.napoleon',
+    'sphinx.ext.inheritance_diagram',
+    'sphinx.ext.viewcode',
     'sphinx.ext.intersphinx',
 ]
 
@@ -81,7 +85,7 @@ exclude_patterns = []
 
 # The reST default role (used for this markup: `text`) to use for all
 # documents.
-#default_role = None
+default_role = 'py:obj'
 
 # If true, '()' will be appended to :func: etc. cross-reference text.
 #add_function_parentheses = True
@@ -287,5 +291,28 @@ texinfo_documents = [
 #texinfo_no_detailmenu = False
 
 
-# Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {'https://docs.python.org/': None}
+# -- Inter-Sphinx -------------------------------------------------------------
+
+intersphinx_mapping = {
+    'python': ('http://docs.python.org/', None),
+    'numpy': ('http://docs.scipy.org/doc/numpy/', None),
+    'scipy': ('http://docs.scipy.org/doc/scipy/reference/', None),
+    'matplotlib': ('http://matplotlib.org/', None),
+    'pandas': ('http://pandas.pydata.org/pandas-docs/stable/', None),
+}
+
+
+# -- Options autodoc ----------------------------------------------------------
+
+# http://sphinx.pocoo.org/ext/autodoc.html#confval-autodoc_member_order
+
+autodoc_member_order = 'bysource'
+
+autodoc_default_flags = {
+    'members': True,
+}
+
+
+# -- Inheritance diagram ------------------------------------------------------
+
+inheritance_graph_attrs = dict(rankdir="TB")
