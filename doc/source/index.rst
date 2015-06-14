@@ -9,9 +9,17 @@ Welcome to compapp's documentation!
 Contents:
 
 .. toctree::
-   :maxdepth: 2
+
+   api.rst
+   api/compapp.rst
+   inheritance-diagram.rst
+
+
+.. toctree::
+   :hidden:
 
    api/modules.rst
+
 
 Indices and tables
 ==================
