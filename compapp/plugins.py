@@ -8,26 +8,75 @@ class BaseDataStore(Plugin):
     pass
 
 
-class DirectoryDataStore(Plugin):
+class DirectoryDataStore(BaseDataStore):
+
+    """
+    Data-store using a directory.
+    """
+
     dir = Required(str)
+    overwrite = True
+    clear_before_run = True
 
     def prepare(self):
-        os.makedirs(self.dir)
+        if not os.path.isdir(self.dir):
+            os.makedirs(self.dir)
+
+    def path(self, *args, **kwds):
+        """
+        Path relative to the base directory `.dir`.
+
+        Parameters
+        ----------
+        args : str
+          Path relative to `.dir`.
+          It will be joined by `os.path.join`.
+
+        Keyword Arguments
+        -----------------
+        mkdir : bool
+           If `True` (default), make the parent directory of returned
+           `path` (i.e., ``os.path.dirname(path)``, not the `path`
+           itself).
+
+        Returns
+        -------
+        path : str
+           ``os.path.join(self.dir, *args)``
+
+        """
+        def makepath(args, mkdir=True):
+            path = os.path.join(self.dir, *args)
+            dirname = os.path.dirname(path)
+            if mkdir and not os.path.isdir(dirname):
+                os.makedirs(dirname)
+            return path
+        return makepath(args, **kwds)
 
 
-class SubDataStore(BaseDataStore):
+class SubDataStore(DirectoryDataStore):
+
+    """
+    Data-store using sub-directory of parent data-store.
+    """
 
     datastore = Delegate()
     ownerinfo = OwnerInfo()
 
     def path(self, *args, **kwds):
         # but how about List/Dict?
-        return self.path(self.name, *args, **kwds)
+        return self.datastore.path(self.name, *args, **kwds)
 
 
-class HashDataStore(Plugin):
+class HashDataStore(DirectoryDataStore):
+
+    """
+    Automatically allocated data-store based on hash of parameter.
+    """
+
     basedir = Required(str)
     owner = Owner()
+    include_plugin_parameters = False
 
     def ownerhash(self):
         def not_datastore(key, value):
@@ -44,7 +93,19 @@ class HashDataStore(Plugin):
 
 
 class Logger(Plugin):
+
+    """
+    Interface to pre-configured `logging.Logger`.
+
+    It does the following automatically:
+
+    - make a logger with an appropriate dotted name
+    - set up handler
+
+    """
+
     handler = Link('#.logger.handler')
+    # FIXME: how to resolve reference-to-self?
 
     def prepare(self):
         path = self.datastore.path('run.log')
@@ -54,12 +115,25 @@ class Logger(Plugin):
 class Debug(Plugin):
 
     """
+    Debug helper plugin.
+
+    Since `.Application` does not allow random attributes to be set,
+    it's hard to debug or interactively investigate simulation and
+    analysis by storing temporary variable to the `.Application`
+    instance.  `Debug` provides the place for that.
+
+    - If `store` flag is *not* set, it does not store anything;
+      assignment would be just no-op.  This is useful for debugging
+      memory-consuming object.
+    - If `logger` is defined, and its level is DEBUG, assignment
+      to `Debug` object writes out debug message.
+
     Example
     -------
     ::
 
       class MySimulator(Simulator):
-          dbg = Debug()
+          dbg = Debug
 
           def run(self):
               tmp = calculate()
@@ -74,14 +148,36 @@ class Debug(Plugin):
     """
 
     logger = Delegate()
+    store = True
 
 
 class AutoDump(Plugin):
 
     """
+    Automatically save owner's results.
 
+    Supported back-ends:
+
+    - `json`
+      for `dict`, `list` or `tuple`
     - `numpy.savez`
+      for `numpy.ndarray`
     - :ref:`pandas.HDFStore <pandas:io.hdf5>`
+      for pandas object
+
+    Example
+    -------
+
+      class MyApp(Application):
+          # Note: Application includes AutoDump by default
+
+          result_names = ('alpha',)
+
+          def run(self):
+              self.alpha = dict(pi='3.14')
+
+    Then ``MyApp({'datastore.dir': 'OUT'}).execute()`` creates a JSON
+    file at ``OUT/alpha.json``.
 
     """
 
@@ -146,16 +242,34 @@ class Figure(Plugin):
 class RecordVCS(Plugin):
 
     """
+    Record VCS revision automatically.
     """
+
+    vcs = 'git'
 
 
 class RecordTiming(Plugin):
 
     """
+    Record timing information.
     """
+
+    def pre_run(self):
+        pass
+
+    def post_run(self):
+        pass
 
 
 class PluginWrapper(Plugin):
 
     """
+    Combine multiple plugins into one plugin.
+
+    Some plugin such as `AutoDump` has no "interface" and just works
+    behind-the-scene.  In this case, having ``MyApp.autodump =
+    AutoDump`` is just wasting user's name-space.  This class avoid
+    this by moving all those behind-the-scene plugins into one name.
+    See `.Application.plugin` for its use-case.
+
     """
