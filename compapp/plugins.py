@@ -261,6 +261,17 @@ class RecordTiming(Plugin):
         pass
 
 
+class DumpParameters(Plugin):
+
+    """
+    Dump parameters used for its owner.
+    """
+    # FIXME: It should be included by default when `HashDataStore` is
+    #        used.  How to avoid running it twice (i.e.,
+    #        `DumpParameters` explicitly specified and the one called
+    #        via `HashDataStore`)?
+
+
 class PluginWrapper(Plugin):
 
     """

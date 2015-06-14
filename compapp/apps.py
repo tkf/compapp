@@ -18,6 +18,7 @@ class ApplicationPlugins(PluginWrapper):
         AutoDump as autodump,
         RecordVCS as recordvcs,
         RecordTiming as recordtiming,
+        DumpParameters as dumpparameters,
     )
 
 
