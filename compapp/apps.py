@@ -27,6 +27,10 @@ class Application(Executable):
     """
     Application base class.
 
+    Everything needed for save/load functions are implemented in
+    :attr:`plugin`.  So, all the methods you need to implement are
+    :meth:`run` and (optionally) :meth:`upstreams`.
+
     Examples
     --------
 

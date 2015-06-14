@@ -110,13 +110,19 @@ class Executable(Parametric):
             self.finish_all()
 
     def upstreams(self):
-        """
-        [TO BE OVERRIDE]
+        r"""
+        [TO BE OVERRIDE] Specify upstream `Executable` members.
+
+        Returns
+        -------
+        names : list
+            `list` of attribute name (`str`)
+
         """
 
     def prepare(self):
         """
-        [TO BE OVERRIDE]
+        [TO BE OVERRIDE] Do anything to be done before `run`.
         """
 
     def prepare_plugins(self):
@@ -141,7 +147,7 @@ class Executable(Parametric):
 
     def run(self):
         """
-        [TO BE OVERRIDE]
+        [TO BE OVERRIDE] Do the actual simulation/analysis.
         """
 
     def post_run(self):
@@ -154,7 +160,7 @@ class Executable(Parametric):
 
     def save(self):
         """
-        [TO BE OVERRIDE]
+        [TO BE OVERRIDE] Save the result manually.
         """
 
     def save_all(self):
@@ -166,12 +172,12 @@ class Executable(Parametric):
 
     def load(self):
         """
-        [TO BE OVERRIDE]
+        [TO BE OVERRIDE] Load saved result manually.
         """
 
     def finish(self):
         """
-        [TO BE OVERRIDE]
+        [TO BE OVERRIDE] Do anything to be done before exit.
         """
 
     def finish_plugins(self):
