@@ -1,6 +1,7 @@
 from .core import Executable
 from .plugins import PluginWrapper, AutoDump, Figure, \
     SubDataStore, HashDataStore
+from .properties import Propagate
 
 
 class Plotter(Executable):
@@ -34,7 +35,12 @@ class Plotter(Executable):
     """
 
     figure = Figure
-    datastore = SubDataStore
+
+    datastore = Propagate
+    # `Propagate` is used here so that figures are saved as
+    # ``PLOTTER_NAME/FIGURE_NAME.png`` rather than
+    # ``PLOTTER_NAME/figure/FIGURE_NAME.png`` (which would be the
+    # case if ``datastore = SubDataStore`` is used).
 
 
 class Simulator(Executable):
