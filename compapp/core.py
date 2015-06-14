@@ -56,6 +56,25 @@ class Parametric(Parameter):
     >>> getattr(mp, 'param.a')
     0
 
+    **Automatic parameter mix-in.**
+    If it is just for resetting parameter, you don't need to inherit
+    nested `Parametric` classes; it happens automatically.
+
+    >>> class Base(Parametric):
+    ...     class x(Parametric):
+    ...         i = 0
+    ...         j = 1
+    ...
+    ... class Another(Base):
+    ...     class x(object):  # do not need to inherit Base.x
+    ...         i = -1
+    ...
+    >>> par = Another()
+    >>> par.x.i
+    -1
+    >>> par.x.j
+    1
+
     """
 
     def get_params(self, deep=False, type=None):
