@@ -14,6 +14,7 @@ Contents:
    api.rst
    api/compapp.rst
    inheritance-diagram.rst
+   glossary.rst
 
 
 .. toctree::

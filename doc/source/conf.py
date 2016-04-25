@@ -113,6 +113,11 @@ pygments_style = 'sphinx'
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = True
 
+# reST snippet to be appended for every source file.
+rst_epilog = """
+.. |TO BE EXTENDED| replace:: :term:`[to be extended] <TBE>`
+"""
+
 
 # -- Options for HTML output ----------------------------------------------
 
