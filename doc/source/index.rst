@@ -10,6 +10,7 @@ Contents:
 
 .. toctree::
 
+   intro.rst
    examples/index.rst
    api.rst
    api/compapp.rst

@@ -24,7 +24,7 @@ class ApplicationPlugins(PluginWrapper):
 
 class Application(Executable):
 
-    """
+    r"""
     Application base class.
 
     Everything needed for save/load functions are implemented in
@@ -49,6 +49,18 @@ class Application(Executable):
     Traceback (most recent call last):
       ...
     AttributeError: 'MyApp' object has no attribute 'gamma'
+
+    Properties
+    ----------
+
+    .. attribute:: datastore
+
+       This is a "conventional" property in the sense `Application`
+       class itself is not aware of this property.  However, this is
+       the most heavily used property accessed by many
+       sub-`.Executable`\ s and `.Plugin` s.  Those "users" of
+       `datastore` property expects it to be a subclass of
+       `.BaseDataStore`.
 
     """
 
