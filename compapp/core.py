@@ -95,6 +95,7 @@ class Parametric(Parameter):
         params : dict
 
         """
+        # MAYBE: rename this to params()
 
     @classmethod
     def get_param_names(cls, type=None):
@@ -105,12 +106,14 @@ class Parametric(Parameter):
         method.
 
         """
+        # MAYBE: rename this to paramnames()
 
     @classmethod
     def get_param_defs(cls, deep=False, type=None):
         """
-        Get parameter "definitions" as a `dict`.
+        Get default parameters as a `dict`.
         """
+        # MAYBE: rename this to defaultparams()
 
 
 class Executable(Parametric):
