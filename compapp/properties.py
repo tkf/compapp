@@ -60,6 +60,10 @@ class Link(Parameter):
 
 class Root(Link):
 
+    """
+    An alias of ``Link('')``.
+    """
+
     def __init__(self):
         super(Root, self).__init__('')
 
@@ -68,6 +72,8 @@ class Delegate(Parameter):
 
     """
     Delegate parameter to its owner.
+
+    ``x = Delegate('x')`` is an shortcut of ``x = Link('..x')``.
 
     Examples
     --------
@@ -118,6 +124,16 @@ class OwnerInfo(Parameter):
 
     """
     Refer to information of owner.
+
+    Examples
+    --------
+    >>> class MyDelegate(Link):
+    ...
+    ...     ownerinfo = OwnerInfo()
+    ...
+    ...     def __init__(self):
+    ...         super(MyDelegate, self).__init__(self.ownerinfo.name)
+
     """
 
     @property
@@ -135,7 +151,7 @@ class OwnerInfo(Parameter):
 
 class Propagate(Parameter):
 
-    """
+    r"""
     Propagate value to nested classes.
 
     >>> class Parent(Parametric):
@@ -167,8 +183,12 @@ class Propagate(Parameter):
     >>> par.sampling_period
     10.0
 
+    .. todo:: Clarify this point.  Isn't it the same for `Delegate`?
+       Maybe `Delegate`\ ed attribute should be un-settable (hence
+       making a difference)?
+
     """
-# TODO: Is it fine to have BOTH `Delegate` and `Propagate` are they
+# TODO: Is it fine to have BOTH `Delegate` and `Propagate`?  Are they
 # any situation these two interfere in a complicated way?
 
 
