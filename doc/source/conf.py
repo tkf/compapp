@@ -320,9 +320,7 @@ intersphinx_mapping = {
 
 autodoc_member_order = 'bysource'
 
-autodoc_default_flags = {
-    'members': True,
-}
+autodoc_default_flags = ['members']
 
 
 # -- Inheritance diagram ------------------------------------------------------
