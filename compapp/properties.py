@@ -54,7 +54,8 @@ class Link(Parameter):
 
     """
 
-    def __init__(self, path):
+    def __init__(self, path, adapter=None, default=None):
+        # FIXME: default should use "unspecified" singleton
         self.path = path
 
 
@@ -101,6 +102,9 @@ class Delegate(Parameter):
 
     """
 
+    def __init__(self, adapter=None):
+        pass
+
 
 class Owner(Parameter):
 
@@ -127,12 +131,33 @@ class OwnerInfo(Parameter):
 
     Examples
     --------
-    >>> class MyDelegate(Link):
+    >>> class Path(Parameter):
     ...
     ...     ownerinfo = OwnerInfo()
+    ...     parent = Link('..path')
     ...
-    ...     def __init__(self):
-    ...         super(MyDelegate, self).__init__(self.ownerinfo.name)
+    ...     def fullpath(self):
+    ...         if self.ownerinfo.name is None:
+    ...             return ''
+    ...         else:
+    ...             return self.parent + '.' + self.ownerinfo.name
+    ...
+    >>> class MyParametric(Parametric):
+    ...     path = Path
+    ...
+    ...     class nested(Parametric):
+    ...         path = Path
+    ...
+    ...         class nested2(Parametric):
+    ...             path = Path
+    ...
+    >>> mp = MyParametric()
+    >>> mp.path
+    ''
+    >>> mp.nested.path
+    '.nested'
+    >>> mp.nested.nested2.path
+    '.nested.nested2'
 
     """
 
@@ -275,6 +300,9 @@ class Choice(Parameter):
 class Or(Parameter):
     """
     """
+
+    def __init__(self, *traits):
+        pass
 
 
 class LiteralEval(Parameter):

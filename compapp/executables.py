@@ -29,7 +29,7 @@ Executable subclasses.
 
 from .core import Executable
 from .plugins import PluginWrapper, AutoDump, Figure, \
-    SubDataStore, HashDataStore
+    SubDataStore, DirectoryDataStore, HashDataStore
 
 
 class Simulator(Executable):
@@ -46,7 +46,7 @@ class Simulator(Executable):
 
     """
 
-    datastore = SubDataStore
+    datastore = DirectoryDataStore
 
     class plugins(PluginWrapper):
         autodump = AutoDump
@@ -120,10 +120,8 @@ class Plotter(Analyzer):
               self.dist.execute(self.simulator)
 
     Then ``myapp.py --datastore.dir out/`` saves density plot in
-    ``out/density/0.png`` and cumulative distribution in
-    ``out/dist/0.png``.
-
-    .. todo:: It should go to ``out/density-0.png``.
+    ``out/density-0.png`` and cumulative distribution in
+    ``out/dist-0.png``.
 
     """
 

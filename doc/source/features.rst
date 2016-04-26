@@ -16,16 +16,25 @@ in this document) is hard.
    :header-rows: 1
    :widths: 1 1 5
 
-   * - `.Application`/`.Executable` subclasses
+   * - `.Application` & `.Executable` subclasses
      - |datastore| property
      - Behavior
    * - `.SimulationApp`
      - `.DirectoryDataStore`
      - Simulation is run with a specified data directory in which
        simulation parameters and results are saved.  :term:`Nested
-       classes <nested class>` such as `Simulator` and `Plotter` may
-       use sub-directories.
-   * - `.AnalysisApp`
+       classes` such as `Simulator` and `Plotter` may use sub-paths.
+   * - `.Simulator`
+     - `.DirectoryDataStore`
+     - `.Simulator` uses the same |datastore| property as
+       `.SimulationApp`.  However, it is usually nests in some
+       :term:`owner app`.  In this case, `.DirectoryDataStore`
+       automatically allocate sub-directory under the directory used
+       by the :term:`owner app`.
+   * - `.Plotter`, `.DataLoader`
+     - `.SubDataStore`
+     - Use files under the directory of the :term:`owner app`.
+   * - `.AnalysisApp`, `.Analyzer`
      - `.HashDataStore`
      - Data analysis is run with a data directory automatically
        allocated depending on the parameter values (including data
@@ -38,17 +47,6 @@ in this document) is hard.
        datastore path is not human friendly (it is based on hash),
        compapp provides :ref:`command line interface <cli>` to help
        house-keeping.
-   * - `.Plotter`
-     - `.Propagate`
-     - Use the |datastore| property of the application using this
-       plotter (called the :term:`owner app` or :term:`owner class`).
-   * - `.Simulator`
-     - `.SubDataStore`
-     - Use sub-directory of the datastore directory used by the
-       :term:`owner app`.
-   * - `.Analyzer`
-     - `.HashDataStore`
-     - (same as `.AnalysisApp`)
 
 .. note:: `.Simulator` and `.Analyzer` have `.AutoDump` plugin which
    dumps the results of simulation or analysis to the datastore.  This

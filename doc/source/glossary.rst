@@ -39,6 +39,9 @@
      An owner class happened to be a subclass of `.Application` is
      called an *owner app*.
 
+     .. todo:: Check if this terminology is compatible with the owner
+        argument of `object.__get__` etc. (for :term:`descriptor`).
+
    TBE
    to be extended
 
