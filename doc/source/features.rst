@@ -48,13 +48,6 @@ in this document) is hard.
        compapp provides :ref:`command line interface <cli>` to help
        house-keeping.
 
-.. note:: `.Simulator` and `.Analyzer` have `.AutoDump` plugin which
-   dumps the results of simulation or analysis to the datastore.  This
-   is the main difference between `.Analyzer` and `.AnalysisApp`;
-   i.e., `.AnalysisApp` does not save the result.
-
-.. todo:: Then why I want to define both `.Analyzer` and `.AnalysisApp`?
-
 .. todo:: How should I support "in-memory" datastore?
 
 

@@ -47,7 +47,7 @@ class DataLoader(Simulator):
     :term:`Data source` loaded from disk.
     """
 
-    plugins = PluginWrapper
+    plugins = None  # null-out plugins
     """
     Since no heavy computations are needed, `.AutoDump` plugin is not
     included.
@@ -61,6 +61,9 @@ class Analyzer(Executable):
     """
 
     datastore = HashDataStore
+
+    class plugins(PluginWrapper):
+        autodump = AutoDump
 
     def execute(self, data, **kwds):
         super(Analyzer, self).execute(data, **kwds)
