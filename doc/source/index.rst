@@ -12,6 +12,7 @@ Contents:
 
    features.rst
    examples/index.rst
+   executables.rst
    api.rst
    api/compapp.rst
    inheritance-diagram.rst

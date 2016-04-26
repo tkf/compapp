@@ -1,29 +1,5 @@
 """
 Executable subclasses.
-
-.. glossary::
-
-   data source
-
-     Executable classes *not* requiring any other resources other than
-     the parameters are called the *data source*.  Data source classes
-     provided in this module are:
-
-     .. autosummary::
-
-        Simulator
-        DataLoader
-
-   data sink
-
-     Executable classes requiring other resource are called the *data
-     sink*.  Data sink classes provided in this module are:
-
-     .. autosummary::
-
-        Analyzer
-        Plotter
-
 """
 
 
