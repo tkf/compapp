@@ -49,3 +49,8 @@
      required to be overridden by subclasses.  In Python code,
      docstrings for such methods and properties are prefixed with
      ``|TO BE EXTENDED|``.
+
+   composition over inheritance
+
+     See: `Composition over inheritance - Wikipedia
+     <https://en.wikipedia.org/wiki/Composition_over_inheritance>`_

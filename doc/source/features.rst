@@ -58,3 +58,114 @@ in this document) is hard.
 .. todo:: Then why I want to define both `.Analyzer` and `.AnalysisApp`?
 
 .. todo:: How should I support "in-memory" datastore?
+
+
+Parameter management
+====================
+
+Simulations and data analysis require various parameters for each run.
+Those parameters often have nested sub-parameters reflecting
+sub-simulations and sub-analysis.  compapp naturally supports such
+nested parameters using :term:`nested class`.  See `.Parametric`.
+
+.. todo:: Explain data file mixin also.  But I should provide it in a
+   separated module.
+
+When parameters have deeply nested structure, it is hard to run a
+simulation or analysis with slightly different parameters.
+`.Application.cli` provides CLI to set such "deep parameters" on the
+fly.
+
+
+Automatic type-check and value-check for properties (traits)
+============================================================
+
+Simulations and data analysis require certain type of parameters but
+checking them manually is hard and letting an error to happen at the
+very end of long-running computations is not an option.  compapp
+provides a very easy way to configure such type checks.  The main idea
+implemented in `.Parametric` is that, for simple Python data types,
+the default values define required data type:
+
+>>> class MyParametric(Parametric):
+...     i = 1
+...     x = 2.0
+>>> MyParametric(i=1.0)
+Traceback (most recent call last):
+    ...
+ValueError: i must be an int
+>>> MyParametric(x='2.0')
+Traceback (most recent call last):
+    ...
+ValueError: x must be a float
+
+
+For more complex control, there are :term:`descriptors <descriptor>`
+such as `.Instance`, `.Required`, `.Optional`, etc.  Collection-type
+descriptors such as `.List` and `.Dict` restricts data types of its
+component (e.g., dict key has to be a string and the value has to be
+int) and other traits such as maximal length.  The descriptor
+`.Choice` restricts the *value* of properties, rather than the type.
+The descriptor `.Or` defines a property that must satisfy one of
+defined restrictions.  Auto-conversion descriptors such as `.CSVList`
+and `.LiteralEval` are useful when setting complex values.
+
+
+Linking properties
+==================
+
+compapp prefers :term:`composition over inheritance`.  However, using
+composition makes it hard to share properties between objects whereas
+in inheritance it is easy (or too easy [#]_) to share properties
+between parent and sub classes.  compapp provides various *linking
+properties* (`.Link`, `.Delegate`, `.Propagate`, etc.) which can refer
+to properties of other objects.
+
+.. [#] In other words, sharing properties is opt-in for composition
+   approach and forced for inheritance approach.
+
+
+Hooks
+=====
+
+`.Executable` defines various methods :term:`to be extended` where
+user's simulation and data analysis classes can hook some
+computations.  User should at least extend the `run <.Executable.run>`
+method to implement some computations.  Methods `save
+<.Executable.save>` and `load <.Executable.load>` can also be extended
+but for data save/load, `.AutoDump` plugin can handle it
+automatically.  There are `.prepare` and `.finish` methods to be
+called always not depending on whether the executable class is `run
+<.Executable.run>` or `load <.Executable.load>`\ ed. Sub-simulations
+and analysis defined as one of the `.upstreams` are executed before
+`run <.Executable.run>`.
+
+See also: :ref:`api`
+
+
+Plugins
+=======
+
+`.Executable` (hence `.Application`) provides various hooks so that it
+is easy to "inject" some useful functions via plugins.  In fact, the
+main aim of compapp is to provide well-defined set of hooks and a
+system for easily coordinating different components by `linking
+properties`_.
+
+Here is the list of plugins provided by `compapp.plugins`:
+
+
+.. currentmodule:: compapp.plugins
+
+.. autosummary::
+
+   DirectoryDataStore
+   SubDataStore
+   HashDataStore
+   Logger
+   Debug
+   AutoDump
+   Figure
+   RecordVCS
+   RecordTiming
+   DumpParameters

@@ -192,6 +192,16 @@ class Propagate(Parameter):
 # any situation these two interfere in a complicated way?
 
 
+class Instance(Parameter):
+
+    """
+    Check if the property is of a specific type.
+    """
+
+    def __init__(self, type):
+        pass
+
+
 class Required(Parameter):
 
     """
