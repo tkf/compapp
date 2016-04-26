@@ -4,8 +4,13 @@ Executable subclasses.
 
 
 from .core import Executable
+from properties import Instance
 from .plugins import PluginWrapper, Figure, \
     BaseDataStore, SubDataStore, DirectoryDataStore, HashDataStore
+
+
+class DictObject(object):  # TODO: implement dict-object hybrid
+    pass
 
 
 class MagicPlugins(PluginWrapper):
@@ -21,31 +26,14 @@ class Computer(Executable):
 
     """
     `.Executable` bundled with useful plugins.
-
-    Examples
-    --------
-
-    **Strict attribute.**
-    `Computer` subclass does not allow setting attribute other than
-    its parameter or result (specified by :attr:`result_names`).  This
-    makes sure that `Computer` holds the same data after `run` and
-    `load`.  To save intermediate data for debugging for interactive
-    use, set it to :attr:`dbg` (instance of `.Debug`).
-
-    >>> class MyApp(Computer):
-    ...    result_names = ('alpha', 'beta')
-    >>> app = MyApp()
-    >>> app.alpha = 1.0
-    >>> app.gamma
-    Traceback (most recent call last):
-      ...
-    AttributeError: 'MyApp' object has no attribute 'gamma'
-
     """
 
-    result_names = ()
+    results = Instance(DictObject)
     """
-    Names of attributes allowed to be set.  A list of `str`.
+    Attributes set to this property are saved to `.datastore` by
+    `.AutoDump` plugin.  Downstream classes *must* rely only on the
+    data under this property.  For debugging purpose, use `.dbg` to
+    store intermediate variables.
     """
 
     magics = MagicPlugins

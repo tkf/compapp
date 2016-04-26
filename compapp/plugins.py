@@ -245,14 +245,18 @@ class AutoDump(Plugin):
       class MyApp(Application):
           # Note: Application includes AutoDump by default
 
-          result_names = ('alpha',)
-
           def run(self):
-              self.alpha = dict(pi='3.14')
+              self.results.alpha = dict(pi='3.14')
 
     Then ``MyApp({'datastore.dir': 'OUT'}).execute()`` creates a JSON
-    file at ``OUT/alpha.json``.
+    file at ``OUT/results.json`` with content ``{'alpha': {'pi':
+    3.14}}``.
 
+    """
+
+    result_names = ('results',)
+    """
+    These attributes of the owner class are dumped.
     """
 
 

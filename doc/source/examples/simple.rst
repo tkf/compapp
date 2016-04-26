@@ -11,4 +11,4 @@ Run::
 
 Result::
 
-  OUT/autodump.json
+  OUT/results.json
