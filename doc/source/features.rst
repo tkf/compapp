@@ -10,7 +10,7 @@ When writing programs for numerical simulations and data analysis,
 managing directories to store resulting data (called :term:`datastore`
 in this document) is hard.
 
-.. |datastore| replace:: `datastore <compapp.apps.Application.datastore>`
+.. |datastore| replace:: `datastore <compapp.executables.Computer.datastore>`
 
 .. list-table::
    :header-rows: 1
@@ -23,13 +23,14 @@ in this document) is hard.
      - `.DirectoryDataStore`
      - Simulation is run with a specified data directory in which
        simulation parameters and results are saved.  :term:`Nested
-       classes` such as `Simulator` and `Plotter` may use sub-paths.
+       classes <nested class>` such as `.Simulator` and `.Plotter` may
+       use sub-paths.
    * - `.Simulator`
      - `.DirectoryDataStore`
      - `.Simulator` uses the same |datastore| property as
        `.SimulationApp`.  However, it is usually nests in some
        :term:`owner app`.  In this case, `.DirectoryDataStore`
-       automatically allocate sub-directory under the directory used
+       automatically allocates sub-directory under the directory used
        by the :term:`owner app`.
    * - `.Plotter`, `.DataLoader`
      - `.SubDataStore`
@@ -64,7 +65,7 @@ nested parameters using :term:`nested class`.  See `.Parametric`.
 
 When parameters have deeply nested structure, it is hard to run a
 simulation or analysis with slightly different parameters.
-`.Application.cli` provides CLI to set such "deep parameters" on the
+`.Application.cli` provides a CLI to set such "deep parameters" on the
 fly.
 
 
@@ -122,14 +123,14 @@ Hooks
 `.Executable` defines various methods :term:`to be extended` where
 user's simulation and data analysis classes can hook some
 computations.  User should at least extend the `run <.Executable.run>`
-method to implement some computations.  Methods `save
-<.Executable.save>` and `load <.Executable.load>` can also be extended
-but for data save/load, `.AutoDump` plugin can handle it
-automatically.  There are `.prepare` and `.finish` methods to be
-called always not depending on whether the executable class is `run
-<.Executable.run>` or `load <.Executable.load>`\ ed. Sub-simulations
-and analysis defined as one of the `.upstreams` are executed before
-`run <.Executable.run>`.
+method to implement some computations.  Although methods `save
+<.Executable.save>` and `load <.Executable.load>` can also be
+extended, `.AutoDump` plugin can handle saving and loading results and
+parameters automatically.  There are `.prepare` and `.finish` methods
+to be called always, not depending on whether the executable class is
+`run <.Executable.run>` or `load <.Executable.load>`\ ed.
+Sub-simulations and analysis defined as `.upstreams` are executed
+before `run <.Executable.run>`.
 
 See also: :ref:`api`
 
