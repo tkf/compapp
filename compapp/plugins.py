@@ -210,7 +210,7 @@ class Figure(Plugin):
 
     """
 
-    datastore = SubDataStore()
+    datastore = Delegate()
     show = False
 
     def __call__(self, name=None):
