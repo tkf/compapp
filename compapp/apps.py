@@ -9,18 +9,7 @@ Application base classes.
 
 """
 
-from .core import Executable
 from .executables import Simulator
-from .plugins import PluginWrapper
-
-
-class ApplicationPlugins(PluginWrapper):
-    from .plugins import (
-        AutoDump as autodump,
-        RecordVCS as recordvcs,
-        RecordTiming as recordtiming,
-        DumpParameters as dumpparameters,
-    )
 
 
 class Application(Simulator):
@@ -28,54 +17,11 @@ class Application(Simulator):
     r"""
     Application base class.
 
-    Everything needed for save/load functions are implemented in
-    :attr:`plugin`.  So, all the methods you need to implement are
-    :meth:`run` and (optionally) :meth:`upstreams`.
-
-    Examples
-    --------
-
-    **Strict attribute.**
-    `Application` subclass does not allow setting attribute other than
-    its parameter or result (specified by :attr:`result_names`).
-    This makes sure that `Application` holds the same data after `run`
-    and `load`.  To save intermediate data for debugging for
-    interactive use, set it to :attr:`dbg` (instance of `.Debug`).
-
-    >>> class MyApp(Application):
-    ...    result_names = ('alpha', 'beta')
-    >>> app = MyApp()
-    >>> app.alpha = 1.0
-    >>> app.gamma
-    Traceback (most recent call last):
-      ...
-    AttributeError: 'MyApp' object has no attribute 'gamma'
-
-    Properties
-    ----------
-
-    .. attribute:: datastore
-
-       This is a "conventional" property in the sense `Application`
-       class itself is not aware of this property.  However, this is
-       the most heavily used property accessed by many
-       sub-`.Executable`\ s and `.Plugin` s.  Those "users" of
-       `datastore` property expects it to be a subclass of
-       `.BaseDataStore`.
+    Everything needed for save/load functions are implemented by
+    plugins (see: :attr:`.magics`).  So, all the methods you need to
+    implement are :meth:`run` and (optionally) :meth:`upstreams`.
 
     """
-
-    result_names = ()
-    """
-    Names of attributes allowed to be set.  A list of `str`.
-    """
-
-    from .plugins import (
-        Debug as dbg,
-        Figure as figure,
-        Logger as logger,
-    )
-    plugin = ApplicationPlugins
 
     @classmethod
     def cli(cls, args=None):
