@@ -13,7 +13,9 @@ class Simulator(Executable):
     """
     Run computations solely depending on parameters.
 
-    .. todo:: Do I need it?  Why not just use `.SimulationApp`?
+    Note that usually user should subclass `.SimulationApp` (which is
+    a subclass of this class) rather than this `Simulator` class since
+    `.SimulationApp` has richer functionalities.
 
     .. todo:: If I were to use this class, it's better to have
        `result_names` stuff implemented in `.Application`.

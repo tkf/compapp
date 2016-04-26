@@ -35,8 +35,10 @@ Kinds of computation
    application
 
      Executable classes which orchestrate other executable classes are
-     called *application* or *app*.  `compapp.apps` defines a few base
-     classes for this purpose:
+     called *application* or *app*.  Note that an *app* is also a
+     :term:`data source` since it does not require additional data
+     source.  `compapp.apps` defines a few base classes for this
+     purpose:
 
      .. currentmodule:: compapp.apps
 
@@ -64,6 +66,13 @@ makes sense they are not subclass of `.Simulator` or `.Application`.
 Typically, `.Analyzer` is used from `.AnalysisApp` combined with
 `.DataLoader` or `.Simulator`.
 
+Note that `.Simulator` exists because of implementation purpose (both
+`.DataLoader` and `.Application` subclasses it; see also
+:ref:`inheritance-diagram`).  It is included here for "symmetry" of
+the table.  It is not recommended to use it directly and
+`.SimulationApp` should always be used even when it's too simple to be
+called an :term:`app`.
+
 
 .. list-table::
    :header-rows: 1
@@ -71,48 +80,25 @@ Typically, `.Analyzer` is used from `.AnalysisApp` combined with
    * - Executable
      - |datastore|
      - Computation
-     - Plugins
    * - `.Simulator`
      - `.DirectoryDataStore`
      - :term:`data source`
-     - `.AutoDump`
    * - `.DataLoader`
      - `.SubDataStore`
      - :term:`data source`
-     -
    * - `.Analyzer`
      - `.HashDataStore`
      - :term:`data sink`
-     - `.AutoDump`
    * - `.Plotter`
      - `.SubDataStore`
      - :term:`data sink`
-     -
    * - `.SimulationApp`
      - `.DirectoryDataStore`
      - :term:`app`
-     - `.AutoDump`, `.RecordVCS`, `.RecordTiming`, `.DumpParameters`,
-       etc.
    * - `.AnalysisApp`
      - `.HashDataStore`
      - :term:`app`
-     - (ditto)
 
 .. |datastore| replace:: `datastore <compapp.apps.Application.datastore>`
-
-.. todo:: It makes sense for `.Analyzer` to not have an entry point
-   (i.e., not an app) and so it make sense to have
-   `.Analyzer`-`AnalysisApp` distinction.  However, why one needs
-   `.Simulator`-`SimulationApp` distinction?  **Isn't it nice if every
-   simulator has CLI and so is runnable?**
-
-   How about distinction along the plugins axis?  `.Simulator` and
-   `SimulationApp` are using different set of plugins.  But probably
-   they shouldn't.  For example, `.RecordVCS` should be turned off
-   automatically for sub-apps (or the result can be cached).  It means
-   that having `.RecordVCS` in `.Simulator` does not hurt.  I'd like
-   to combine different applications together so this auto-off feature
-   should be implemented and so cannot be the reason for the
-   distinction.
 
 .. todo:: Maybe `.Analyzer.datastore` should be `.DirectoryDataStore`.

@@ -10,6 +10,7 @@ Application base classes.
 """
 
 from .core import Executable
+from .executables import Simulator
 from .plugins import PluginWrapper
 
 
@@ -22,7 +23,7 @@ class ApplicationPlugins(PluginWrapper):
     )
 
 
-class Application(Executable):
+class Application(Simulator):
 
     r"""
     Application base class.
