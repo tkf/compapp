@@ -43,9 +43,15 @@ class Computer(Executable):
 
     from .plugins import (
         Debug as dbg,
-        Figure as figure,
         Logger as logger,
     )
+
+    class figure(Figure):
+        """
+        `.Figure` with `.SubDataStore`.
+        """
+
+        datastore = SubDataStore  # Figure.datastore is Delegate()
 
     datastore = BaseDataStore
     r"""

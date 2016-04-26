@@ -11,4 +11,4 @@ Run::
 
 Result::
 
-  OUT/figure/0.png
+  OUT/figure-0.png
