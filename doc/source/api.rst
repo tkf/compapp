@@ -19,12 +19,16 @@
    core.Executable.load
    core.Executable.finish
    core.Executable.execute
+   executables.Simulator
+   executables.Simulator.run
+   executables.Simulator.execute
+   executables.DataLoader
+   executables.Analyzer
+   executables.Analyzer.run
+   executables.Analyzer.execute
+   executables.Plotter
    apps
    apps.Application
    apps.SimulationApp
    apps.AnalysisApp
    plugins
-   utils
-   utils.Plotter
-   utils.Simulator
-   utils.Analyzer

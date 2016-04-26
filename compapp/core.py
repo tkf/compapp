@@ -122,12 +122,12 @@ class Executable(Parametric):
     The base class supporting execution and plugin mechanism.
     """
 
-    def execute(self, finish=True):
+    def execute(self, data=None, finish=True):
         self.prepare_all()
         if self.is_loadable():
             self.load()
         else:
-            self.run_all()
+            self.run_all(data)
             self.save_all()
         if finish:
             self.finish_all()
@@ -168,17 +168,24 @@ class Executable(Parametric):
     def pre_run(self):
         call_plugins(self, 'pre_run')
 
-    def run(self):
+    def run(self, data=None):
         """
         |TO BE EXTENDED| Do the actual simulation/analysis.
+
+        Note that call signature of this method for `.Simulator` and
+        `.Analyzer` is different:
+
+        - ``Simulator.run()``: ``data`` is *not* passed
+        - ``Analyzer.run(data)``: ``data`` argument is *mandatory*
+
         """
 
     def post_run(self):
         call_plugins(self, 'post_run')
 
-    def run_all(self):
+    def run_all(self, data=None):
         self.pre_run()
-        self.run()
+        self.run(data=None)
         self.post_run()
 
     def save(self):
