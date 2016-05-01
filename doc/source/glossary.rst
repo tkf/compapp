@@ -9,7 +9,7 @@
      Datastore is the directory to put your simulation and analysis
      results.  compapp may support more advanced data storage (e.g.,
      data bases) in the future.  See also `datastore
-     <compapp.apps.Application.datastore>` property.
+     <compapp.apps.Computer.datastore>` property.
 
    nested class
    owner class
@@ -36,7 +36,7 @@
      - `SubSimulator` is a nested class of `MySimulator`.
      - `MySimulator` is a nested class of `MyApp`.
 
-     An owner class happened to be a subclass of `.Application` is
+     An owner class happened to be a subclass of `.Computer` is
      called an *owner app*.
 
      .. todo:: Check if this terminology is compatible with the owner

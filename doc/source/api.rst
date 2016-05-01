@@ -18,10 +18,9 @@
    core.Executable.load
    core.Executable.finish
    core.Executable.execute
-   executables.DataLoader
+   executables.Loader
    executables.Plotter
    apps
-   apps.Application
-   apps.SimulationApp
-   apps.AnalysisApp
+   apps.Computer
+   apps.Memoizer
    plugins

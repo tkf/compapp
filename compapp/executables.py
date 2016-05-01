@@ -23,7 +23,7 @@ class MagicPlugins(PluginWrapper):
     )
 
 
-class Computer(Executable):
+class Assembler(Executable):
 
     """
     `.Executable` bundled with useful plugins.
@@ -56,7 +56,7 @@ class Computer(Executable):
 
     datastore = DirectoryDataStore
     r"""
-    This is a "conventional" property in the sense `Computer` class
+    This is a "conventional" property in the sense `Assembler` class
     itself is not aware of this property.  However, this is the most
     heavily used property accessed by many sub-`.Executable`\ s and
     `.Plugin`\ s.  Those "users" of `datastore` property expects it to
@@ -75,7 +75,7 @@ class Computer(Executable):
         raise NotImplementedError
 
 
-class DataLoader(Computer):
+class Loader(Assembler):
     """
     :term:`Data source` loaded from disk.
     """
@@ -90,10 +90,10 @@ class DataLoader(Computer):
     datastore = SubDataStore
 
 
-class Plotter(Computer):
+class Plotter(Assembler):
 
     """
-    An `.Computer` subclass specialized for plotting.
+    An `.Assembler` subclass specialized for plotting.
 
     Example
     -------
@@ -105,7 +105,7 @@ class Plotter(Computer):
       class CumulativeDistributionPlotter(Plotter):
           pass
 
-      class MyApp(SimulationApp):
+      class MyApp(Computer):
           density = DensityPlotter
           dist = CumulativeDistributionPlotter
 

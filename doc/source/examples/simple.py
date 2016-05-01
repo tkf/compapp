@@ -1,7 +1,7 @@
-from compapp import SimulationApp
+from compapp import Computer
 
 
-class SimpleApp(SimulationApp):
+class SimpleApp(Computer):
 
     x = 1.0
     y = 2.0

@@ -10,30 +10,30 @@ When writing programs for numerical simulations and data analysis,
 managing directories to store resulting data (called :term:`datastore`
 in this document) is hard.
 
-.. |datastore| replace:: `datastore <compapp.executables.Computer.datastore>`
+.. |datastore| replace:: `datastore <compapp.executables.Assembler.datastore>`
 
 .. list-table::
    :header-rows: 1
    :widths: 1 1 5
 
-   * - `.Application` & `.Executable` subclasses
+   * - `.Computer` & `.Executable` subclasses
      - |datastore| property
      - Behavior
-   * - `.SimulationApp`
+   * - `.Computer`
      - `.DirectoryDataStore`
      - Simulation is run with a specified data directory in which
        simulation parameters and results are saved.  :term:`Nested
        classes <nested class>` such as `.Plotter` and other nested
-       `.SimulationApp`\ s may use sub-paths.
-   * - :term:`nested <nested class>` `.SimulationApp`
+       `.Computer`\ s may use sub-paths.
+   * - :term:`nested <nested class>` `.Computer`
      - `.DirectoryDataStore`
-     - If a `.SimulationApp` subclass nests in some :term:`owner app`,
+     - If a `.Computer` subclass nests in some :term:`owner app`,
        `.DirectoryDataStore` automatically allocates sub-directory
        under the directory used by the :term:`owner app`.
-   * - `.Plotter`, `.DataLoader`
+   * - `.Plotter`, `.Loader`
      - `.SubDataStore`
      - Use files under the directory of the :term:`owner app`.
-   * - `.AnalysisApp`
+   * - `.Memoizer`
      - `.HashDataStore`
      - Data analysis is run with a data directory automatically
        allocated depending on the parameter values (including data
@@ -41,7 +41,7 @@ in this document) is hard.
        the same result given parameters.  Thus, if the datastore
        already exists when this application is run, it loads the
        results rather than re-computing them.  In other words,
-       combinations of `.AnalysisApp` act as build dependencies
+       combinations of `.Memoizer` act as build dependencies
        defined by Makefile and similar build tools.  Since generated
        datastore path is not human friendly (it is based on hash),
        compapp provides :ref:`command line interface <cli>` to help
@@ -63,7 +63,7 @@ nested parameters using :term:`nested class`.  See `.Parametric`.
 
 When parameters have deeply nested structure, it is hard to run a
 simulation or analysis with slightly different parameters.
-`.Application.cli` provides a CLI to set such "deep parameters" on the
+`.Computer.cli` provides a CLI to set such "deep parameters" on the
 fly.
 
 
@@ -134,7 +134,7 @@ See also: :ref:`api`
 Plugins
 =======
 
-`.Executable` (hence `.Application`) provides various hooks so that it
+`.Executable` (hence `.Computer`) provides various hooks so that it
 is easy to "inject" some useful functions via plugins.  In fact, the
 main aim of compapp is to provide well-defined set of hooks and a
 system for easily coordinating different components by `linking

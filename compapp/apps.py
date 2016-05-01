@@ -2,17 +2,16 @@
 Application base classes.
 
 .. inheritance-diagram::
-   Application
-   SimulationApp
-   AnalysisApp
+   Computer
+   Memoizer
    :parts: 1
 
 """
 
-from .executables import Computer
+from .executables import Assembler
 
 
-class Application(Computer):
+class Computer(Assembler):
 
     r"""
     Application base class.
@@ -87,7 +86,7 @@ class Application(Computer):
 
         Returns
         -------
-        self : Application
+        self : Computer
 
         """
         self = cls(**param)
@@ -95,13 +94,10 @@ class Application(Computer):
         return self
 
 
-SimulationApp = Application
-
-
-class AnalysisApp(Application):
+class Memoizer(Computer):
 
     """
-    `Application` with `.HashDataStore`.
+    `Computer` with `.HashDataStore`.
     """
 
     from .plugins import HashDataStore as datastore

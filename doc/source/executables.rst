@@ -20,7 +20,7 @@ Kinds of computation
 
      .. autosummary::
 
-        DataLoader
+        Loader
 
    data sink
 
@@ -46,9 +46,8 @@ Kinds of computation
 
      .. autosummary::
 
-        Application
-        SimulationApp
-        AnalysisApp
+        Computer
+        Memoizer
 
 
 Taxonomy of executables
@@ -59,10 +58,10 @@ well when kind of computations, the type of |datastore| and used
 plugins are compared.
 
 Executables with `.SubDataStore` require parent executable.  It fits
-well with `.DataLoader` since just loading data is useless.  It also
+well with `.Loader` since just loading data is useless.  It also
 fits well with `.Plotter` since it is a data sink, i.e., it needs data
 for plotting.  Since `.Plotter` needs some external :term:`data
-source`, it makes sense that it is not a subclass of `.Application`.
+source`, it makes sense that it is not a subclass of `.Computer`.
 
 
 .. list-table::
@@ -71,17 +70,17 @@ source`, it makes sense that it is not a subclass of `.Application`.
    * - Executable
      - |datastore|
      - Computation
-   * - `.DataLoader`
+   * - `.Loader`
      - `.SubDataStore`
      - :term:`data source`
    * - `.Plotter`
      - `.SubDataStore`
      - :term:`data sink`
-   * - `.SimulationApp`
+   * - `.Computer`
      - `.DirectoryDataStore`
      - :term:`app`
-   * - `.AnalysisApp`
+   * - `.Memoizer`
      - `.HashDataStore`
      - :term:`app`
 
-.. |datastore| replace:: `datastore <compapp.apps.Application.datastore>`
+.. |datastore| replace:: `datastore <compapp.apps.Computer.datastore>`

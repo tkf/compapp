@@ -190,9 +190,9 @@ class Debug(Plugin):
     """
     Debug helper plugin.
 
-    Since `.Application` does not allow random attributes to be set,
+    Since `.Computer` does not allow random attributes to be set,
     it's hard to debug or interactively investigate simulation and
-    analysis by storing temporary variable to the `.Application`
+    analysis by storing temporary variable to the `.Computer`
     instance.  `Debug` provides the place for that.
 
     - If `store` flag is *not* set, it does not store anything;
@@ -205,7 +205,7 @@ class Debug(Plugin):
     -------
     ::
 
-      class MySimulator(SimulationApp):
+      class MySimulator(Computer):
           dbg = Debug
 
           def run(self):
@@ -242,8 +242,8 @@ class AutoDump(Plugin):
     -------
     ::
 
-      class MyApp(Application):
-          # Note: Application includes AutoDump by default
+      class MyApp(Computer):
+          # Note: Computer includes AutoDump by default
 
           def run(self):
               self.results.alpha = dict(pi='3.14')
@@ -281,7 +281,7 @@ class Figure(Plugin):
               ax = fig.add_subplot(111)
               ax.plot(...)
 
-      class MyApp(Application):
+      class MyApp(Computer):
           figure = Figure
           plotter = MyPlotter
 
@@ -397,6 +397,6 @@ class PluginWrapper(Plugin):
     behind-the-scene.  In this case, having ``MyApp.autodump =
     AutoDump`` is just wasting user's name-space.  This class avoid
     this by moving all those behind-the-scene plugins into one name.
-    See `.Application.plugin` for its use-case.
+    See `.Computer.plugin` for its use-case.
 
     """

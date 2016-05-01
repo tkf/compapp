@@ -1,7 +1,7 @@
-from compapp import SimulationApp
+from compapp import Computer
 
 
-class PlottingApp(SimulationApp):
+class PlottingApp(Computer):
 
     def run(self):
         fig = self.figure()
