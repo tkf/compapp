@@ -13,22 +13,24 @@ Kinds of computation
    data source
 
      Executable classes *not* requiring any other resources other than
-     the parameters are called the *data source*.  Data source classes
-     provided in `compapp.executables` are:
+     the parameters are called the *data source*.  That is to say, an
+     Executable class is a data source if its :code:`run` method
+     overriding `.Executable.run` does *not* taking any arguments.
+     Example:
 
      .. autosummary::
 
-        Simulator
         DataLoader
 
    data sink
 
      Executable classes requiring other resource are called the *data
-     sink*.  Data sink classes provided in `compapp.executables` are:
+     sink*.  That is to say, an Executable class is a data sink if its
+     :code:`run` method overriding `.Executable.run` takes *at least
+     one* argument.  Example:
 
      .. autosummary::
 
-        Analyzer
         Plotter
 
    app
@@ -57,21 +59,10 @@ well when kind of computations, the type of |datastore| and used
 plugins are compared.
 
 Executables with `.SubDataStore` require parent executable.  It fits
-well with `DataLoader` since just loading data is useless.  It also
-fits well with `Plotter` since it is a data sink, i.e., it needs data
-for plotting.
-
-Since `.Analyzer` and `.Plotter` need external :term:`data source`, it
-makes sense they are not subclass of `.Simulator` or `.Application`.
-Typically, `.Analyzer` is used from `.AnalysisApp` combined with
-`.DataLoader` or `.Simulator`.
-
-Note that `.Simulator` exists because of implementation purpose (both
-`.DataLoader` and `.Application` subclasses it; see also
-:ref:`inheritance-diagram`).  It is included here for "symmetry" of
-the table.  It is not recommended to use it directly and
-`.SimulationApp` should always be used even when it's too simple to be
-called an :term:`app`.
+well with `.DataLoader` since just loading data is useless.  It also
+fits well with `.Plotter` since it is a data sink, i.e., it needs data
+for plotting.  Since `.Plotter` needs some external :term:`data
+source`, it makes sense that it is not a subclass of `.Application`.
 
 
 .. list-table::
@@ -80,15 +71,9 @@ called an :term:`app`.
    * - Executable
      - |datastore|
      - Computation
-   * - `.Simulator`
-     - `.DirectoryDataStore`
-     - :term:`data source`
    * - `.DataLoader`
      - `.SubDataStore`
      - :term:`data source`
-   * - `.Analyzer`
-     - `.HashDataStore`
-     - :term:`data sink`
    * - `.Plotter`
      - `.SubDataStore`
      - :term:`data sink`
@@ -100,5 +85,3 @@ called an :term:`app`.
      - :term:`app`
 
 .. |datastore| replace:: `datastore <compapp.apps.Application.datastore>`
-
-.. todo:: Maybe `.Analyzer.datastore` should be `.DirectoryDataStore`.

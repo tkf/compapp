@@ -23,19 +23,17 @@ in this document) is hard.
      - `.DirectoryDataStore`
      - Simulation is run with a specified data directory in which
        simulation parameters and results are saved.  :term:`Nested
-       classes <nested class>` such as `.Simulator` and `.Plotter` may
-       use sub-paths.
-   * - `.Simulator`
+       classes <nested class>` such as `.Plotter` and other nested
+       `.SimulationApp`\ s may use sub-paths.
+   * - :term:`nested <nested class>` `.SimulationApp`
      - `.DirectoryDataStore`
-     - `.Simulator` uses the same |datastore| property as
-       `.SimulationApp`.  However, it is usually nests in some
-       :term:`owner app`.  In this case, `.DirectoryDataStore`
-       automatically allocates sub-directory under the directory used
-       by the :term:`owner app`.
+     - If a `.SimulationApp` subclass nests in some :term:`owner app`,
+       `.DirectoryDataStore` automatically allocates sub-directory
+       under the directory used by the :term:`owner app`.
    * - `.Plotter`, `.DataLoader`
      - `.SubDataStore`
      - Use files under the directory of the :term:`owner app`.
-   * - `.AnalysisApp`, `.Analyzer`
+   * - `.AnalysisApp`
      - `.HashDataStore`
      - Data analysis is run with a data directory automatically
        allocated depending on the parameter values (including data

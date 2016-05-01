@@ -7,9 +7,6 @@
 .. inheritance-diagram::
    compapp.core.Parametric
    compapp.core.Executable
-   compapp.executables.Simulator
-   compapp.executables.DataLoader
-   compapp.executables.Analyzer
    compapp.executables.Plotter
    compapp.apps.Application
    compapp.apps.SimulationApp
