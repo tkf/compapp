@@ -9,10 +9,10 @@ Application base classes.
 
 """
 
-from .executables import Simulator
+from .executables import Computer
 
 
-class Application(Simulator):
+class Application(Computer):
 
     r"""
     Application base class.
@@ -95,13 +95,7 @@ class Application(Simulator):
         return self
 
 
-class SimulationApp(Application):
-
-    """
-    `Application` with `.DirectoryDataStore`.
-    """
-
-    from .plugins import DirectoryDataStore as datastore
+SimulationApp = Application
 
 
 class AnalysisApp(Application):

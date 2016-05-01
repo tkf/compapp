@@ -205,7 +205,7 @@ class Debug(Plugin):
     -------
     ::
 
-      class MySimulator(Simulator):
+      class MySimulator(SimulationApp):
           dbg = Debug
 
           def run(self):
@@ -354,8 +354,7 @@ class DumpParameters(Plugin):
 
 
 def is_runnable(excbl):
-    from .executables import Analyzer
-    if isinstance(excbl, Analyzer):
+    if getattr(excbl, 'nargs', None) != 0:
         return False
     for name in excbl.get_param_names(type=Link):
         if not hasattr(excbl, name):
