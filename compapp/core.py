@@ -85,7 +85,7 @@ class Parametric(Parameter):
 
     """
 
-    def get_params(self, deep=False, type=None):
+    def params(self, deep=False, type=None):
         """
         Get parameters as a `dict`.
 
@@ -102,10 +102,9 @@ class Parametric(Parameter):
         params : dict
 
         """
-        # MAYBE: rename this to params()
 
     @classmethod
-    def get_param_names(cls, type=None):
+    def paramnames(cls, type=None):
         """
         List names of parameter for this class.
 
@@ -113,14 +112,12 @@ class Parametric(Parameter):
         method.
 
         """
-        # MAYBE: rename this to paramnames()
 
     @classmethod
-    def get_param_defs(cls, deep=False, type=None):
+    def defaultparams(cls, deep=False, type=None):
         """
         Get default parameters as a `dict`.
         """
-        # MAYBE: rename this to defaultparams()
 
 
 class Defer(object):
@@ -240,7 +237,7 @@ class Executable(Parametric):
 
 
 def call_plugins(self, method):
-    for plugin in self.get_params(type=Plugin):
+    for plugin in self.params(type=Plugin):
         getattr(plugin, method)()
 
 

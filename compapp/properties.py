@@ -246,11 +246,11 @@ class Optional(Parameter):
     >>> class MyParametric(Parametric):
     ...     i = Optional(int)
     ...     j = Optional(int)
-    >>> MyParametric.get_param_names()
+    >>> MyParametric.paramnames()
     []
-    >>> MyParametric().get_params()
+    >>> MyParametric().params()
     {}
-    >>> MyParametric(i=1).get_params()
+    >>> MyParametric(i=1).params()
     {'i': 1}
 
     This is useful when writing `Parametric` interface to external
@@ -265,7 +265,7 @@ class Optional(Parameter):
     ...     normed = Optional(bool)
     ...
     ...     def plot(self, ax, x):
-    ...         ax.hist(x, **self.get_params())
+    ...         ax.hist(x, **self.params())
 
     """
 

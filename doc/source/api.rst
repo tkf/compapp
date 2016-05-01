@@ -8,9 +8,9 @@
 
    core
    core.Parametric
-   core.Parametric.get_params
-   core.Parametric.get_param_names
-   core.Parametric.get_param_defs
+   core.Parametric.params
+   core.Parametric.paramnames
+   core.Parametric.defaultparams
    core.Executable
    core.Executable.prepare
    core.Executable.run

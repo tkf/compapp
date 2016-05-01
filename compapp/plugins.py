@@ -154,7 +154,7 @@ class HashDataStore(DirectoryDataStore):
     def ownerhash(self):
         def not_datastore(key, value):
             pass
-        params = self.owner.get_params(deep=True, include=not_datastore)
+        params = self.owner.params(deep=True, include=not_datastore)
         ownerclass = type(self.owner)
         return self.sha1(ownerclass, params)
 
@@ -356,7 +356,7 @@ class DumpParameters(Plugin):
 def is_runnable(excbl):
     if getattr(excbl, 'nargs', None) != 0:
         return False
-    for name in excbl.get_param_names(type=Link):
+    for name in excbl.paramnames(type=Link):
         if not hasattr(excbl, name):
             return False
     # All the links are accessible, meaning that all
@@ -377,7 +377,7 @@ class AutoUpstreams(Plugin):
         return getattr(excbl, 'is_runnable', lambda: is_runnable(excbl))()
 
     def prepare(self):
-        executables = self.owner.get_params(type=Executable)
+        executables = self.owner.params(type=Executable)
         while executables:
             for i, ebl in executables:
                 if self.is_runnable(ebl):
