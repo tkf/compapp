@@ -132,17 +132,6 @@ class Executable(Parametric):
         if finish:
             self.finish_all()
 
-    def upstreams(self):
-        r"""
-        |TO BE EXTENDED| Specify upstream `Executable` members.
-
-        Returns
-        -------
-        names : list
-            `list` of attribute name (`str`)
-
-        """
-
     def prepare(self):
         """
         |TO BE EXTENDED| Do anything to be done before `run`.
@@ -152,17 +141,8 @@ class Executable(Parametric):
         """ Call 'prepare' hook of plugins. """
         call_plugins(self, 'prepare')
 
-    def prepare_upstreams(self):
-        r"""
-        Execute (load or run) upstream `Executable`\ 's.
-        """
-        for name in self.upstreams():
-            upstream = getattr(self, name)
-            upstream.execute(finish=False)
-
     def prepare_all(self):
         self.prepare_plugins()
-        self.prepare_upstreams()
         self.prepare()
 
     def pre_run(self):
@@ -216,7 +196,6 @@ class Executable(Parametric):
     def finish_all(self):
         self.finish()
         self.finish_plugins()
-        self.finish_upstreams()
 
 
 def call_plugins(self, method):

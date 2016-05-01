@@ -129,8 +129,6 @@ extended, `.AutoDump` plugin can handle saving and loading results and
 parameters automatically.  There are `.prepare` and `.finish` methods
 to be called always, not depending on whether the executable class is
 `run <.Executable.run>` or `load <.Executable.load>`\ ed.
-Sub-simulations and analysis defined as `.upstreams` are executed
-before `run <.Executable.run>`.
 
 See also: :ref:`api`
 

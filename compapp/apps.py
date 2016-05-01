@@ -18,8 +18,8 @@ class Application(Simulator):
     Application base class.
 
     Everything needed for save/load functions are implemented by
-    plugins (see: :attr:`.magics`).  So, all the methods you need to
-    implement are :meth:`run` and (optionally) :meth:`upstreams`.
+    plugins (see: :attr:`.magics`).  Only the method :meth:`run` is
+    needed to be implemented most of the cases.
 
     """
 

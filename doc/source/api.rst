@@ -12,7 +12,6 @@
    core.Parametric.get_param_names
    core.Parametric.get_param_defs
    core.Executable
-   core.Executable.upstreams
    core.Executable.prepare
    core.Executable.run
    core.Executable.save
