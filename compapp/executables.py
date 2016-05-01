@@ -19,6 +19,7 @@ class MagicPlugins(PluginWrapper):
         RecordVCS as recordvcs,
         RecordTiming as recordtiming,
         DumpParameters as dumpparameters,
+        AutoUpstreams as autoupstreams,
     )
 
 

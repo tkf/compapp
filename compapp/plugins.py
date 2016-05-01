@@ -1,6 +1,6 @@
 import os
 
-from .core import Plugin
+from .core import Plugin, Executable
 from .properties import Link, Delegate, Owner, OwnerInfo, Required, Or
 
 
@@ -348,6 +348,42 @@ class DumpParameters(Plugin):
     #        used.  How to avoid running it twice (i.e.,
     #        `DumpParameters` explicitly specified and the one called
     #        via `HashDataStore`)?
+
+
+def is_runnable(excbl):
+    from .executables import Analyzer
+    if isinstance(excbl, Analyzer):
+        return False
+    for name in excbl.get_param_names(type=Link):
+        if not hasattr(excbl, name):
+            return False
+    # All the links are accessible, meaning that all
+    # "implicit upstreams" are already run.
+    return True
+
+
+class AutoUpstreams(Plugin):
+
+    """
+    Automatically execute upstreams.
+    """
+
+    owner = Owner()
+
+    @staticmethod
+    def is_runnable(excbl):
+        return getattr(excbl, 'is_runnable', lambda: is_runnable(excbl))()
+
+    def prepare(self):
+        executables = self.owner.get_params(type=Executable)
+        while executables:
+            for i, ebl in executables:
+                if self.is_runnable(ebl):
+                    break
+            else:
+                return
+            del executables[i]
+            self.execute()
 
 
 class PluginWrapper(Plugin):
