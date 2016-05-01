@@ -1,3 +1,10 @@
+import itertools
+import logging
+
+
+logger = logging.getLogger(__name__)
+
+
 class Parameter(object):
     pass
 
@@ -116,21 +123,62 @@ class Parametric(Parameter):
         # MAYBE: rename this to defaultparams()
 
 
+class Defer(object):
+
+    def __init__(self):
+        self.callbacks = {}
+
+    def keyed(self, key, *args, **kwds):
+        """
+        Register a callback with `key`.
+        """
+        def decorator(teardown):
+            return lambda: teardown(*args, **kwds)
+        self.callbacks.setdefault(key, []).append(decorator)
+        return decorator
+
+    def __call__(self, *args, **kwds):
+        """
+        Register a callback.
+        """
+        return self.keyed(None, *args, **kwds)
+
+    def call(self, key=None):
+        """
+        Call deferred callbacks and un-register them.
+        """
+        if key is None:
+            callbacks = itertools.chain.from_iterable(self.callbacks.values())
+            self.callbacks.clear()
+        else:
+            callbacks = self.callbacks.pop(key)
+        for c in callbacks:
+            try:
+                c()
+            except Exception as err:
+                logger.exception(err)
+
+
 class Executable(Parametric):
 
     """
     The base class supporting execution and plugin mechanism.
     """
 
-    def execute(self, data=None, finish=True):
-        self.prepare_all()
-        if self.is_loadable():
-            self.load()
-        else:
-            self.run_all(data)
-            self.save_all()
-        if finish:
-            self.finish_all()
+    def execute(self, data=None):
+        try:
+            self.prepare_all()
+            if self.is_loadable():
+                self.load()
+            else:
+                self.run_all(data)
+                self.save_all()
+            self.finish()
+        # except Exception as err:
+        #     self.onerror(err)
+        #     raise
+        finally:
+            self.defer.call()
 
     def prepare(self):
         """

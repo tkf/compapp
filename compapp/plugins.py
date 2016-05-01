@@ -301,20 +301,23 @@ class Figure(Plugin):
         from matplotlib import pyplot
         fig = pyplot.figure()
         # FXIME: record `fig` to internal list etc.
+
+        @self.defer.keyed('save')
+        def _():
+            path = self.datastore.path(name + '.' + self.ext)
+            fig.savefig(path)
+
+        self.defer()(fig.close)
+
         return fig
 
     def save(self):
-        for (name, fig) in self.items():
-            path = self.datastore.path(name + '.' + self.ext)
-            fig.savefig(path)
+        self.defer.call('save')
 
     def finish(self):
         if self.show():
             from matplotlib import pyplot
             pyplot.show()
-
-        for (name, fig) in self.items():
-            fig.close()
 
 
 class RecordVCS(Plugin):
