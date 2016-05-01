@@ -24,6 +24,54 @@ basic_types = simple_types + (tuple, list, dict, set)
 Basic Python types.
 """
 
+_type = type
+
+
+def itervars(obj):
+    for name in dir(obj):
+        if name.startswith('_'):
+            continue
+        yield name, getattr(obj, name)
+
+
+def mixdicts(dicts):
+    mixed = {}
+    for d in dicts:
+        mixed.update(d)
+    return mixed
+
+
+def automixin(owner, key, params):
+    defaults = []
+    for cls in owner.mro():
+        try:
+            nested = getattr(cls, key)
+        except AttributeError:
+            continue
+        if issubclass(nested, Parametric):
+            return nested(*defaults[::-1], **params)
+        defaults.append(itervars(nested))
+
+
+def _is_mixable_3(cls):
+    return isinstance(cls, type) and (
+        issubclass(cls, Parametric) or len(cls.mro()) == 2
+    )
+
+try:
+    from types import ClassType
+
+    def _is_mixable(cls):
+        return _is_mixable_3(cls) or type(cls) == ClassType
+except ImportError:
+    _is_mixable = _is_mixable_3
+
+
+class Descriptor(object):
+
+    def __init__(self, default):
+        self.default = default
+
 
 class Parametric(Parameter):
 
@@ -58,11 +106,6 @@ class Parametric(Parameter):
     0
     >>> mp.param.b
     200
-    >>> setattr(mp, 'param.b', -1)
-    >>> mp.param.b
-    -1
-    >>> getattr(mp, 'param.a')
-    0
 
     **Automatic parameter mix-in.**
     If it is just for resetting parameter, you don't need to inherit
@@ -73,7 +116,7 @@ class Parametric(Parameter):
     ...         i = 0
     ...         j = 1
     ...
-    ... class Another(Base):
+    >>> class Another(Base):
     ...     class x(object):  # do not need to inherit Base.x
     ...         i = -1
     ...
@@ -84,6 +127,28 @@ class Parametric(Parameter):
     1
 
     """
+
+    def __init__(self, *args, **kwds):
+        params = mixdicts(args + (kwds,))
+        nestedparams = {}
+        for (key, val) in params.items():
+            cls = getattr(self.__class__, key, None)
+            if isinstance(cls, type):
+                nestedparams[key] = val
+            setattr(self, key, val)
+
+        for key, cls in itervars(self.__class__):
+            if not _is_mixable(cls):
+                continue
+
+            val = automixin(self.__class__, key, nestedparams.get(key, {}))
+            if val is not None:
+                setattr(self, key, val)
+                continue
+
+            if key in nestedparams:
+                raise ValueError('Setting non-Parametric property {0}'
+                                 .format(key))
 
     def params(self, nested=False, type=None):
         """
@@ -102,6 +167,15 @@ class Parametric(Parameter):
         params : dict
 
         """
+        params = {}
+        for name in self.paramnames(type=type):
+            val = getattr(self, name)
+            if isinstance(val, Parametric):
+                if nested and type is None or isinstance(val, type):
+                    params[name] = val
+            else:
+                params[name] = val
+        return params
 
     @classmethod
     def paramnames(cls, type=None):
@@ -112,12 +186,32 @@ class Parametric(Parameter):
         method.
 
         """
+        # FIXME: optimize!
+        names = list(cls.defaultparams(type=type))
+        for name, val in itervars(cls):
+            if isinstance(val, _type) and issubclass(val, Parametric):
+                if type is None or issubclass(val, type):
+                    names.append(name)
+        return names
 
     @classmethod
     def defaultparams(cls, nested=False, type=None):
         """
         Get default parameters as a `dict`.
         """
+        params = {}
+        for name, val in itervars(cls):
+            if isinstance(val, _type) and issubclass(val, Parametric):
+                if nested and (type is None or issubclass(val, type)):
+                    params[name] = val.defaultparams(nested=nested, type=type)
+            elif type is not None:
+                if isinstance(val, type):
+                    params[name] = val
+            elif isinstance(val, basic_types):
+                params[name] = val
+            elif isinstance(val, Descriptor):
+                params[name] = val.default
+        return params
 
 
 class Defer(object):
