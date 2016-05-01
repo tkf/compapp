@@ -85,13 +85,13 @@ class Parametric(Parameter):
 
     """
 
-    def params(self, deep=False, type=None):
+    def params(self, nested=False, type=None):
         """
         Get parameters as a `dict`.
 
         Parameters
         ----------
-        deep : bool
+        nested : bool
             if true, return a nested `dict` for `Parametric`
             properties.
         type
@@ -114,7 +114,7 @@ class Parametric(Parameter):
         """
 
     @classmethod
-    def defaultparams(cls, deep=False, type=None):
+    def defaultparams(cls, nested=False, type=None):
         """
         Get default parameters as a `dict`.
         """
