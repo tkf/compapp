@@ -2,13 +2,12 @@ from __future__ import print_function
 
 import itertools
 import logging
+import weakref
+
+from .base import Unspecified
 
 
 logger = logging.getLogger(__name__)
-
-
-class Parameter(object):
-    pass
 
 
 simple_types = (
@@ -97,10 +96,92 @@ except ImportError:
     _is_mixable = _is_mixable_3
 
 
+class WeakRefProperty(object):
+
+    def __init__(self, name):
+        self.name = name
+        self.refname = '_' + name
+
+    def __get__(self, obj, cls):
+        if obj is None:
+            return self
+        try:
+            return getattr(obj, self.refname)()
+        except AttributeError:
+            return None
+
+    def __set__(self, obj, value):
+        setattr(obj, self.refname, weakref.ref(value))
+
+
+class Private(object):
+
+    owner = WeakRefProperty('owner')
+    # root = WeakRefProperty('root')
+
+    def __init__(self):
+        self.data = {}
+
+    def set_context(self, owner, myname):
+        self.myname = myname
+        self.owner = owner
+        # self.root = private(owner).root
+
+    def getroot(self):
+        par = self.owner
+        owner = private(par).owner
+        while owner:
+            owner, par = private(par).owner, owner
+        return par
+
+
+class Parameter(object):
+    pass
+
+
+def private(par):
+    assert isinstance(par, Parameter)
+    return par.__dict__.setdefault('_!!compapp!!_', Private())
+
+
 class Descriptor(object):
 
-    def __init__(self, default):
+    def __init__(self, default=Unspecified):
         self.default = default
+
+    @property
+    def key(self):
+        return self
+
+    def get(self, obj):
+        return private(obj).data.get(self.key, self.default)
+
+    def verify(self, value):
+        return value
+
+    def myname(self, obj, error=False):
+        try:
+            cls = obj.__class__
+            for name in dir(cls):
+                if getattr(cls, name) is self:
+                    return name
+        except Exception:
+            if error:
+                raise
+        return '<unknown>'
+
+    def __get__(self, obj, cls):
+        if obj is None:
+            return self
+        got = self.get(obj)
+        if got is Unspecified:
+            raise AttributeError(
+                "'{0}' object has no attribute '{1}'"
+                .format(obj.__class__.__name__, self.myname(obj)))
+        return got
+
+    def __set__(self, obj, value):
+        private(obj).data[self.key] = self.verify(value)
 
 
 class Parametric(Parameter):
@@ -191,6 +272,7 @@ class Parametric(Parameter):
             val = automixin(self.__class__, key, nestedparams.get(key, {}))
             if val is not None:
                 setattr(self, key, val)
+                private(val).set_context(self, key)
                 continue
 
             # If `automixin` return `None` it means that none of the
