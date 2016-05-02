@@ -58,6 +58,12 @@ def itervars(obj):
         yield name, getattr(obj, name)
 
 
+def attrs_of(obj, type):
+    for _, val in itervars(obj):
+        if isinstance(val, type):
+            yield val
+
+
 def mixdicts(dicts):
     mixed = {}
     for d in dicts:
@@ -436,16 +442,43 @@ class Executable(Parametric):
 
     """
     The base class supporting execution and plugin mechanism.
+
+    Example
+    -------
+    >>> class MyPlugin(Plugin):
+    ...     def pre_run(self):
+    ...         print('Pre-run:', self.__class__.__name__)
+    ...
+    >>> class MyExec(Executable):
+    ...     myplugin = MyPlugin
+    ...
+    ...     def run(self):
+    ...         print('Run:', self.__class__.__name__)
+    ...
+    >>> excbl = MyExec()
+    >>> excbl.execute()
+    Pre-run: MyPlugin
+    Run: MyExec
+
     """
+
+    def __init__(self, *args, **kwds):
+        super(Executable, self).__init__(*args, **kwds)
+        self.defer = Defer()
 
     def execute(self, *args):
         try:
-            self.prepare_all()
+            self.prepare()
+            call_plugins(self, 'prepare')
             if self.is_loadable():
                 self.load()
             else:
-                self.run_all(*args)
-                self.save_all()
+                call_plugins(self, 'pre_run')
+                self.run(*args)
+                call_plugins(self, 'post_run')
+                self.save()
+                call_plugins(self, 'save')
+            call_plugins(self, 'finish')
             self.finish()
         # except Exception as err:
         #     self.onerror(err)
@@ -453,46 +486,29 @@ class Executable(Parametric):
         finally:
             self.defer.call()
 
+    def is_loadable(self):
+        """
+        |TO BE EXTENDED| Return `True` if `self` is loadable.
+
+        Default is to return `False` always.
+
+        """
+        return False
+
     def prepare(self):
         """
         |TO BE EXTENDED| Do anything to be done before `run`.
         """
-
-    def prepare_plugins(self):
-        """ Call 'prepare' hook of plugins. """
-        call_plugins(self, 'prepare')
-
-    def prepare_all(self):
-        self.prepare_plugins()
-        self.prepare()
-
-    def pre_run(self):
-        call_plugins(self, 'pre_run')
 
     def run(self, *args):
         """
         |TO BE EXTENDED| Do the actual simulation/analysis.
         """
 
-    def post_run(self):
-        call_plugins(self, 'post_run')
-
-    def run_all(self, *args):
-        self.pre_run()
-        self.run(*args)
-        self.post_run()
-
     def save(self):
         """
         |TO BE EXTENDED| Save the result manually.
         """
-
-    def save_all(self):
-        self.save()
-        self.save_plugins()
-
-    def save_plugins(self):
-        call_plugins(self, 'save')
 
     def load(self):
         """
@@ -504,16 +520,9 @@ class Executable(Parametric):
         |TO BE EXTENDED| Do anything to be done before exit.
         """
 
-    def finish_plugins(self):
-        call_plugins(self, 'finish')
-
-    def finish_all(self):
-        self.finish()
-        self.finish_plugins()
-
 
 def call_plugins(self, method):
-    for plugin in self.params(type=Plugin):
+    for plugin in attrs_of(self, Plugin):
         getattr(plugin, method)()
 
 
@@ -522,6 +531,10 @@ class Plugin(Parametric):
     """
     Plugin base class.
     """
+
+    def __init__(self, *args, **kwds):
+        super(Parametric, self).__init__(*args, **kwds)
+        self.defer = Defer()
 
     def prepare(self):
         pass
