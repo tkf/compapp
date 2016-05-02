@@ -71,3 +71,56 @@ class OfType(Descriptor):
                     classes,
                     value))
         return value
+
+
+class Required(Descriptor):
+
+    """
+    Attributes required to be set before `.Executable.run`.
+
+    Examples
+    --------
+
+    >>> from compapp.core import Parametric
+    >>> class MyParametric(Parametric):
+    ...     i = Required()
+    ...
+    >>> mp = MyParametric()
+    >>> has_required_attributes(mp)
+    False
+    >>> mp.i = 1
+    >>> has_required_attributes(mp)
+    True
+
+    >>> class MyParametric(Parametric):
+    ...     i = Required(OfType(int))
+    ...
+    >>> mp = MyParametric()
+    >>> has_required_attributes(mp)
+    False
+    >>> mp.i = '1'
+    Traceback (most recent call last):
+      ...
+    ValueError: MyParametric.i only accepts type of int: got 1
+    >>> mp.i = 1
+    >>> has_required_attributes(mp)
+    True
+
+    """
+
+    def __init__(self, desc=None):
+        super(Required, self).__init__()
+        self.desc = desc
+        if desc:
+            # self.get = desc.get
+            self.verify = desc.verify
+            desc.myname = self.myname
+
+
+def has_required_attributes(obj):  # FIXME call it via pre_run()
+    for name in dir(obj.__class__):
+        if not isinstance(getattr(obj.__class__, name), Required):
+            continue
+        if not hasattr(obj, name):
+            return False
+    return True
