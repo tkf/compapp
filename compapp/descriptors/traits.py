@@ -25,7 +25,7 @@ class OfType(Descriptor):
     >>> MyParametric(i='a')
     Traceback (most recent call last):
       ...
-    ValueError: MyParametric.i only accepts type of int: got a
+    ValueError: MyParametric.i only accepts type of int: got 'a'
 
     `OfType` can take multiple classes:
 
@@ -74,7 +74,7 @@ class OfType(Descriptor):
             else:
                 classes = self.classes.__name__
             raise ValueError(
-                "{0}.{1} only accepts type of {2}: got {3}".format(
+                "{0}.{1} only accepts type of {2}: got {3!r}".format(
                     obj.__class__.__name__,
                     myname or self.myname(obj),
                     classes,
@@ -110,7 +110,7 @@ class Required(Descriptor):
     >>> mp.i = '1'
     Traceback (most recent call last):
       ...
-    ValueError: MyParametric.i only accepts type of int: got 1
+    ValueError: MyParametric.i only accepts type of int: got '1'
     >>> mp.i = 1
     >>> has_required_attributes(mp)
     True
@@ -155,7 +155,7 @@ class List(Descriptor):
     >>> mp.intlist = [0, 1, '2']
     Traceback (most recent call last):
       ...
-    ValueError: MyParametric.intlist[2] only accepts type of int: got 2
+    ValueError: MyParametric.intlist[2] only accepts type of int: got '2'
 
     """
 
