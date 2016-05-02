@@ -119,7 +119,7 @@ class Parametric(Parameter):
     ...         j = 1
     ...
     >>> class Another(Base):
-    ...     class x(object):  # do not need to inherit Base.x
+    ...     class x:  # do not need to inherit Base.x
     ...         i = -1
     ...
     >>> par = Another()
@@ -135,9 +135,10 @@ class Parametric(Parameter):
         nestedparams = {}
         for (key, val) in params.items():
             cls = getattr(self.__class__, key, None)
-            if isinstance(cls, type):
+            if _is_mixable(cls):
                 nestedparams[key] = val
-            setattr(self, key, val)
+            else:
+                setattr(self, key, val)
 
         for key, cls in itervars(self.__class__):
             if not _is_mixable(cls):
@@ -147,6 +148,12 @@ class Parametric(Parameter):
             if val is not None:
                 setattr(self, key, val)
                 continue
+
+            # If `automixin` return `None` it means that none of the
+            # super classes of self don't have a Parametric subclass
+            # as its attribute of the same name `key`.  Thus,
+            # self.<key> holds some non-parameter value and setting it
+            # is an error:
 
             if key in nestedparams:
                 raise ValueError('Setting non-Parametric property {0}'
