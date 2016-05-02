@@ -292,3 +292,43 @@ class Choice(Descriptor):
                     self.choices,
                     value))
         return value
+
+
+class Or(Descriptor):
+
+    """
+    Use one of the specified traits.
+
+    Examples
+    --------
+
+    >>> from compapp.core import Parametric
+    >>> class MyParametric(Parametric):
+    ...     attr = Or(Choice(*'abc'), OfType(int))
+    ...
+    >>> mp = MyParametric()
+    >>> mp.attr = 'a'
+    >>> mp.attr = 1
+    >>> mp.attr = 1.0
+    Traceback (most recent call last):
+      ...
+    ValueError: None of the traits are matched to: 1.0
+
+    .. todo:: `Or` should work with link-type descriptor.
+
+    """
+
+    def __init__(self, *traits, **kwds):
+        super(Or, self).__init__(**kwds)
+        self.traits = traits
+
+    def verify(self, obj, value, myname=None):
+        myname = myname or self.myname(obj)
+        for trait in self.traits:
+            try:
+                trait.verify(obj, value, myname=myname)
+                return value
+            except ValueError:
+                continue
+        raise ValueError("None of the traits are matched to: {0!r}"
+                         .format(value))
