@@ -1,7 +1,5 @@
 from ..core import Descriptor
 
-_type = type
-
 
 def tupleoftypes(t):
     if isinstance(t, type):
@@ -60,19 +58,19 @@ class OfType(Descriptor):
 
     def __init__(self, *classes, **kwds):
         super(OfType, self).__init__(**kwds)
-        self.classes = classes
+        self.allowed = classes
 
     def verify(self, obj, value, myname=None):
-        if not isinstance(value, self.classes):
-            if isinstance(self.classes, tuple):
-                if len(self.classes) > 1:
+        if not isinstance(value, self.allowed):
+            if isinstance(self.allowed, tuple):
+                if len(self.allowed) > 1:
                     classes = ', '.join(
-                        cls.__name__ for cls in self.classes[:-1]
-                    ) + ' or ' + self.classes[-1].__name__
+                        cls.__name__ for cls in self.allowed[:-1]
+                    ) + ' or ' + self.allowed[-1].__name__
                 else:
-                    classes = self.classes[0].__name__
+                    classes = self.allowed[0].__name__
             else:
-                classes = self.classes.__name__
+                classes = self.allowed.__name__
             raise ValueError(
                 "{0}.{1} only accepts type of {2}: got {3!r}".format(
                     obj.__class__.__name__,
@@ -135,7 +133,15 @@ def has_required_attributes(obj):  # FIXME call it via pre_run()
     return True
 
 
-class List(Descriptor):
+def asdesc(trait):
+    if isinstance(trait, (type, tuple)):
+        return OfType(*tupleoftypes(trait))
+    else:
+        assert isinstance(trait, (Descriptor, type(None)))
+        return trait
+
+
+class List(OfType):
 
     """
     Attribute accepting only list with certain traits.
@@ -147,6 +153,7 @@ class List(Descriptor):
     >>> class MyParametric(Parametric):
     ...     anylist = List()
     ...     intlist = List(int)
+    ...     castlist = List(int, cast=tuple)
     ...
     >>> mp = MyParametric()
     >>> mp.anylist = [1]
@@ -157,27 +164,36 @@ class List(Descriptor):
       ...
     ValueError: MyParametric.intlist[2] only accepts type of int: got '2'
 
+    >>> mp.intlist = (1,)
+    Traceback (most recent call last):
+      ...
+    ValueError: MyParametric.intlist only accepts type of list: got (1,)
+    >>> mp.castlist = (1,)
+    >>> mp.castlist
+    [1]
+
     """
 
     def __init__(self, trait=None, type=list, cast=None, **kwds):
-        super(List, self).__init__(**kwds)
-        self.type = self.allowed = tupleoftypes(type)
+        allowed = (type,)
         if cast:
             cast = tupleoftypes(cast)
-            self.allowed += cast
+            allowed += cast
+
+        super(List, self).__init__(*allowed, **kwds)
+
+        self.type = type
         self.cast = cast
+        self.trait = asdesc(trait)
 
-        if isinstance(trait, (_type, tuple)):
-            self.trait = OfType(*tupleoftypes(trait))
-        else:
-            assert isinstance(trait, (Descriptor, _type(None)))
-            self.trait = trait
+    def verify(self, obj, value, myname=None):
+        super(List, self).verify(obj, value, myname=myname)
+        if not isinstance(value, self.type):
+            value = self.type(value)
 
-    def verify(self, obj, value):
-        assert isinstance(value, self.allowed)
         if self.trait is None:
             return value
-        myname = self.myname(obj)
+        myname = myname or self.myname(obj)
         for i, x in enumerate(value):
             self.trait.verify(obj, x, myname='{0}[{1}]'.format(myname, i))
         return value
