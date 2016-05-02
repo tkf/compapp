@@ -26,7 +26,27 @@ basic_types = simple_types + (tuple, list, dict, set)
 Basic Python types.
 """
 
+cast_map = {}
+cast_map[float] = (int,)
+cast_map[complex] = (int, float)
+try:
+    cast_map[float] += (long,)
+    cast_map[long] = (int,)
+    cast_map[unicode] = (str,)
+except NameError:
+    pass
+
 _type = type
+
+
+def simple_type_check(default, actual, errfmt, **fmtkwds):
+    defaulttype = type(default)
+    castables = (defaulttype,) + cast_map.get(defaulttype, ())
+    if isinstance(actual, castables):
+        return defaulttype(actual)
+    castablenames = ', '.join(c.__name__ for c in castables)
+    kwds = dict(fmtkwds, actualtype=type(actual), **locals())
+    raise ValueError(errfmt.format(**kwds))
 
 
 def itervars(obj):
@@ -128,14 +148,30 @@ class Parametric(Parameter):
     >>> par.x.j
     1
 
+    **Automatic type-checking and casting.**
+
+    >>> MyParametric(i='a')     # doctest: +NORMALIZE_WHITESPACE, +ELLIPSIS
+    Traceback (most recent call last):
+      ...
+    ValueError: Value 'a' (type: str) cannot be assigned to the
+    variable MyParametric.i (default: 1) ...
+    >>> mp = MyParametric()
+    >>> mp.x = 1j               # doctest: +NORMALIZE_WHITESPACE, +ELLIPSIS
+    Traceback (most recent call last):
+      ...
+    ValueError: Value 1j (type: complex) cannot be assigned to the
+    variable MyParametric.x (default: 2.0) ...
+    >>> MyParametric(x=10).x
+    10.0
+
     """
 
     def __init__(self, *args, **kwds):
         params = mixdicts(args + (kwds,))
         nestedparams = {}
         for (key, val) in params.items():
-            cls = getattr(self.__class__, key, None)
-            if _is_mixable(cls):
+            default = getattr(self.__class__, key, None)
+            if _is_mixable(default):
                 nestedparams[key] = val
             else:
                 setattr(self, key, val)
@@ -158,6 +194,19 @@ class Parametric(Parameter):
             if key in nestedparams:
                 raise ValueError('Setting non-Parametric property {0}'
                                  .format(key))
+
+    def __setattr__(self, name, value):
+        default = getattr(self.__class__, name, None)
+        if isinstance(default, simple_types):
+            value = simple_type_check(
+                default, value,
+                "Value {actual!r} (type: {actualtype.__name__})"
+                " cannot be assigned to the variable"
+                " {self.__class__.__name__}.{name}"
+                " (default: {default}) which only accepts one of"
+                " the following types: {castablenames}.",
+                name=name, self=self)
+        super(Parametric, self).__setattr__(name, value)
 
     def params(self, nested=False, type=None):
         """
