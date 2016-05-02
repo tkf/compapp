@@ -13,11 +13,13 @@ simple_types = (
     complex,
     float,
     int,
-    long,
     str,
-    unicode,
     bool,
 )
+try:
+    simple_types += (long, unicode)
+except NameError:
+    pass
 
 basic_types = simple_types + (tuple, list, dict, set)
 """
