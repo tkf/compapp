@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import itertools
 import logging
 
@@ -339,6 +341,60 @@ class Parametric(Parameter):
 
 class Defer(object):
 
+    """
+    Callback registry.
+
+    Example
+    -------
+    >>> defer = Defer()
+    >>> @defer(1, y=2)
+    ... def _(x, y):
+    ...     print('x:', x, ' ', 'y:', y)
+    ...
+    >>> defer.call()
+    x: 1   y: 2
+
+    Once the callbacks are called, they are cleared from the registry.
+
+    >>> defer.call()
+
+    Of coerce, decorator syntax is not mandatory:
+
+    >>> defer('x:', 1)(print)                          # doctest: +ELLIPSIS
+    <function ...>
+    >>> defer.call()
+    x: 1
+
+    .. To make the following doctest reproducible, let's do this:
+
+       >>> from collections import OrderedDict
+       >>> defer.callbacks = OrderedDict()
+
+    The callback registry can be categorized with keys:
+
+    >>> for i in range(3):
+    ...     for v in 'xy':
+    ...         _ = defer.keyed(('cat', i), v, '=', i)(print)
+    ...
+
+    One category can be run by specifying ``key`` argument of `.call`.
+
+    >>> defer.call(('cat', 1))
+    x = 1
+    y = 1
+
+    Calling without ``key`` argument means "call everything".  Note
+    that the category 1 callbacks are not called below, since they
+    were already called.
+
+    >>> defer.call()
+    x = 0
+    y = 0
+    x = 2
+    y = 2
+
+    """
+
     def __init__(self):
         self.callbacks = {}
 
@@ -347,8 +403,10 @@ class Defer(object):
         Register a callback with `key`.
         """
         def decorator(teardown):
-            return lambda: teardown(*args, **kwds)
-        self.callbacks.setdefault(key, []).append(decorator)
+            def wrapper():
+                teardown(*args, **kwds)
+            self.callbacks.setdefault(key, []).append(wrapper)
+            return wrapper
         return decorator
 
     def __call__(self, *args, **kwds):
@@ -362,7 +420,8 @@ class Defer(object):
         Call deferred callbacks and un-register them.
         """
         if key is None:
-            callbacks = itertools.chain.from_iterable(self.callbacks.values())
+            cbs = self.callbacks.values()
+            callbacks = list(itertools.chain.from_iterable(cbs))
             self.callbacks.clear()
         else:
             callbacks = self.callbacks.pop(key)
