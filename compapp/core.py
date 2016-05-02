@@ -472,6 +472,7 @@ class Executable(Parametric):
             call_plugins(self, 'prepare')
             if self.is_loadable():
                 self.load()
+                call_plugins(self, 'load')
             else:
                 call_plugins(self, 'pre_run')
                 self.run(*args)
