@@ -61,7 +61,7 @@ class OfType(Descriptor):
         self.allowed = classes
 
     def verify(self, obj, value, myname=None):
-        if not isinstance(value, self.allowed):
+        if self.allowed and not isinstance(value, self.allowed):
             if isinstance(self.allowed, tuple):
                 if len(self.allowed) > 1:
                     classes = ', '.join(
@@ -196,4 +196,61 @@ class List(OfType):
         myname = myname or self.myname(obj)
         for i, x in enumerate(value):
             self.trait.verify(obj, x, myname='{0}[{1}]'.format(myname, i))
+        return value
+
+
+class Dict(OfType):
+
+    """
+    Attribute accepting only dict with certain traits.
+
+    Examples
+    --------
+
+    >>> from compapp.core import Parametric
+    >>> class MyParametric(Parametric):
+    ...     anydict = Dict()
+    ...     strint = Dict(str, int)
+    ...
+    >>> mp = MyParametric()
+    >>> mp.anydict = {'a': 1}
+    >>> mp.strint = {'a': 1}
+    >>> mp.strint = {1: 1}
+    Traceback (most recent call last):
+      ...
+    ValueError: MyParametric.strint[...] only accepts type of str: got 1
+    >>> mp.strint = {'a': 'b'}
+    Traceback (most recent call last):
+      ...
+    ValueError: MyParametric.strint['a'] only accepts type of int: got 'b'
+
+    """
+
+    def __init__(self, key=None, value=None, type=dict, cast=None,
+                 **kwds):
+        allowed = (type,)
+        if cast:
+            cast = tupleoftypes(cast)
+            allowed += cast
+
+        super(Dict, self).__init__(**kwds)
+
+        self.type = type
+        self.cast = cast
+        self.keytrait = asdesc(key)
+        self.valuetrait = asdesc(value)
+
+    def verify(self, obj, value, myname=None):
+        super(Dict, self).verify(obj, value, myname=myname)
+        if not isinstance(value, self.type):
+            value = self.type(value)
+
+        myname = myname or self.myname(obj)
+        if self.keytrait:
+            for k in value:
+                self.keytrait.verify(obj, k, myname='{0}[...]'.format(myname))
+        if self.valuetrait:
+            for k, v in value.items():
+                self.valuetrait.verify(obj, v,
+                                       myname='{0}[{1!r}]'.format(myname, k))
         return value
