@@ -101,3 +101,47 @@ class Root(Link):
 
     def __init__(self, **kwds):
         super(Root, self).__init__('', **kwds)
+
+
+class Delegate(Link):
+
+    """
+    Delegate parameter to its owner.
+
+    ``x = Delegate()`` is equivalent to ``x = Link('..x')``.
+
+    Examples
+    --------
+
+    >>> from compapp.core import Parametric
+    >>> class Parent(Parametric):
+    ...
+    ...     class nest1(Parametric):
+    ...         sampling_period = Delegate()
+    ...
+    ...     class nest2(Parametric):
+    ...         sampling_period = Delegate()
+    ...
+    ...     sampling_period = 10.0
+    ...
+    >>> par = Parent()
+    >>> par.sampling_period
+    10.0
+    >>> par.nest1.sampling_period
+    10.0
+    >>> par.nest2.sampling_period
+    10.0
+    >>> par.sampling_period = 20.0
+    >>> par.nest1.sampling_period
+    20.0
+
+    """
+
+    def __init__(self, **kwds):
+        super(Delegate, self).__init__(None, **kwds)
+
+    def get(self, obj):
+        # FIXME: This is a bit hacky implementation (communicating by
+        # mutating shared namespace).  Need refactoring.
+        self.path = '..' + self.myname(obj)
+        return super(Delegate, self).get(obj)
