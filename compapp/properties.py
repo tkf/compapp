@@ -1,7 +1,7 @@
-from .core import Parameter
+from .core import Descriptor
 
 
-class Link(Parameter):
+class Link(Descriptor):
 
     """
     "Link" parameter.
@@ -69,7 +69,7 @@ class Root(Link):
         super(Root, self).__init__('')
 
 
-class Delegate(Parameter):
+class Delegate(Descriptor):
 
     """
     Delegate parameter to its owner.
@@ -106,7 +106,7 @@ class Delegate(Parameter):
         pass
 
 
-class Owner(Parameter):
+class Owner(Descriptor):
 
     """
     Link to its owner.
@@ -124,14 +124,14 @@ class Owner(Parameter):
     """
 
 
-class OwnerInfo(Parameter):
+class OwnerInfo(Descriptor):
 
     """
     Refer to information of owner.
 
     Examples
     --------
-    >>> class Path(Parameter):
+    >>> class Path(Descriptor):
     ...
     ...     ownerinfo = OwnerInfo()
     ...     parent = Link('..path')
@@ -174,7 +174,7 @@ class OwnerInfo(Parameter):
         """
 
 
-class Propagate(Parameter):
+class Propagate(Descriptor):
 
     r"""
     Propagate value to nested classes.
@@ -217,7 +217,7 @@ class Propagate(Parameter):
 # any situation these two interfere in a complicated way?
 
 
-class Instance(Parameter):
+class Instance(Descriptor):
 
     """
     Check if the property is of a specific type.
@@ -227,7 +227,7 @@ class Instance(Parameter):
         pass
 
 
-class Required(Parameter):
+class Required(Descriptor):
 
     """
     """
@@ -236,7 +236,7 @@ class Required(Parameter):
         pass
 
 
-class Optional(Parameter):
+class Optional(Descriptor):
 
     """
     Optional parameter.
@@ -270,19 +270,19 @@ class Optional(Parameter):
     """
 
 
-class List(Parameter):
+class List(Descriptor):
 
     """
     """
 
 
-class Dict(Parameter):
+class Dict(Descriptor):
 
     """
     """
 
 
-class CSVList(Parameter):
+class CSVList(Descriptor):
     """
     """
 
@@ -292,12 +292,12 @@ class CSVList(Parameter):
         self.default = value
 
 
-class Choice(Parameter):
+class Choice(Descriptor):
     """
     """
 
 
-class Or(Parameter):
+class Or(Descriptor):
     """
     """
 
@@ -305,6 +305,6 @@ class Or(Parameter):
         pass
 
 
-class LiteralEval(Parameter):
+class LiteralEval(Descriptor):
     """
     """
