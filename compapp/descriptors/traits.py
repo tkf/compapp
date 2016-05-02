@@ -254,3 +254,41 @@ class Dict(OfType):
                 self.valuetrait.verify(obj, v,
                                        myname='{0}[{1!r}]'.format(myname, k))
         return value
+
+
+class Choice(Descriptor):
+
+    """
+    Attribute accepting only one of the specified value.
+
+    Examples
+    --------
+
+    >>> from compapp.core import Parametric
+    >>> class MyParametric(Parametric):
+    ...     choice = Choice(1, 2, 'a')
+    ...
+    >>> mp = MyParametric()
+    >>> mp.choice = 1
+    >>> mp.choice = 'a'
+    >>> mp.choice = 'unknown'              # doctest: +NORMALIZE_WHITESPACE
+    Traceback (most recent call last):
+      ...
+    ValueError: MyParametric.choice only accepts one of (1, 2, 'a'):
+    got 'unknown'
+
+    """
+
+    def __init__(self, *choices, **kwds):
+        super(Choice, self).__init__(*kwds)
+        self.choices = choices
+
+    def verify(self, obj, value, myname=None):
+        if value not in self.choices:
+            raise ValueError(
+                "{0}.{1} only accepts one of {2}: got {3!r}".format(
+                    obj.__class__.__name__,
+                    myname or self.myname(obj),
+                    self.choices,
+                    value))
+        return value
