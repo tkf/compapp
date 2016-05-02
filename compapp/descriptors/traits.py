@@ -1,5 +1,14 @@
 from ..core import Descriptor
 
+_type = type
+
+
+def tupleoftypes(t):
+    if isinstance(t, type):
+        return (t,)
+    assert isinstance(t, tuple)
+    return t
+
 
 class OfType(Descriptor):
 
@@ -53,7 +62,7 @@ class OfType(Descriptor):
         super(OfType, self).__init__(**kwds)
         self.classes = classes
 
-    def verify(self, obj, value):
+    def verify(self, obj, value, myname=None):
         if not isinstance(value, self.classes):
             if isinstance(self.classes, tuple):
                 if len(self.classes) > 1:
@@ -67,7 +76,7 @@ class OfType(Descriptor):
             raise ValueError(
                 "{0}.{1} only accepts type of {2}: got {3}".format(
                     obj.__class__.__name__,
-                    self.myname(obj),
+                    myname or self.myname(obj),
                     classes,
                     value))
         return value
@@ -124,3 +133,51 @@ def has_required_attributes(obj):  # FIXME call it via pre_run()
         if not hasattr(obj, name):
             return False
     return True
+
+
+class List(Descriptor):
+
+    """
+    Attribute accepting only list with certain traits.
+
+    Examples
+    --------
+
+    >>> from compapp.core import Parametric
+    >>> class MyParametric(Parametric):
+    ...     anylist = List()
+    ...     intlist = List(int)
+    ...
+    >>> mp = MyParametric()
+    >>> mp.anylist = [1]
+    >>> mp.anylist = ['a']
+    >>> mp.intlist = [1]
+    >>> mp.intlist = [0, 1, '2']
+    Traceback (most recent call last):
+      ...
+    ValueError: MyParametric.intlist[2] only accepts type of int: got 2
+
+    """
+
+    def __init__(self, trait=None, type=list, cast=None, **kwds):
+        super(List, self).__init__(**kwds)
+        self.type = self.allowed = tupleoftypes(type)
+        if cast:
+            cast = tupleoftypes(cast)
+            self.allowed += cast
+        self.cast = cast
+
+        if isinstance(trait, (_type, tuple)):
+            self.trait = OfType(*tupleoftypes(trait))
+        else:
+            assert isinstance(trait, (Descriptor, _type(None)))
+            self.trait = trait
+
+    def verify(self, obj, value):
+        assert isinstance(value, self.allowed)
+        if self.trait is None:
+            return value
+        myname = self.myname(obj)
+        for i, x in enumerate(value):
+            self.trait.verify(obj, x, myname='{0}[{1}]'.format(myname, i))
+        return value

@@ -156,7 +156,7 @@ class Descriptor(object):
     def get(self, obj):
         return private(obj).data.get(self.key, self.default)
 
-    def verify(self, obj, value):
+    def verify(self, obj, value, myname=None):  # FIXME: clean the interface
         return value
 
     def myname(self, obj, error=False):
