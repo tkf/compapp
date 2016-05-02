@@ -1,11 +1,42 @@
 import os
 
 from ..core import Plugin
-from ..descriptors import Link, Delegate, Owner, OwnerInfo, Required, Or
+from ..descriptors import Link, OwnerName, Owner, OwnerInfo, Required
 
 
 class BaseDataStore(Plugin):
     pass
+
+
+def iswritable(directory):
+    """
+    Check if `directory` is writable.
+
+    >>> iswritable('.')
+    True
+
+    >>> os.path.exists('spam')
+    False
+    >>> iswritable('spam/egg')
+    True
+
+    >>> os.access('/', os.W_OK | os.X_OK)
+    False
+    >>> os.path.exists('/spam')
+    False
+    >>> iswritable('/spam/egg')
+    False
+
+    """
+    parent = os.path.realpath(directory)
+    cur = os.path.join(parent, '_dummy_')
+    while parent != cur:
+        if os.path.exists(parent):
+            if os.access(parent, os.W_OK | os.X_OK):
+                return True
+            else:
+                return False
+        cur, parent = parent, os.path.dirname(parent)
 
 
 class DirectoryDataStore(BaseDataStore):
@@ -16,12 +47,22 @@ class DirectoryDataStore(BaseDataStore):
     Examples
     --------
 
+    .. Run the code below in a clean temporary directory:
+       >>> getfixture('cleancwd')
+
+    >>> from compapp.core import Parametric
     >>> class MyParametric(Parametric):
     ...     datastore = DirectoryDataStore
     ...
-    >>> mp = MyParametric({'datastore.dir': 'out'})
-    >>> mp.path('file')
+    >>> mp = MyParametric()
+    >>> mp.datastore.dir = 'out'
+    >>> mp.datastore.path('file')
     'out/file'
+
+    `.path` creates intermediate directories if required:
+
+    >>> os.listdir('.')
+    ['out']
 
     If a :term:`nested class` uses `DirectoryDataStore`, the path is
     automatically allocated under the `.dir` of the :term:`owner
@@ -33,7 +74,8 @@ class DirectoryDataStore(BaseDataStore):
     ...     class nested(Parametric):
     ...         datastore = DirectoryDataStore
     ...
-    >>> mp = MyParametric({'datastore.dir': 'out'})
+    >>> mp = MyParametric()
+    >>> mp.datastore.dir = 'out'
     >>> mp.nested.datastore.path()
     'out/nested'
     >>> mp.nested.datastore.path('file')
@@ -41,22 +83,39 @@ class DirectoryDataStore(BaseDataStore):
     >>> mp.nested.datastore.path('dir', 'file')
     'out/nested/dir/file'
 
+    >>> mp.nested.datastore.dir = 'another'
+    >>> mp.nested.datastore.path('file')
+    'another/file'
+
     """
 
-    def __dir_adapter(self, value):
-        # In the above example:
-        #    value == 'out'
-        #    self.ownerinfo.name == 'nested'
-        return os.path.join(self.ownerinfo.name, value)
-
-    dir = Or(Delegate(adapter=__dir_adapter), Required(str))
-    ownerinfo = OwnerInfo()
+    _parent = Link('...datastore')
+    _ownername = OwnerName()
     overwrite = True
     clear_before_run = True
 
+    @property
+    def dir(self):
+        try:
+            return self._dir
+        except AttributeError:
+            pass
+        try:
+            parentdir = self._parent.dir
+            ownername = self._ownername
+        except AttributeError:
+            return None
+        return os.path.join(parentdir, ownername)
+
+    @dir.setter
+    def dir(self, value):
+        assert isinstance(value, str)
+        self._dir = value
+
     def prepare(self):
-        if not os.path.isdir(self.dir):
-            os.makedirs(self.dir)
+        if hasattr(self, '_dir') and not iswritable(self._dir):
+            raise RuntimeError("Directory {0} is not writable."
+                               .format(self._dir))
 
     def path(self, *args, **kwds):
         """

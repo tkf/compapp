@@ -145,3 +145,13 @@ class Delegate(Link):
         # mutating shared namespace).  Need refactoring.
         self.path = '..' + self.myname(obj)
         return super(Delegate, self).get(obj)
+
+
+class MyName(Descriptor):
+    def get(self, obj):
+        return private(obj).myname
+
+
+class OwnerName(Descriptor):
+    def get(self, obj):
+        return private(private(obj).owner).myname

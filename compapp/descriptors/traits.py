@@ -117,6 +117,8 @@ class Required(Descriptor):
 
     def __init__(self, desc=None):
         super(Required, self).__init__()
+        if not isinstance(desc, Descriptor):
+            desc = OfType(desc)
         self.desc = desc
         if desc:
             # self.get = desc.get
