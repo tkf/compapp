@@ -166,13 +166,39 @@ class Parametric(Parameter):
         -------
         params : dict
 
+        Example
+        -------
+        >>> class MyParametric(Parametric):
+        ...     x = 1.0
+        ...     i = 1
+        ...     s = 'A'
+        ...
+        ...     class ps(Parametric):
+        ...         y = 2.0
+        ...         j = 2
+        ...
+        >>> mp = MyParametric()
+        >>> mp.params() == {'x': 1.0, 'i': 1, 's': 'A'}
+        True
+        >>> mp.params(nested=True) == dict(mp.params(), ps=dict(y=2.0, j=2))
+        True
+        >>> mp.params(nested=True, type=int) == {'i': 1, 'ps': {'j': 2}}
+        True
+
         """
+        if type is None:
+            nametypes = None
+        else:
+            if not isinstance(type, tuple):
+                type = (type,)
+            nametypes = type + (Parametric,)
+
         params = {}
-        for name in self.paramnames(type=type):
+        for name in self.paramnames(type=nametypes):
             val = getattr(self, name)
             if isinstance(val, Parametric):
-                if nested and type is None or isinstance(val, type):
-                    params[name] = val
+                if nested:
+                    params[name] = val.params(nested=nested, type=type)
             else:
                 params[name] = val
         return params
@@ -185,6 +211,21 @@ class Parametric(Parameter):
         User sub-class can modify own behavior by overriding this
         method.
 
+        Example
+        -------
+        >>> class MyParametric(Parametric):
+        ...     x = 1.0
+        ...     i = 1
+        ...     s = 'string'
+        ...
+        ...     class ps(Parametric):
+        ...         pass
+        ...
+        >>> sorted(MyParametric.paramnames())
+        ['i', 'ps', 's', 'x']
+        >>> MyParametric.paramnames(type=float)
+        ['x']
+
         """
         # FIXME: optimize!
         names = list(cls.defaultparams(type=type))
@@ -196,13 +237,37 @@ class Parametric(Parameter):
 
     @classmethod
     def defaultparams(cls, nested=False, type=None):
-        """
+        r"""
         Get default parameters as a `dict`.
+
+        Example
+        -------
+        >>> class MyParametric(Parametric):
+        ...     x = 1.0
+        ...     i = 1
+        ...     s = 'string'
+        ...
+        ...     class ps(Parametric):
+        ...         y = 2.0
+        ...         j = 2
+        ...
+        >>> shallow = {
+        ...     'x': 1.0, 'i': 1, 's': 'string'
+        ... }
+        >>> MyParametric.defaultparams() == shallow
+        True
+        >>> MyParametric.defaultparams(nested=True) \
+        ...     == dict(shallow, ps={'y': 2.0, 'j': 2})
+        True
+        >>> MyParametric.defaultparams(nested=True, type=int) \
+        ...     == {'i': 1, 'ps': {'j': 2}}
+        True
+
         """
         params = {}
         for name, val in itervars(cls):
             if isinstance(val, _type) and issubclass(val, Parametric):
-                if nested and (type is None or issubclass(val, type)):
+                if nested:
                     params[name] = val.defaultparams(nested=nested, type=type)
             elif type is not None:
                 if isinstance(val, type):
