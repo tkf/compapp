@@ -156,7 +156,7 @@ class Descriptor(object):
     def get(self, obj):
         return private(obj).data.get(self.key, self.default)
 
-    def verify(self, value):
+    def verify(self, obj, value):
         return value
 
     def myname(self, obj, error=False):
@@ -181,7 +181,7 @@ class Descriptor(object):
         return got
 
     def __set__(self, obj, value):
-        private(obj).data[self.key] = self.verify(value)
+        private(obj).data[self.key] = self.verify(obj, value)
 
 
 class Parametric(Parameter):
