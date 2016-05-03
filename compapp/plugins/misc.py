@@ -122,7 +122,7 @@ class Figure(Plugin):
 
 
 def is_runnable(excbl):
-    if getattr(excbl, 'nargs', None) != 0:
+    if getattr(excbl, 'argrange', (None, None))[0] != 0:
         return False
     for name in excbl.paramnames(type=Link):
         if not hasattr(excbl, name):

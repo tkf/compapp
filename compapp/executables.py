@@ -2,11 +2,12 @@
 Executable subclasses.
 """
 
+import inspect
 
 from .core import Executable
 from .descriptors import OfType
 from .plugins import PluginWrapper, Figure, \
-    SubDataStore, DirectoryDataStore, HashDataStore
+    SubDataStore, DirectoryDataStore
 
 
 class DictObject(object):  # TODO: implement dict-object hybrid
@@ -64,15 +65,38 @@ class Assembler(Executable):
     """
 
     @property
-    def nargs(self):
+    def argrange(self):
         """
         Number of arguments of the `.run` method accept.
 
-        Same syntax as the one accepted by
-        `argparse.ArgumentParser.add_argument`.
+        >>> class MyComp00(Assembler):
+        ...     def run(self):
+        ...         pass
+        ...
+        >>> MyComp00().argrange
+        (0, 0)
+
+        >>> class MyComp12(Assembler):
+        ...     def run(self, x, y=1):
+        ...         pass
+        ...
+        >>> MyComp12().argrange
+        (1, 2)
+
+        >>> class MyComp2i(Assembler):
+        ...     def run(self, x, y, *args):
+        ...         pass
+        ...
+        >>> MyComp2i().argrange
+        (2, None)
 
         """
-        raise NotImplementedError
+        (args, varargs, _, defaults) = inspect.getargspec(self.run)
+        nargs = len(args) - 1
+        return (
+            nargs - (len(defaults) if defaults else 0),  # min
+            None if varargs else nargs,                  # max
+        )
 
 
 class Loader(Assembler):
