@@ -60,6 +60,16 @@ class OfType(Descriptor):
         super(OfType, self).__init__(**kwds)
         self.allowed = classes
 
+    @property
+    def allowed(self):
+        return self._allowed
+
+    @allowed.setter
+    def allowed(self, value):
+        for t in value:
+            assert isinstance(t, type)
+        self._allowed = value
+
     def verify(self, obj, value, myname=None):
         if self.allowed and not isinstance(value, self.allowed):
             if isinstance(self.allowed, tuple):
@@ -117,7 +127,7 @@ class Required(Descriptor):
 
     def __init__(self, desc=None):
         super(Required, self).__init__()
-        if not isinstance(desc, Descriptor):
+        if desc and not isinstance(desc, Descriptor):
             desc = OfType(desc)
         self.desc = desc
         if desc:
