@@ -74,24 +74,27 @@ class Figure(Plugin):
     Examples
     --------
 
-    ::
+    .. plot::
+       :include-source:
 
-      class MyPlotter(Executable):
-          figure = Delegate()
+       from compapp.apps import Computer
 
-          def run(self):
-              fig = self.figure()
-              ax = fig.add_subplot(111)
-              ax.plot(...)
+       class MyApp(Computer):
+           def run(self):
+               fig = self.figure()
+               ax = fig.add_subplot(111)
+               ax.plot([x ** 2 for x in range(100)])
 
-      class MyApp(Computer):
-          figure = Figure
-          plotter = MyPlotter
+       MyApp().execute()
 
     """
 
     datastore = Delegate()
     show = False
+
+    def prepare(self):
+        self._figures = {}
+        self._num = 0
 
     def __call__(self, name=None):
         """
@@ -102,15 +105,27 @@ class Figure(Plugin):
         fig : matplotlib.figure.Figure
         """
         from matplotlib import pyplot
-        fig = pyplot.figure()
-        # FXIME: record `fig` to internal list etc.
+
+        if name is None:
+            while str(self._num) in self._figures:
+                self._num += 1
+            name = str(self._num)
+            self._num += 1
+        assert isinstance(name, str)
+
+        try:
+            return self._figures[name]
+        except KeyError:
+            pass
+
+        self._figures[name] = fig = pyplot.figure()
 
         @self.defer.keyed('save')
         def _():
             path = self.datastore.path(name + '.' + self.ext)
             fig.savefig(path)
 
-        self.defer()(fig.close)
+        self.defer(fig)(pyplot.close)
 
         return fig
 
