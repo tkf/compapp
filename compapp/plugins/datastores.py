@@ -14,6 +14,12 @@ def iswritable(directory):
     """
     Check if `directory` is writable.
 
+    Examples
+    --------
+
+    .. Run the code below in a clean temporary directory:
+       >>> getfixture('cleancwd')
+
     >>> iswritable('.')
     True
 
