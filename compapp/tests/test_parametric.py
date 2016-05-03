@@ -36,3 +36,11 @@ class TestMixClassObj(TestMixObject):
     class AutoMixed(MyParametric):
         class nested:
             a = -1
+
+
+def test_assembler_init():
+    from ..executables import Assembler
+    from ..plugins import PluginWrapper, DumpResults
+    excbl = Assembler()
+    assert isinstance(excbl.magics, PluginWrapper)
+    assert isinstance(excbl.magics.dumpresults, DumpResults)
