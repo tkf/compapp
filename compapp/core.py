@@ -586,6 +586,7 @@ class Executable(Parametric):
         #     self.onerror(err)
         #     raise
         finally:
+            call_plugins(self, '_defer_call')
             self.defer.call()
 
     def is_loadable(self):
@@ -637,6 +638,9 @@ class Plugin(Parametric):
     def __init__(self, *args, **kwds):
         super(Plugin, self).__init__(*args, **kwds)
         self.defer = Defer()
+
+    def _defer_call(self):
+        self.defer.call()
 
     def prepare(self):
         pass
