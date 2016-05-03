@@ -78,3 +78,56 @@ class DictObject(object):
 
     def __repr__(self):
         return '{0}({1!r})'.format(self.__class__.__name__, self.__dict__)
+
+
+def nesteditems(dct, emptydict=False):
+    """
+    Works like `dict.iteritems` but iterate over all descendant items.
+
+    >>> dct = dict(a=1, b=2, c=dict(d=3, e=4))
+    >>> sorted(nesteditems(dct))
+    [(('a',), 1), (('b',), 2), (('c', 'd'), 3), (('c', 'e'), 4)]
+
+    If "leaf" dict is empty, keys will not be yielded.
+
+    >>> sorted(nesteditems(dict(a={}, b=dict(c={}))))
+    []
+
+    If ``emptydict=True``, empty dictionary is regarded as a value so
+    that items with empty dict as value are yielded.
+
+    >>> sorted(nesteditems(dict(a={}, b=dict(c={})), emptydict=True))
+    [(('a',), {}), (('b', 'c'), {})]
+
+    """
+    for (key0, val0) in dct.items():
+        if isinstance(val0, dict) and (not emptydict or val0):
+            for (key, val) in nesteditems(val0, emptydict=emptydict):
+                yield ((key0,) + key, val)
+        else:
+            yield ((key0,), val0)
+
+
+def setnestedattr(obj, dct, emptydict=False):
+    """
+    Set values of nested dictionary `dct` to attributes of `obj`.
+
+    >>> class A(object):
+    ...     pass
+    >>> a = A()
+    >>> a.b = A()
+    >>> a.b.c = A()
+    >>> setnestedattr(a, dict(b=dict(c=dict(d=1), e=2), f=3))
+    >>> a.b.c.d
+    1
+    >>> a.b.e
+    2
+    >>> a.f
+    3
+
+    """
+    for keys, val in nesteditems(dct, emptydict=emptydict):
+        holder = obj
+        for k in keys[:-1]:
+            holder = getattr(holder, k)
+        setattr(holder, keys[-1], val)

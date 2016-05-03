@@ -3,7 +3,9 @@ import json
 import os
 import sys
 
+from ..base import setnestedattr
 from ..core import basic_types, private, Plugin
+from .misc import PluginWrapper
 
 
 class DumpResults(Plugin):
@@ -206,11 +208,79 @@ class DumpParameters(Plugin):
 
     """
     Dump parameters used for its owner.
+
+    Example
+    -------
+
+    .. Run the code below in a clean temporary directory:
+       >>> getfixture('cleancwd')
+
+    >>> from compapp.core import Parametric
+    >>> from compapp.apps import Computer
+
+    Examples below use an app class derived from `.Computer` since it
+    is bundled with the `DumpResults` plugin:
+
+    >>> Computer.magics.dumpparameters
+    <class 'compapp.plugins.recorders.DumpParameters'>
+
+    >>> class MyApp(Computer):
+    ...     i = 0
+    ...     x = 1.0
+    ...     class nested(Parametric):
+    ...         i = 10
+    ...         x = 11.0
+    ...
+    >>> app = MyApp()
+    >>> app.datastore.dir = 'out'
+    >>> app.i = -1
+    >>> app.execute()
+
+    The parameters are dumped automatically to ``out/params.json``:
+
+    >>> app.datastore.path('params.json')
+    'out/params.json'
+    >>> os.path.exists('out/params.json')
+    True
+
+    Running the same app using the same ``app.datastore.dir``
+    automatically loads the parameters:
+
+    >>> app2 = MyApp()
+    >>> app2.datastore.dir = 'out'
+    >>> app2.execute()
+    >>> app2.i
+    -1
+
     """
     # FIXME: It should be included by default when `HashDataStore` is
     #        used.  How to avoid running it twice (i.e.,
     #        `DumpParameters` explicitly specified and the one called
     #        via `HashDataStore`)?
+
+    def _verified_owner(self):
+        prv = private(self)
+        owner = prv.owner
+        root = prv.getroot()
+        if isinstance(owner, PluginWrapper):  # FIXME: ugly special case
+            owner = private(owner).owner
+        if owner is root and owner.datastore.dir:
+            return owner
+
+    def pre_run(self):
+        owner = self._verified_owner()
+        if owner is None:
+            return
+        with open(owner.datastore.path('params.json'), 'w') as file:
+            json.dump(owner.params(nested=True), file)
+
+    def load(self):
+        owner = self._verified_owner()
+        if owner is None:
+            return
+        with open(owner.datastore.path('params.json')) as file:
+            data = json.load(file)
+        setnestedattr(owner, data)  # FIXME: use emptydict=True
 
 
 class RecordVCS(Plugin):

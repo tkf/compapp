@@ -34,6 +34,7 @@ try:
     cast_map[float] += (long,)
     cast_map[long] = (int,)
     cast_map[unicode] = (str,)
+    cast_map[str] = (unicode,)  # FIXME: find a better way
 except NameError:
     pass
 
@@ -140,6 +141,20 @@ class Parameter(object):
 
 
 def private(par):
+    """
+    Access the private data storage for compapp internals.
+
+    Parameters
+    ----------
+    par : Parameter
+
+    Returns
+    -------
+    prv : Private
+        The `Private` instance attached to the object `par` of any
+        subclass of `Parameter` is returned.
+
+    """
     assert isinstance(par, Parameter)
     return par.__dict__.setdefault('_!!compapp!!_', Private())
 
@@ -425,8 +440,9 @@ class Parametric(Parameter):
                     params[name] = val
             elif isinstance(val, basic_types):
                 params[name] = val
-            elif isinstance(val, Descriptor):
-                params[name] = val.default
+            elif isinstance(val, DataDescriptor):
+                if val.default is not Unspecified:
+                    params[name] = val.default
         return params
 
 
