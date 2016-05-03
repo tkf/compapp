@@ -1,3 +1,4 @@
+from ..base import Unspecified
 from ..core import DataDescriptor
 
 
@@ -326,21 +327,69 @@ class Or(DataDescriptor):
       ...
     ValueError: None of the traits are matched to: 1.0
 
-    .. todo:: `Or` should work with link-type descriptor.
+    `Or` can be combined with `.Link`-like descriptors:
+
+    >>> from compapp.descriptors import Delegate
+    >>> class MyRoot(Parametric):
+    ...     attr = Choice(*'abc')
+    ...
+    ...     class nested(Parametric):
+    ...         attr = Or(OfType(int), Delegate())
+    ...
+    >>> par = MyRoot()
+    >>> par.nested.attr
+    Traceback (most recent call last):
+      ...
+    AttributeError: 'nested' object has no attribute 'attr'
+
+    If ``par.nested.attr`` is not specified (i.e., ``OfType(int)`` is
+    not in action), accessing to ``par.nested.attr`` invokes
+    `.Delegate` which tries to access ``par.attr``.  In the above
+    example, ``par.attr`` was not set so the `AttributeError` was
+    raised.  Setting ``par.attr`` makes ``par.nested.attr``
+    accessible:
+
+    >>> par.attr = 'b'
+    >>> par.nested.attr
+    'b'
+
+    Specifying ``par.nested.attr`` directly invokes `.OfType`:
+
+    >>> par.nested.attr = 'c'
+    Traceback (most recent call last):
+      ...
+    ValueError: None of the traits are matched to: 'c'
+    >>> par.nested.attr = 496
+    >>> par.nested.attr
+    496
 
     """
 
     def __init__(self, *traits, **kwds):
         super(Or, self).__init__(**kwds)
         self.traits = traits
+        for trait in traits:
+            trait.key = self.key
+            trait.myname = self.myname  # FIXME: an awful hack
 
     def verify(self, obj, value, myname=None):
         myname = myname or self.myname(obj)
         for trait in self.traits:
             try:
-                trait.verify(obj, value, myname=myname)
+                verify = trait.verify
+            except AttributeError:
+                continue
+            try:
+                verify(obj, value, myname=myname)
                 return value
             except ValueError:
                 continue
         raise ValueError("None of the traits are matched to: {0!r}"
                          .format(value))
+
+    def get(self, obj):
+        for trait in self.traits:
+            got = trait.get(obj)
+            if got is not Unspecified:
+                return got
+        return self.default

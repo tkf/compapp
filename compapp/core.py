@@ -173,9 +173,9 @@ class Descriptor(object):
 
 class DataDescriptor(Descriptor):
 
-    @property
-    def key(self):
-        return self
+    def __init__(self, **kwds):
+        super(DataDescriptor, self).__init__(**kwds)
+        self.key = self
 
     def get(self, obj):
         return private(obj).data.get(self.key, self.default)
