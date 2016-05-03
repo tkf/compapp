@@ -1,7 +1,7 @@
 import os
 
 from ..core import Plugin
-from ..descriptors import Link, OwnerName, Owner, OwnerInfo, Required
+from ..descriptors import Link, OwnerName, Owner, Required
 
 
 class BaseDataStore(Plugin):
@@ -157,13 +157,18 @@ class SubDataStore(DirectoryDataStore):
     Examples
     --------
 
+    .. Run the code below in a clean temporary directory:
+       >>> getfixture('cleancwd')
+
+    >>> from compapp.core import Parametric
     >>> class MyParametric(Parametric):
     ...     datastore = DirectoryDataStore
     ...
     ...     class nested(Parametric):
     ...         datastore = SubDataStore
     ...
-    >>> mp = MyParametric({'datastore.dir': 'out'})
+    >>> mp = MyParametric()
+    >>> mp.datastore.dir = 'out'
     >>> mp.nested.datastore.path()
     'out/nested'
     >>> mp.nested.datastore.path('file')
@@ -172,7 +177,7 @@ class SubDataStore(DirectoryDataStore):
     'out/nested-dir/file'
     >>> mp.nested.datastore.path('a', 'b', 'c')
     'out/nested-a/b/c'
-    >>> mp.nested.sep = '.'
+    >>> mp.nested.datastore.sep = '.'
     >>> mp.nested.datastore.path('file')
     'out/nested.file'
 
@@ -188,16 +193,16 @@ class SubDataStore(DirectoryDataStore):
     # MAYBE: this class should be called ParasiteDataStore?
 
     dir = None  # null-out the dir parameter
-    datastore = Link('...datastore')
-    ownerinfo = OwnerInfo()
+    _parent = Link('...datastore')
+    _ownername = OwnerName()
     sep = '-'
 
     def path(self, *args, **kwds):
         # but how about List/Dict?
         if not args:
-            self.datastore.path(self.name)
-        part0 = self.name + self.sep + args[0]
-        return self.datastore.path(part0, *args[1:], **kwds)
+            return self._parent.path(self._ownername)
+        part0 = self._ownername + self.sep + args[0]
+        return self._parent.path(part0, *args[1:], **kwds)
 
 
 class HashDataStore(DirectoryDataStore):
