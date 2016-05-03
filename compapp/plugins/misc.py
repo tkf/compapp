@@ -1,4 +1,4 @@
-from ..core import private, Plugin, Executable
+from ..core import call_plugins, private, Plugin, Executable
 from ..descriptors import Link, Delegate
 
 
@@ -14,10 +14,12 @@ class Logger(Plugin):
 
     """
 
+    datastore = Delegate()
     handler = Link('logger.handler')
     # FIXME: how to resolve reference-to-self?
 
     def prepare(self):
+        return                  # FIXME: Implement Logger.prepare
         path = self.datastore.path('run.log')
         self.setup_file_stream_handler(path)
 
@@ -116,7 +118,7 @@ class Figure(Plugin):
         self.defer.call('save')
 
     def finish(self):
-        if self.show():
+        if self.show:
             from matplotlib import pyplot
             pyplot.show()
 
@@ -167,3 +169,19 @@ class PluginWrapper(Plugin):
     See `.Computer.plugin` for its use-case.
 
     """
+
+    def __getattr__(self, name):
+        return getattr(private(self).owner, name)
+
+
+def makemethod(method):
+    def func(self):
+        call_plugins(self, method)
+    return func
+
+
+for method in set(dir(Plugin)) - set(dir(Plugin.mro()[1])):
+    if method.startswith('_'):
+        continue
+    setattr(PluginWrapper, method, makemethod(method))
+del method

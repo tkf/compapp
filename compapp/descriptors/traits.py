@@ -58,7 +58,11 @@ class OfType(DataDescriptor):
     """
 
     def __init__(self, *classes, **kwds):
+        init = kwds.pop('init', None)
         super(OfType, self).__init__(**kwds)
+        if isinstance(init, type) and init not in classes:
+            classes = (init,) + classes
+        self.init = init
         self.allowed = classes
 
     @property
@@ -89,6 +93,13 @@ class OfType(DataDescriptor):
                     classes,
                     value))
         return value
+
+    def get(self, obj):
+        got = super(OfType, self).get(obj)
+        if got is Unspecified and self.init is not None:
+            got = self.init()
+            self.__set__(obj, got)
+        return got
 
 
 class Required(DataDescriptor):

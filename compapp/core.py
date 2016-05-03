@@ -515,7 +515,7 @@ class Defer(object):
             callbacks = list(itertools.chain.from_iterable(cbs))
             self.callbacks.clear()
         else:
-            callbacks = self.callbacks.pop(key)
+            callbacks = self.callbacks.pop(key, ())
         for c in callbacks:
             try:
                 c()
@@ -619,7 +619,7 @@ class Plugin(Parametric):
     """
 
     def __init__(self, *args, **kwds):
-        super(Parametric, self).__init__(*args, **kwds)
+        super(Plugin, self).__init__(*args, **kwds)
         self.defer = Defer()
 
     def prepare(self):

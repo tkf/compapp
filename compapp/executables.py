@@ -4,14 +4,11 @@ Executable subclasses.
 
 import inspect
 
+from .base import DictObject
 from .core import Executable
 from .descriptors import OfType
 from .plugins import PluginWrapper, Figure, \
     SubDataStore, DirectoryDataStore
-
-
-class DictObject(object):  # TODO: implement dict-object hybrid
-    pass
 
 
 class MagicPlugins(PluginWrapper):
@@ -30,7 +27,7 @@ class Assembler(Executable):
     `.Executable` bundled with useful plugins.
     """
 
-    results = OfType(DictObject)
+    results = OfType(init=DictObject)
     """
     Attributes set to this property are saved to `.datastore` by
     `.DumpResults` plugin.  Downstream classes *must* rely only on the
@@ -63,6 +60,11 @@ class Assembler(Executable):
     `.Plugin`\ s.  Those "users" of `datastore` property expects it to
     be a subclass of `.BaseDataStore`.
     """
+
+    def is_loadable(self):
+        if not self.datastore.exists():
+            return False
+        return True
 
     @property
     def argrange(self):
@@ -105,7 +107,7 @@ class Loader(Assembler):
     """
 
     class magics(MagicPlugins):
-        autodump = None  # null-out
+        dumpresults = None  # null-out
     """
     Since no heavy computations are needed, `.DumpResults` plugin is not
     included.

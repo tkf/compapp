@@ -150,6 +150,9 @@ class DirectoryDataStore(BaseDataStore):
             return path
         return makepath(args, **kwds)
 
+    def exists(self, *path):
+        return self.dir and os.path.exists(self.path(*path, mkdir=False))
+
 
 class SubDataStore(DirectoryDataStore):
 
