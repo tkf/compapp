@@ -1,7 +1,9 @@
+import hashlib
+import json
 import os
 
-from ..core import Plugin
-from ..descriptors import Link, OwnerName, Owner, Required
+from ..core import private, Plugin
+from ..descriptors import Link, OwnerName
 
 
 class BaseDataStore(Plugin):
@@ -205,25 +207,59 @@ class SubDataStore(DirectoryDataStore):
         return self._parent.path(part0, *args[1:], **kwds)
 
 
+def hexdigest(jsonable):
+    """
+    Calculate hex digest of a `jsonable` object.
+
+    >>> hexdigest({'a': 1, 'b': 2, 'c': 3})
+    'e20096b15530bd66a35a7332619f6666e2322070'
+
+    """
+    string = json.dumps(jsonable, sort_keys=True).encode()
+    return hashlib.sha1(string).hexdigest()
+
+
 class HashDataStore(DirectoryDataStore):
 
     """
     Automatically allocated data-store based on hash of parameter.
+
+    Examples
+    --------
+
+    .. Run the code below in a clean temporary directory:
+       >>> getfixture('cleancwd')
+
+    >>> from compapp.core import Parametric
+    >>> class MyParametric(Parametric):
+    ...     datastore = HashDataStore
+    ...     a = 1
+    ...
+    >>> mp = MyParametric()
+    >>> mp.datastore.prepare()
+    >>> mp.datastore.dir
+    'Data/hash/be/a393597a3c5518cad18a4c96c08d038de3f00a'
+    >>> mp.a = 2
+    >>> mp.datastore.prepare()
+    >>> mp.datastore.dir
+    'Data/hash/a2/722afcdc53688843b61b8d71329fabab16b6ae'
+    >>> mp.datastore.basedir = '.'
+    >>> mp.datastore.prepare()
+    >>> mp.datastore.dir
+    './a2/722afcdc53688843b61b8d71329fabab16b6ae'
+
     """
 
-    basedir = Required(str)
-    owner = Owner()
-    include_plugin_parameters = False
+    basedir = os.path.join('Data', 'hash')
 
     def ownerhash(self):
-        def not_datastore(key, value):
-            pass
-        params = self.owner.params(deep=True, include=not_datastore)
-        ownerclass = type(self.owner)
-        return self.sha1(ownerclass, params)
+        owner = private(self).owner
+        params = owner.params(nested=True)
+        del params['datastore']
+        cls = type(owner)
+        name = cls.__module__ + '.' + cls.__name__
+        return hexdigest([name, params])
 
-    def run(self):
+    def prepare(self):
         digest = self.ownerhash()
-        path = os.path.join(self.basedir, digest[:2], digest[2:])
-        os.makedirs(path)
-        self.dir = path
+        self.dir = os.path.join(self.basedir, digest[:2], digest[2:])
