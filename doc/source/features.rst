@@ -97,8 +97,7 @@ component (e.g., dict key has to be a string and the value has to be
 int) and other traits such as maximal length.  The descriptor
 `.Choice` restricts the *value* of properties, rather than the type.
 The descriptor `.Or` defines a property that must satisfy one of
-defined restrictions.  Auto-conversion descriptors such as `.CSVList`
-and `.LiteralEval` are useful when setting complex values.
+defined restrictions.
 
 
 Linking properties
@@ -108,8 +107,8 @@ compapp prefers :term:`composition over inheritance`.  However, using
 composition makes it hard to share properties between objects whereas
 in inheritance it is easy (or too easy [#]_) to share properties
 between parent and sub classes.  compapp provides various *linking
-properties* (`.Link`, `.Delegate`, `.Propagate`, etc.) which can refer
-to properties of other objects.
+properties* (`.Link`, `.Delegate`, etc.) which can refer to properties
+of other objects.
 
 .. [#] In other words, sharing properties is opt-in for composition
    approach and forced for inheritance approach.

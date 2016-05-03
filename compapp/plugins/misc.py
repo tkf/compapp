@@ -1,5 +1,5 @@
-from ..core import Plugin, Executable
-from ..properties import Link, Delegate, Owner
+from ..core import private, Plugin, Executable
+from ..descriptors import Link, Delegate
 
 
 class Logger(Plugin):
@@ -14,7 +14,7 @@ class Logger(Plugin):
 
     """
 
-    handler = Link('#.logger.handler')
+    handler = Link('logger.handler')
     # FIXME: how to resolve reference-to-self?
 
     def prepare(self):
@@ -138,14 +138,13 @@ class AutoUpstreams(Plugin):
     Automatically execute upstreams.
     """
 
-    owner = Owner()
-
     @staticmethod
     def is_runnable(excbl):
         return getattr(excbl, 'is_runnable', lambda: is_runnable(excbl))()
 
     def prepare(self):
-        executables = self.owner.params(type=Executable)
+        owner = private(self).owner
+        executables = owner.params(type=Executable)
         while executables:
             for i, ebl in executables:
                 if self.is_runnable(ebl):

@@ -4,7 +4,7 @@ Executable subclasses.
 
 
 from .core import Executable
-from properties import Instance
+from .descriptors import OfType
 from .plugins import PluginWrapper, Figure, \
     SubDataStore, DirectoryDataStore, HashDataStore
 
@@ -15,7 +15,7 @@ class DictObject(object):  # TODO: implement dict-object hybrid
 
 class MagicPlugins(PluginWrapper):
     from .plugins import (
-        AutoDump as autodump,
+        DumpResults as dumpresults,
         RecordVCS as recordvcs,
         RecordTiming as recordtiming,
         DumpParameters as dumpparameters,
@@ -29,10 +29,10 @@ class Assembler(Executable):
     `.Executable` bundled with useful plugins.
     """
 
-    results = Instance(DictObject)
+    results = OfType(DictObject)
     """
     Attributes set to this property are saved to `.datastore` by
-    `.AutoDump` plugin.  Downstream classes *must* rely only on the
+    `.DumpResults` plugin.  Downstream classes *must* rely only on the
     data under this property.  For debugging purpose, use `.dbg` to
     store intermediate variables.
     """
@@ -83,7 +83,7 @@ class Loader(Assembler):
     class magics(MagicPlugins):
         autodump = None  # null-out
     """
-    Since no heavy computations are needed, `.AutoDump` plugin is not
+    Since no heavy computations are needed, `.DumpResults` plugin is not
     included.
     """
 
