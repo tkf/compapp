@@ -1,4 +1,4 @@
-from ..core import Descriptor
+from ..core import DataDescriptor
 
 
 def tupleoftypes(t):
@@ -8,7 +8,7 @@ def tupleoftypes(t):
     return t
 
 
-class OfType(Descriptor):
+class OfType(DataDescriptor):
 
     """
     Attribute accepting only certain type(s) of value.
@@ -90,7 +90,7 @@ class OfType(Descriptor):
         return value
 
 
-class Required(Descriptor):
+class Required(DataDescriptor):
 
     """
     Attributes required to be set before `.Executable.run`.
@@ -127,7 +127,7 @@ class Required(Descriptor):
 
     def __init__(self, desc=None):
         super(Required, self).__init__()
-        if desc and not isinstance(desc, Descriptor):
+        if desc and not isinstance(desc, DataDescriptor):
             desc = OfType(desc)
         self.desc = desc
         if desc:
@@ -149,7 +149,7 @@ def asdesc(trait):
     if isinstance(trait, (type, tuple)):
         return OfType(*tupleoftypes(trait))
     else:
-        assert isinstance(trait, (Descriptor, type(None)))
+        assert isinstance(trait, (DataDescriptor, type(None)))
         return trait
 
 
@@ -268,7 +268,7 @@ class Dict(OfType):
         return value
 
 
-class Choice(Descriptor):
+class Choice(DataDescriptor):
 
     """
     Attribute accepting only one of the specified value.
@@ -306,7 +306,7 @@ class Choice(Descriptor):
         return value
 
 
-class Or(Descriptor):
+class Or(DataDescriptor):
 
     """
     Use one of the specified traits.

@@ -149,16 +149,6 @@ class Descriptor(object):
     def __init__(self, default=Unspecified):
         self.default = default
 
-    @property
-    def key(self):
-        return self
-
-    def get(self, obj):
-        return private(obj).data.get(self.key, self.default)
-
-    def verify(self, obj, value, myname=None):  # FIXME: clean the interface
-        return value
-
     def myname(self, obj, error=False):
         try:
             cls = obj.__class__
@@ -179,6 +169,19 @@ class Descriptor(object):
                 "'{0}' object has no attribute '{1}'"
                 .format(obj.__class__.__name__, self.myname(obj)))
         return got
+
+
+class DataDescriptor(Descriptor):
+
+    @property
+    def key(self):
+        return self
+
+    def get(self, obj):
+        return private(obj).data.get(self.key, self.default)
+
+    def verify(self, obj, value, myname=None):  # FIXME: clean the interface
+        return value
 
     def __set__(self, obj, value):
         private(obj).data[self.key] = self.verify(obj, value)
