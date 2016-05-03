@@ -81,9 +81,13 @@ class Figure(Plugin):
 
        class MyApp(Computer):
            def run(self):
-               fig = self.figure()
-               ax = fig.add_subplot(111)
-               ax.plot([x ** 2 for x in range(100)])
+               fig1 = self.figure()
+               ax1 = fig1.add_subplot(111)
+               ax1.plot([x ** 2 for x in range(100)])
+
+               fig2, (ax21, ax22) = self.figure.subplots(2)
+               ax21.plot([0, 2, 1, 3, 5])
+               ax22.plot([0, 1, 5, 3, 0])
 
        MyApp().execute()
 
@@ -96,16 +100,34 @@ class Figure(Plugin):
         self._figures = {}
         self._num = 0
 
-    def __call__(self, name=None):
+    def __call__(self, *args, **kwds):
         """
         Make a new matplotlib figure.
+
+        All the positional and keyword arguments are passed to
+        `matplotlib.pyplot.figure` except one keyword argument *name*.
+
+        Parameters
+        ----------
+        name : str, int, or None
+            Unique name of the figure.  If the figure already exists,
+            the old figure is returned, and the rest of the arguments
+            are ignored.
 
         Returns
         -------
         fig : matplotlib.figure.Figure
+
+        Todo
+        ----
+
+        Ignoring the arguments is probably not a good idea.  Find a
+        better interface.
+
         """
         from matplotlib import pyplot
 
+        name = kwds.pop('name', None)
         if name is None:
             while str(self._num) in self._figures:
                 self._num += 1
@@ -118,7 +140,12 @@ class Figure(Plugin):
         except KeyError:
             pass
 
-        self._figures[name] = fig = pyplot.figure()
+        return self._set_fig(name, pyplot.figure(*args, **kwds))
+
+    def _set_fig(self, name, fig):
+        from matplotlib import pyplot
+
+        self._figures[name] = fig
 
         @self.defer.keyed('save')
         def _():
@@ -136,6 +163,37 @@ class Figure(Plugin):
         if self.show:
             from matplotlib import pyplot
             pyplot.show()
+
+    def subplots(self, *args, **kwds):
+        """
+        Wrapper around `matplotlib.pyplot.subplot`.
+
+        All the positional and keyword arguments are passed to
+        `matplotlib.pyplot.subplot` except one keyword argument
+        *name*.
+
+        Parameters
+        ----------
+        name : str, int, or None
+            Unique name of the figure.  If the figure already exists,
+            the old figure will be **removed and closed**.
+
+        Returns
+        -------
+        fig : `matplotlib.figure.Figure`
+        ax : `matplotlib.axes.Axes` or `tuple`
+
+        """
+        from matplotlib import pyplot
+
+        name = str(kwds.pop('name', None))
+        if name in self._figures:
+            pyplot.close(self._figures[name])
+            del self._figures[name]
+
+        ret = fig, _ = pyplot.subplots(*args, **kwds)
+        self._set_fig(name, fig)
+        return ret
 
 
 def is_runnable(excbl):
