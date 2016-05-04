@@ -249,11 +249,11 @@ class HashDataStore(DirectoryDataStore):
     >>> mp = MyParametric()
     >>> mp.datastore.prepare()
     >>> mp.datastore.dir
-    'Data/hash/be/a393597a3c5518cad18a4c96c08d038de3f00a'
+    'Data/memo/be/a393597a3c5518cad18a4c96c08d038de3f00a'
     >>> mp.a = 2
     >>> mp.datastore.prepare()
     >>> mp.datastore.dir
-    'Data/hash/a2/722afcdc53688843b61b8d71329fabab16b6ae'
+    'Data/memo/a2/722afcdc53688843b61b8d71329fabab16b6ae'
     >>> mp.datastore.basedir = '.'
     >>> mp.datastore.prepare()
     >>> mp.datastore.dir
@@ -261,7 +261,7 @@ class HashDataStore(DirectoryDataStore):
 
     """
 
-    basedir = os.path.join('Data', 'hash')
+    basedir = os.path.join('Data', 'memo')
 
     def ownerhash(self):
         owner = private(self).owner
