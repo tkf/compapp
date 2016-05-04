@@ -100,48 +100,6 @@ class Figure(Plugin):
         self._figures = {}
         self._num = 0
 
-    def __call__(self, *args, **kwds):
-        """
-        Make a new matplotlib figure.
-
-        All the positional and keyword arguments are passed to
-        `matplotlib.pyplot.figure` except one keyword argument *name*.
-
-        Parameters
-        ----------
-        name : str, int, or None
-            Unique name of the figure.  If the figure already exists,
-            the old figure is returned, and the rest of the arguments
-            are ignored.
-
-        Returns
-        -------
-        fig : matplotlib.figure.Figure
-
-        Todo
-        ----
-
-        Ignoring the arguments is probably not a good idea.  Find a
-        better interface.
-
-        """
-        from matplotlib import pyplot
-
-        name = kwds.pop('name', None)
-        if name is None:
-            while str(self._num) in self._figures:
-                self._num += 1
-            name = str(self._num)
-            self._num += 1
-        assert isinstance(name, str)
-
-        try:
-            return self._figures[name]
-        except KeyError:
-            pass
-
-        return self._set_fig(name, pyplot.figure(*args, **kwds))
-
     def _set_fig(self, name, fig):
         from matplotlib import pyplot
 
@@ -155,6 +113,76 @@ class Figure(Plugin):
         self.defer(fig)(pyplot.close)
 
         return fig
+
+    def __call__(self, *args, **kwds):
+        """
+        Make a new matplotlib figure.
+
+        All the positional and keyword arguments are passed to
+        `matplotlib.pyplot.figure` except one keyword argument *name*.
+
+        Parameters
+        ----------
+        name : str, int, or None
+            Unique name of the figure.  It is an error to call this
+            method with the same *name* twice.
+
+        Returns
+        -------
+        fig : matplotlib.figure.Figure
+
+        """
+        from matplotlib import pyplot
+        name = kwds.pop('name', None)
+        assert name not in self._figures
+        return self._set_fig(name, pyplot.figure(*args, **kwds))
+
+    def __getitem__(self, name):
+        """
+        Make a new matplotlib figure or get the new one.
+
+        Examples
+        --------
+        >>> figure = Figure()
+        >>> figure.prepare()
+        >>> fig_a = figure(name='a')
+        >>> assert fig_a is figure['a']  # access an existing figure
+        >>> fig_b = figure['b']  # create a new figure
+        >>> assert fig_b is figure['b']
+
+        Note that a new figure is created always when *name* is
+        `None`:
+
+        >>> assert figure[None] is not figure[None]
+
+        .. Manually close:
+           >>> figure.defer.call()
+
+        Parameters
+        ----------
+        name : str, int, or None
+            Unique name of the figure.
+
+        Returns
+        -------
+        fig : matplotlib.figure.Figure
+
+        """
+        from matplotlib import pyplot
+
+        if name is None:
+            while str(self._num) in self._figures:
+                self._num += 1
+            name = str(self._num)
+            self._num += 1
+        assert isinstance(name, str)
+
+        try:
+            return self._figures[name]
+        except KeyError:
+            pass
+
+        return self._set_fig(name, pyplot.figure())
 
     def save(self):
         self.defer.call('save')
@@ -175,8 +203,8 @@ class Figure(Plugin):
         Parameters
         ----------
         name : str, int, or None
-            Unique name of the figure.  If the figure already exists,
-            the old figure will be **removed and closed**.
+            Unique name of the figure.  It is an error to call this
+            method with the same *name* twice.
 
         Returns
         -------
@@ -185,12 +213,8 @@ class Figure(Plugin):
 
         """
         from matplotlib import pyplot
-
         name = str(kwds.pop('name', None))
-        if name in self._figures:
-            pyplot.close(self._figures[name])
-            del self._figures[name]
-
+        assert name not in self._figures
         ret = fig, _ = pyplot.subplots(*args, **kwds)
         self._set_fig(name, fig)
         return ret
