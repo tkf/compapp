@@ -122,6 +122,9 @@ class DirectoryDataStore(BaseDataStore):
         assert isinstance(value, str)
         self._dir = value
 
+    def is_writable(self):
+        return self.dir and iswritable(self.dir)
+
     def prepare(self):
         if hasattr(self, '_dir') and not iswritable(self._dir):
             raise RuntimeError("Directory {0} is not writable."
@@ -205,7 +208,7 @@ class SubDataStore(DirectoryDataStore):
 
     # MAYBE: this class should be called ParasiteDataStore?
 
-    dir = None  # null-out the dir parameter
+    dir = Link('._parent.dir')
     _parent = Link('...datastore')
     _ownername = OwnerName()
     sep = '-'

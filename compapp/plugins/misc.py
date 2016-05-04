@@ -140,12 +140,31 @@ class Figure(Plugin):
     >>> app.sub.sub.figure.show
     True
 
+    .. Run the code below in a clean temporary directory:
+       >>> getfixture('cleancwd')
+
+    >>> import os
+    >>> from compapp import Computer
+    >>> class MyApp(Computer):
+    ...     def run(self):
+    ...         self.figure()
+    ...         self.figure(name='alpha')
+    ...         self.figure(name='beta')
+    ...
+    >>> app = MyApp()
+    >>> app.datastore.dir = 'out'
+    >>> app.execute()
+    >>> sorted(os.listdir('out'))     # doctest: +NORMALIZE_WHITESPACE
+    ['figure-0.png', 'figure-alpha.png', 'figure-beta.png', 'params.json']
+
     See also
     --------
     :ref:`ex-simple_plots`
     :ref:`ex-named_figure`
 
     """
+
+    ext = 'png'
 
     datastore = Delegate()
     r"""
@@ -173,11 +192,19 @@ class Figure(Plugin):
     def _set_fig(self, name, fig):
         from matplotlib import pyplot
 
+        if name is None:
+            while str(self._num) in self._figures:
+                self._num += 1
+            name = str(self._num)
+            self._num += 1
+        assert isinstance(name, str)
+
         self._figures[name] = fig
 
         @self.defer.keyed('save')
         def _():
-            if not (hasattr(self, 'datastore') and self.datastore.exists()):
+            if not (hasattr(self, 'datastore') and
+                    self.datastore.is_writable()):
                 return
             path = self.datastore.path(name + '.' + self.ext)
             fig.savefig(path)
@@ -248,13 +275,6 @@ class Figure(Plugin):
 
         """
         from matplotlib import pyplot
-
-        if name is None:
-            while str(self._num) in self._figures:
-                self._num += 1
-            name = str(self._num)
-            self._num += 1
-        assert isinstance(name, str)
 
         try:
             return self._figures[name]
