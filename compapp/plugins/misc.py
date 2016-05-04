@@ -1,4 +1,4 @@
-from ..core import call_plugins, private, Plugin, Executable
+from ..core import attrs_of, call_plugins, private, Plugin, Executable
 from ..descriptors import Link, Delegate, Or, OfType
 
 
@@ -322,15 +322,15 @@ class AutoUpstreams(Plugin):
 
     def prepare(self):
         owner = private(self).owner
-        executables = owner.params(type=Executable)
+        executables = list(attrs_of(owner, Executable))
         while executables:
-            for i, ebl in executables:
-                if self.is_runnable(ebl):
+            for i, excbl in enumerate(executables):
+                if self.is_runnable(excbl):
                     break
             else:
                 return
             del executables[i]
-            self.execute()
+            excbl.execute()
 
 
 class PluginWrapper(Plugin):
