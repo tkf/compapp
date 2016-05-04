@@ -22,11 +22,11 @@ class MixinMockHooks(object):
 
 
 class MockExecutable(MixinMockHooks, Executable):
-    hooks = ['is_loadable', 'prepare', 'run', 'save', 'load', 'finish']
+    hooks = ['should_load', 'prepare', 'run', 'save', 'load', 'finish']
 
     def __init__(self, *args, **kwds):
         super(MockExecutable, self).__init__(*args, **kwds)
-        self.is_loadable.return_value = False
+        self.should_load.return_value = False
 
 
 class MockPlugin(MixinMockHooks, Plugin):
@@ -46,7 +46,7 @@ def test_executable_hooks_simple_run():
     excbl.execute()
     assert excbl.rootmock.method_calls == [
         mock.call.prepare(),
-        mock.call.is_loadable(),
+        mock.call.should_load(),
         mock.call.run(),
         mock.call.save(),
         mock.call.finish(),
@@ -55,11 +55,11 @@ def test_executable_hooks_simple_run():
 
 def test_executable_hooks_loadable_run():
     excbl = MockExecutable()
-    excbl.is_loadable.return_value = True
+    excbl.should_load.return_value = True
     excbl.execute()
     assert excbl.rootmock.method_calls == [
         mock.call.prepare(),
-        mock.call.is_loadable(),
+        mock.call.should_load(),
         mock.call.load(),
         mock.call.finish(),
     ]
@@ -71,7 +71,7 @@ def test_plugin_hooks_simple_run():
     assert excbl.rootmock.method_calls == [
         mock.call.prepare(),
         mock.call.mockplugin.prepare(),
-        mock.call.is_loadable(),
+        mock.call.should_load(),
         mock.call.mockplugin.pre_run(),
         mock.call.run(),
         mock.call.mockplugin.post_run(),
@@ -84,12 +84,12 @@ def test_plugin_hooks_simple_run():
 
 def test_plugin_hooks_loadable_run():
     excbl = MockExecutableWithPlugin()
-    excbl.is_loadable.return_value = True
+    excbl.should_load.return_value = True
     excbl.execute()
     assert excbl.rootmock.method_calls == [
         mock.call.prepare(),
         mock.call.mockplugin.prepare(),
-        mock.call.is_loadable(),
+        mock.call.should_load(),
         mock.call.load(),
         mock.call.mockplugin.load(),
         mock.call.mockplugin.finish(),
@@ -104,7 +104,7 @@ def test_plugin_hooks_with_a_deferred_calls():
     assert excbl.rootmock.method_calls == [
         mock.call.prepare(),
         mock.call.mockplugin.prepare(),
-        mock.call.is_loadable(),
+        mock.call.should_load(),
         mock.call.mockplugin.pre_run(),
         mock.call.run(),
         mock.call.mockplugin.post_run(),
@@ -126,7 +126,7 @@ def test_plugin_hooks_deferred_calls_on_error():
     assert excbl.rootmock.method_calls == [
         mock.call.prepare(),
         mock.call.mockplugin.prepare(),
-        mock.call.is_loadable(),
+        mock.call.should_load(),
         mock.call.mockplugin.pre_run(),
         mock.call.run(),
         mock.call.mockplugin.defer.call(),
@@ -144,7 +144,7 @@ def test_plugin_hooks_one_error_in_deferred_call():
     assert excbl.rootmock.method_calls == [
         mock.call.prepare(),
         mock.call.mockplugin.prepare(),
-        mock.call.is_loadable(),
+        mock.call.should_load(),
         mock.call.mockplugin.pre_run(),
         mock.call.run(),
         mock.call.mockplugin.post_run(),
@@ -170,7 +170,7 @@ def test_plugin_hooks_two_errors_in_deferred_call():
     assert excbl.rootmock.method_calls == [
         mock.call.prepare(),
         mock.call.mockplugin.prepare(),
-        mock.call.is_loadable(),
+        mock.call.should_load(),
         mock.call.mockplugin.pre_run(),
         mock.call.run(),
         mock.call.mockplugin.post_run(),

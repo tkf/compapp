@@ -188,7 +188,11 @@ class Descriptor(object):
 
 class DataDescriptor(Descriptor):
 
+    hidden = False
+
     def __init__(self, **kwds):
+        if 'hidden' in kwds:
+            self.hidden = kwds.pop('hidden')
         super(DataDescriptor, self).__init__(**kwds)
         self.key = self
 
@@ -440,7 +444,7 @@ class Parametric(Parameter):
                     params[name] = val
             elif isinstance(val, basic_types):
                 params[name] = val
-            elif isinstance(val, DataDescriptor):
+            elif isinstance(val, DataDescriptor) and not val.hidden:
                 if val.default is not Unspecified:
                     params[name] = val.default
         return params
@@ -567,7 +571,7 @@ class Executable(Parametric):
         try:
             self.prepare()
             call_plugins(self, 'prepare')
-            if self.is_loadable():
+            if self.should_load():
                 self.load()
                 call_plugins(self, 'load')
             else:
@@ -587,11 +591,12 @@ class Executable(Parametric):
                 self.defer.call,
             ])
 
-    def is_loadable(self):
+    def should_load(self):
         """
-        |TO BE EXTENDED| Return `True` if `self` is loadable.
+        Return `True` if `.load` should be run.
 
         Default is to return `False` always.
+        See also `.Assembler.is_loadable`.
 
         """
         return False

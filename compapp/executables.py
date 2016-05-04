@@ -6,7 +6,7 @@ import inspect
 
 from .base import DictObject
 from .core import Executable
-from .descriptors import OfType
+from .descriptors import OfType, Choice
 from .plugins import PluginWrapper, Figure, \
     SubDataStore, DirectoryDataStore
 
@@ -25,6 +25,14 @@ class Assembler(Executable):
 
     """
     `.Executable` bundled with useful plugins.
+    """
+
+    mode = Choice('auto', 'run', 'load', hidden=True)
+    """
+    Execution mode.  The mode ``'run'`` and ``'load'`` means to call
+    `.run` and `.load`, respectively.  When ``'auto'`` is specified,
+    call `.run` if `.is_loadable` returns `True` otherwise call
+    `.load`.
     """
 
     results = OfType(init=DictObject)
@@ -61,10 +69,19 @@ class Assembler(Executable):
     be a subclass of `.BaseDataStore`.
     """
 
+    def should_load(self):
+        return (self.mode == 'load' or
+                self.mode == 'auto' and self.is_loadable())
+
     def is_loadable(self):
-        if not self.datastore.exists():
-            return False
-        return True
+        """
+        |TO BE EXTENDED| Return `True` if `self` is loadable.
+
+        Default implementation calls `self.datastore.exists()
+        <.DirectoryDataStore.exists>`.
+
+        """
+        return self.datastore.exists()
 
     @property
     def argrange(self):

@@ -285,6 +285,18 @@ class Choice(DataDescriptor):
     """
     Attribute accepting only one of the specified value.
 
+    Parameters
+    ----------
+    default
+        Default value (see *nodefault*).
+    *choices
+        Alternative values.
+    nodefault : bool
+        Treat *default* is just an alternative; i.e., do not
+        "initialize" the attribute.
+    **kwds
+        See: `.DataDescriptor`.
+
     Examples
     --------
 
@@ -293,7 +305,9 @@ class Choice(DataDescriptor):
     ...     choice = Choice(1, 2, 'a')
     ...
     >>> mp = MyParametric()
-    >>> mp.choice = 1
+    >>> mp.choice
+    1
+    >>> mp.choice = 2
     >>> mp.choice = 'a'
     >>> mp.choice = 'unknown'              # doctest: +NORMALIZE_WHITESPACE
     Traceback (most recent call last):
@@ -303,9 +317,11 @@ class Choice(DataDescriptor):
 
     """
 
-    def __init__(self, *choices, **kwds):
-        super(Choice, self).__init__(*kwds)
-        self.choices = choices
+    def __init__(self, default, *choices, **kwds):
+        if not kwds.pop('nodefault', False):
+            kwds.update(default=default)
+        super(Choice, self).__init__(**kwds)
+        self.choices = (default,) + choices
 
     def verify(self, obj, value, myname=None):
         if value not in self.choices:
@@ -342,7 +358,7 @@ class Or(DataDescriptor):
 
     >>> from compapp.descriptors import Delegate
     >>> class MyRoot(Parametric):
-    ...     attr = Choice(*'abc')
+    ...     attr = Choice(*'abc', nodefault=True)
     ...
     ...     class nested(Parametric):
     ...         attr = Or(OfType(int), Delegate())
