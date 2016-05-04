@@ -50,7 +50,7 @@ help:
 	@echo "  coverage   to run coverage check of the documentation (if enabled)"
 
 clean:
-	-rm -rf $(BUILDDIR)/* source/api
+	-rm -rf $(BUILDDIR)/* source/api source/examples
 
 api:
 	-rm -rf source/api
@@ -59,6 +59,15 @@ api:
 source/api: ../compapp
 	$(SPHINXAPIDOC) --force --separate --private -o $@ $<
 	touch $@
+
+examples:
+	-rm -rf source/examples
+	$(MAKE) source/examples
+
+source/examples:
+	mkdir source/examples
+	ln -s ../../../compapp/samples source/examples/code
+	source/genexamples.py
 
 html: source/api
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html

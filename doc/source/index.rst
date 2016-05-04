@@ -11,7 +11,7 @@ Contents:
 .. toctree::
 
    features.rst
-   examples/index.rst
+   examples.rst
    executables.rst
    api.rst
    api/compapp.rst
