@@ -113,6 +113,8 @@ class DirectoryDataStore(BaseDataStore):
             ownername = self._ownername
         except AttributeError:
             return None
+        if parentdir is None:
+            return None
         return os.path.join(parentdir, ownername)
 
     @dir.setter
