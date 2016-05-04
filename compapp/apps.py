@@ -99,6 +99,53 @@ class Memoizer(Computer):
 
     """
     `Computer` with `.HashDataStore`.
+
+    Examples
+    --------
+
+    .. Run the code below in a clean temporary directory:
+       >>> getfixture('cleancwd')
+
+    >>> class UpStream1(Memoizer):
+    ...
+    ...     parameter = 1
+    ...
+    ...     def run(self):
+    ...         self.results.data = 'result of intense computation'
+    ...         self.results.name = type(self).__name__
+    ...         self.isrun = True
+    ...
+    ...     def load(self):
+    ...         self.isrun = False
+    ...
+    >>> class UpStream2(UpStream1):
+    ...     pass
+    ...
+    >>> class DownStream(UpStream1):
+    ...     up1 = UpStream1
+    ...     up2 = UpStream2
+    ...
+    ...     def run(self):
+    ...         self.up1.execute()
+    ...         self.up2.execute()
+    ...         super(DownStream, self).run()
+    ...         self.results.sum = (self.up1.results.data +
+    ...                             self.up2.results.data)
+    ...
+    >>> up1 = UpStream1()
+    >>> up1.execute()
+    >>> assert up1.isrun
+    >>> up1 = UpStream1()
+    >>> up1.execute()
+    >>> assert not up1.isrun
+    >>> down = DownStream()
+    >>> down.execute()
+    >>> assert not down.up1.isrun
+    >>> assert down.up2.isrun
+    >>> assert down.isrun
+    >>> down.up1.results.data == 'result of intense computation'
+    True
+
     """
 
     from .plugins import HashDataStore as datastore
