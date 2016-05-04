@@ -74,25 +74,31 @@ class Figure(Plugin):
     Examples
     --------
 
-    .. plot::
-       :include-source:
+    Normally, `Figure` is prepared by an `.Executable` subclass such
+    as `.Computer`.  To manually play with `Figure`, it is equivalent
+    to do:
 
-       from compapp.apps import Computer
+    >>> figure = Figure()
+    >>> figure.prepare()
 
-       class MyApp(Computer):
-           def run(self):
-               fig1 = self.figure()
-               ax1 = fig1.add_subplot(111)
-               ax1.plot([x ** 2 for x in range(100)])
+    `Calling <__call__>` a `Figure` instance gives you a matplotlib
+    figure.
 
-               fig2, (ax21, ax22) = self.figure.subplots(2)
-               ax21.plot([0, 2, 1, 3, 5])
-               ax22.plot([0, 1, 5, 3, 0])
+    >>> figure()                                       # doctest: +ELLIPSIS
+    <matplotlib.figure.Figure object at ...>
 
-               # FIXME: a hack to show the figure in sphinx doc:
-               self.figure.defer.callbacks.clear()
+    It also has `.subplots` which is just a thin wrapper around
+    `matplotlib.pyplot.subplots`:
 
-       MyApp().execute()
+    >>> fig, (ax1, ax2) = figure.subplots(2)
+
+    .. Manually close:
+       >>> figure.defer.call()
+
+    See also
+    --------
+    :ref:`ex-simple_plots`
+    :ref:`ex-named_figure`
 
     """
 
@@ -148,8 +154,14 @@ class Figure(Plugin):
 
         Examples
         --------
+        The usual preparation (see: `Figure`):
+
         >>> figure = Figure()
         >>> figure.prepare()
+
+        If figure is created with a name, it can be accessed by the
+        dict-like interface:
+
         >>> fig_a = figure(name='a')
         >>> assert fig_a is figure['a']  # access an existing figure
         >>> fig_b = figure['b']  # create a new figure
