@@ -4,7 +4,7 @@ import itertools
 import logging
 import weakref
 
-from .base import Unspecified
+from .base import Unspecified, MultiException
 
 
 logger = logging.getLogger(__name__)
@@ -532,11 +532,10 @@ class Defer(object):
             self.callbacks.clear()
         else:
             callbacks = self.callbacks.pop(key, ())
-        for c in callbacks:
-            try:
-                c()
-            except Exception as err:
-                logger.exception(err)
+        with MultiException.recorder() as mexc:
+            for c in callbacks:
+                with mexc.record():
+                    c()
 
 
 class Executable(Parametric):
@@ -586,8 +585,11 @@ class Executable(Parametric):
         #     self.onerror(err)
         #     raise
         finally:
-            call_plugins(self, '_defer_call')
-            self.defer.call()
+            with MultiException.recorder() as mexc:
+                with mexc.record():
+                    call_plugins(self, '_defer_call')
+                with mexc.record():
+                    self.defer.call()
 
     def is_loadable(self):
         """

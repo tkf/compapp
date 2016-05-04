@@ -3,6 +3,9 @@ try:
 except ImportError:
     import mock
 
+import pytest
+
+from ..base import MultiException
 from ..core import Executable, Plugin
 
 
@@ -91,4 +94,90 @@ def test_plugin_hooks_loadable_run():
         mock.call.mockplugin.load(),
         mock.call.mockplugin.finish(),
         mock.call.finish(),
+    ]
+
+
+def test_plugin_hooks_with_a_deferred_calls():
+    excbl = MockExecutableWithPlugin()
+    excbl.mockplugin.defer()(excbl.rootmock.mockplugin.defer.call)
+    excbl.execute()
+    assert excbl.rootmock.method_calls == [
+        mock.call.prepare(),
+        mock.call.mockplugin.prepare(),
+        mock.call.is_loadable(),
+        mock.call.mockplugin.pre_run(),
+        mock.call.run(),
+        mock.call.mockplugin.post_run(),
+        mock.call.save(),
+        mock.call.mockplugin.save(),
+        mock.call.mockplugin.finish(),
+        mock.call.finish(),
+        mock.call.mockplugin.defer.call(),
+    ]
+
+
+def test_plugin_hooks_deferred_calls_on_error():
+    excbl = MockExecutableWithPlugin()
+    excbl.mockplugin.defer()(excbl.rootmock.mockplugin.defer.call)
+    excbl.run.side_effect = raised = RuntimeError("dummy error")
+    with pytest.raises(RuntimeError) as excinfo:
+        excbl.execute()
+    assert excinfo.value is raised
+    assert excbl.rootmock.method_calls == [
+        mock.call.prepare(),
+        mock.call.mockplugin.prepare(),
+        mock.call.is_loadable(),
+        mock.call.mockplugin.pre_run(),
+        mock.call.run(),
+        mock.call.mockplugin.defer.call(),
+    ]
+
+
+def test_plugin_hooks_one_error_in_deferred_call():
+    excbl = MockExecutableWithPlugin()
+    raised = RuntimeError("dummy error")
+    excbl.rootmock.mockplugin.defer.call.side_effect = raised
+    excbl.mockplugin.defer()(excbl.rootmock.mockplugin.defer.call)
+    with pytest.raises(MultiException) as excinfo:
+        excbl.execute()
+    assert excinfo.value.errors[0].errors[0] is raised
+    assert excbl.rootmock.method_calls == [
+        mock.call.prepare(),
+        mock.call.mockplugin.prepare(),
+        mock.call.is_loadable(),
+        mock.call.mockplugin.pre_run(),
+        mock.call.run(),
+        mock.call.mockplugin.post_run(),
+        mock.call.save(),
+        mock.call.mockplugin.save(),
+        mock.call.mockplugin.finish(),
+        mock.call.finish(),
+        mock.call.mockplugin.defer.call(),
+    ]
+
+
+def test_plugin_hooks_two_errors_in_deferred_call():
+    excbl = MockExecutableWithPlugin()
+    raised1 = RuntimeError("dummy error 1")
+    raised2 = RuntimeError("dummy error 2")
+    excbl.rootmock.mockplugin.defer.call1.side_effect = raised1
+    excbl.rootmock.mockplugin.defer.call2.side_effect = raised2
+    excbl.mockplugin.defer()(excbl.rootmock.mockplugin.defer.call1)
+    excbl.mockplugin.defer()(excbl.rootmock.mockplugin.defer.call2)
+    with pytest.raises(MultiException) as excinfo:
+        excbl.execute()
+    assert excinfo.value.errors[0].errors == [raised1, raised2]
+    assert excbl.rootmock.method_calls == [
+        mock.call.prepare(),
+        mock.call.mockplugin.prepare(),
+        mock.call.is_loadable(),
+        mock.call.mockplugin.pre_run(),
+        mock.call.run(),
+        mock.call.mockplugin.post_run(),
+        mock.call.save(),
+        mock.call.mockplugin.save(),
+        mock.call.mockplugin.finish(),
+        mock.call.finish(),
+        mock.call.mockplugin.defer.call1(),
+        mock.call.mockplugin.defer.call2(),
     ]

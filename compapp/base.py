@@ -1,3 +1,10 @@
+from contextlib import contextmanager
+import itertools
+import sys
+
+PY3 = (sys.version_info[0] >= 3)
+
+
 def constant(cls):
     """
     Pickleable singleton generator.
@@ -11,6 +18,60 @@ class Unspecified(object):
     """
     A placeholder singleton to indicate that the argument is not specified.
     """
+
+
+class MultiException(Exception):
+
+    def __init__(self, message="Multiple exceptions are raised:",
+                 errors=None):
+        super(MultiException, self).__init__(message, errors)
+        self.message = message
+        self.errors = [] if errors is None else errors
+        self.args = (message, self.errors)
+
+    def __str__(self):
+        msgs = map("* {0.__class__.__name__}: {0}".format, self.errors)
+        return "\n".join(itertools.chain([self.message], msgs))
+
+    def __fix_doc(f):
+        # Workaround for Python 2/3 doctest difference.  I am doing
+        # this in a decorator since it's not editable after
+        # @classmethod.
+        if not PY3:
+            f.__doc__ = f.__doc__.replace('compapp.base.MultiException:',
+                                          'MultiException:')
+        return f
+
+    @contextmanager
+    def record(self, type=Exception):
+        try:
+            yield self
+        except type as err:
+            self.errors.append(err)
+
+    @classmethod
+    @contextmanager
+    @__fix_doc
+    def recorder(cls, *args, **kwds):
+        """
+        Context manager to raise error (if any) at the end of execution.
+
+        >>> with MultiException.recorder() as mexc:
+        ...     with mexc.record():
+        ...         raise ValueError(1)
+        ...     with mexc.record():
+        ...         raise RuntimeError(2)
+        Traceback (most recent call last):
+          ...
+        compapp.base.MultiException: Multiple exceptions are raised:
+        * ValueError: 1
+        * RuntimeError: 2
+
+        """
+        self = cls(*args, **kwds)
+        yield self
+        if self.errors:
+            raise self
 
 
 class DictObject(object):
