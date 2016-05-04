@@ -512,13 +512,14 @@ class Defer(object):
                 teardown(*args, **kwds)
             self._callbacks.append((key, wrapper))
             return wrapper
+        assert key is not None
         return decorator
 
     def __call__(self, *args, **kwds):
         """
-        Register a callback.
+        Register a callback; equivalent to ``.keyed(Unspecified, ...)``
         """
-        return self.keyed(None, *args, **kwds)
+        return self.keyed(Unspecified, *args, **kwds)
 
     def call(self, key=None):
         """
