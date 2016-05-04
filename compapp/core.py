@@ -1,6 +1,5 @@
 from __future__ import print_function
 
-import itertools
 import logging
 import weakref
 
@@ -476,11 +475,6 @@ class Defer(object):
     >>> defer.call()
     x: 1
 
-    .. To make the following doctest reproducible, let's do this:
-
-       >>> from collections import OrderedDict
-       >>> defer.callbacks = OrderedDict()
-
     The callback registry can be categorized with keys:
 
     >>> for i in range(3):
@@ -507,7 +501,7 @@ class Defer(object):
     """
 
     def __init__(self):
-        self.callbacks = {}
+        self._callbacks = []
 
     def keyed(self, key, *args, **kwds):
         """
@@ -516,7 +510,7 @@ class Defer(object):
         def decorator(teardown):
             def wrapper():
                 teardown(*args, **kwds)
-            self.callbacks.setdefault(key, []).append(wrapper)
+            self._callbacks.append((key, wrapper))
             return wrapper
         return decorator
 
@@ -530,12 +524,20 @@ class Defer(object):
         """
         Call deferred callbacks and un-register them.
         """
+        if not self._callbacks:
+            return
         if key is None:
-            cbs = self.callbacks.values()
-            callbacks = list(itertools.chain.from_iterable(cbs))
-            self.callbacks.clear()
+            _, callbacks = zip(*self._callbacks)
+            self._callbacks[:] = []
         else:
-            callbacks = self.callbacks.pop(key, ())
+            rest = []
+            callbacks = []
+            for k, f in self._callbacks:
+                if k == key:
+                    callbacks.append(f)
+                else:
+                    rest.append((k, f))
+            self._callbacks[:] = rest
         MultiException.run(callbacks)
 
 
