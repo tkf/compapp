@@ -17,7 +17,7 @@ Example: `compapp.samples.{name}`
 .. plot::
 
    from compapp.samples.{name} import MyApp
-   MyApp().execute()
+   MyApp({{'figure': {{'autoclose': False}}}}).execute()
 
 """
 

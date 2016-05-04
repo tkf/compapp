@@ -23,6 +23,7 @@ class Link(Descriptor):
     >>> from compapp.core import Parametric
     >>> class MyParametric(Parametric):
     ...     x = 1
+    ...     broken = Link('..')
     ...
     ...     class nest(Parametric):
     ...         x = 2
@@ -30,6 +31,7 @@ class Link(Descriptor):
     ...         l1 = Link('x')
     ...         l2 = Link('..x')
     ...         l3 = Link('.nest.x')
+    ...         broken = Link('..broken')
     ...
     ...         class nest(Parametric):
     ...             x = 3
@@ -37,6 +39,7 @@ class Link(Descriptor):
     ...             l1 = Link('x')
     ...             l2 = Link('..x')
     ...             l3 = Link('.nest.x')
+    ...             broken = Link('..broken')
     ...
     >>> par = MyParametric()
     >>> par is par.nest.l0 is par.nest.nest.l0
@@ -55,6 +58,12 @@ class Link(Descriptor):
     Traceback (most recent call last):
       ...
     AttributeError: 'nest' object has no attribute 'l3'
+    >>> hasattr(par, 'broken')
+    False
+    >>> hasattr(par.nest, 'broken')
+    False
+    >>> hasattr(par.nest.nest, 'broken')
+    False
 
 
     .. todo:: Should `path` use more explicit notation as in the JSON
@@ -75,6 +84,8 @@ class Link(Descriptor):
             start = obj
             for _ in range(i - 1):
                 start = private(start).owner
+                if start is None:
+                    return self.default
             restpath = self.path[i:]
         else:
             restpath = self.path

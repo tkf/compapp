@@ -12,9 +12,6 @@ class MyApp(Computer):
         ax21.plot([0, 2, 1, 3, 5])
         ax22.plot([0, 1, 5, 3, 0])
 
-        # FIXME: a hack to show the figure in sphinx doc:
-        self.figure.defer.callbacks.clear()
-
 
 if __name__ == '__main__':
     MyApp().execute()

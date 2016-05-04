@@ -1,5 +1,5 @@
 from ..core import call_plugins, private, Plugin, Executable
-from ..descriptors import Link, Delegate
+from ..descriptors import Link, Delegate, Or, OfType
 
 
 class Logger(Plugin):
@@ -65,7 +65,7 @@ class Debug(Plugin):
 
 class Figure(Plugin):
 
-    """
+    r"""
     A wrapper around `matplotlib.pyplot.figure`.
 
     Automatically save and (optionally) show the figure at the end of
@@ -95,6 +95,39 @@ class Figure(Plugin):
     .. Manually close:
        >>> figure.defer.call()
 
+
+    Suppose you have a nested `.Computer`\ s:
+
+    >>> from compapp.apps import Computer
+    >>> class MyApp(Computer):
+    ...     class sub(Computer):
+    ...         class sub(Computer):
+    ...             pass
+
+    The attribute `.autoclose` is `.Link`\ ed to the plugin of the
+    owner `Computer`.  It makes it possible to configure `Figure`
+    plugins globally:
+
+    >>> app = MyApp()
+    >>> app.sub.figure.autoclose  # default value
+    True
+    >>> app.figure.autoclose = False
+    >>> app.sub.figure.autoclose
+    False
+    >>> app.sub.sub.figure.autoclose
+    False
+
+    Similar global configuration mechanism works for the `.show`
+    attribute:
+
+    >>> app.figure.show  # default value
+    False
+    >>> app.figure.show = True
+    >>> app.sub.figure.show
+    True
+    >>> app.sub.sub.figure.show
+    True
+
     See also
     --------
     :ref:`ex-simple_plots`
@@ -103,7 +136,8 @@ class Figure(Plugin):
     """
 
     datastore = Delegate()
-    show = False
+    show = Or(Link('...figure.show'), OfType(bool, default=False))
+    autoclose = Or(Link('...figure.autoclose'), OfType(bool, default=True))
 
     def prepare(self):
         self._figures = {}
@@ -121,7 +155,8 @@ class Figure(Plugin):
             path = self.datastore.path(name + '.' + self.ext)
             fig.savefig(path)
 
-        self.defer(fig)(pyplot.close)
+        if self.autoclose:
+            self.defer(fig)(pyplot.close)
 
         return fig
 

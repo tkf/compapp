@@ -23,9 +23,6 @@ class MyApp(Computer):
             ax.set_yticks([0, 30])
             ax.text(10, 10, name)
 
-        # FIXME: a hack to show the figure in sphinx doc:
-        self.figure.defer.callbacks.clear()
-
 
 if __name__ == '__main__':
     MyApp().execute()
