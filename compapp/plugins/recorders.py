@@ -3,7 +3,7 @@ import json
 import os
 import sys
 
-from ..base import setnestedattr
+from ..base import setnestedattr, MultiException
 from ..core import basic_types, private, Plugin
 from .misc import PluginWrapper
 
@@ -110,16 +110,10 @@ class DumpResults(Plugin):
         owner = private(self).owner
         if not owner.datastore.exists():
             return
-        errors = []
-        for name in self.result_names:
-            try:
-                errors.extend(self.save_results(owner, name))
-            except Exception as err:
-                errors.append(err)
-        if errors:
-            raise RuntimeError(
-                "{0} errors while saving the results:\n{1!r}"
-                .format(len(errors), errors))
+        with MultiException.recorder() as mexc:
+            for name in self.result_names:
+                with mexc.record():
+                    mexc.errors.extend(self.save_results(owner, name))
 
     @classmethod
     def save_results(cls, owner, name):
