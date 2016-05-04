@@ -108,6 +108,8 @@ class DumpResults(Plugin):
 
     def _save(self):
         owner = private(self).owner
+        if not owner.datastore.exists():
+            return
         errors = []
         for name in self.result_names:
             try:

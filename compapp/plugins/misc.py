@@ -89,6 +89,9 @@ class Figure(Plugin):
                ax21.plot([0, 2, 1, 3, 5])
                ax22.plot([0, 1, 5, 3, 0])
 
+               # FIXME: a hack to show the figure in sphinx doc:
+               self.figure.defer.callbacks.clear()
+
        MyApp().execute()
 
     """
@@ -107,6 +110,8 @@ class Figure(Plugin):
 
         @self.defer.keyed('save')
         def _():
+            if not (hasattr(self, 'datastore') and self.datastore.exists()):
+                return
             path = self.datastore.path(name + '.' + self.ext)
             fig.savefig(path)
 
