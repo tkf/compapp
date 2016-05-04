@@ -8,6 +8,16 @@ PY3 = (sys.version_info[0] >= 3)
 def constant(cls):
     """
     Pickleable singleton generator.
+
+    Usage:
+
+    >>> @constant
+    ... class MyConstant(object):
+    ...     pass
+    ...
+    >>> MyConstant
+    MyConstant
+
     """
     cls.__repr__ = cls.__reduce__ = lambda self: self.__class__.__name__
     return cls()
@@ -18,6 +28,10 @@ class Unspecified(object):
     """
     A placeholder singleton to indicate that the argument is not specified.
     """
+
+    def __bool__(self):
+        return False
+    __nonzero__ = __bool__
 
 
 class MultiException(Exception):
