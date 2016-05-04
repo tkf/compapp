@@ -104,9 +104,13 @@ class Figure(Plugin):
     ...         class sub(Computer):
     ...             pass
 
-    The attribute `.autoclose` is `.Link`\ ed to the plugin of the
-    owner `Computer`.  It makes it possible to configure `Figure`
-    plugins globally:
+    .. glossary::
+
+       Global `.Figure` plugin configuration
+
+         The attribute `.autoclose` is `.Link`\ ed to the plugin of
+         the owner `Computer`.  It makes possible to configure
+         `Figure` plugins "globally":
 
     >>> app = MyApp()
     >>> app.sub.figure.autoclose  # default value
@@ -117,8 +121,16 @@ class Figure(Plugin):
     >>> app.sub.sub.figure.autoclose
     False
 
-    Similar global configuration mechanism works for the `.show`
-    attribute:
+    A "sub-tree" of the `.Computer`\ s can be configured separately:
+
+    >>> app.sub.figure.autoclose = True
+    >>> app.sub.sub.figure.autoclose
+    True
+    >>> app.figure.autoclose
+    False
+
+    Similar global/sub-tree configuration mechanism works for the
+    `.show` attribute:
 
     >>> app.figure.show  # default value
     False
@@ -136,8 +148,23 @@ class Figure(Plugin):
     """
 
     datastore = Delegate()
-    show = Or(Link('...figure.show'), OfType(bool, default=False))
-    autoclose = Or(Link('...figure.autoclose'), OfType(bool, default=True))
+    r"""
+    `.Delegate`\ ed attribute accessing to a `.BaseDataStore`.
+    """
+
+    show = Or(OfType(bool), Link('...figure.show'), default=False)
+    """
+    Automatically call `matplotlib.pyplot.show` if `True`.  The
+    default is `False`, if not specified by the :term:`owner class`.
+    See: :term:`Global Figure plugin configuration`.
+    """
+
+    autoclose = Or(OfType(bool), Link('...figure.autoclose'), default=True)
+    """
+    Automatically close matplotlib figures if `True` which is the
+    default, if not specified by the :term:`owner class`.
+    See: :term:`Global Figure plugin configuration`.
+    """
 
     def prepare(self):
         self._figures = {}
