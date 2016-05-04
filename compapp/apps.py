@@ -8,6 +8,7 @@ Application base classes.
 
 """
 
+from .descriptors import Choice
 from .executables import Assembler
 
 
@@ -101,3 +102,5 @@ class Memoizer(Computer):
     """
 
     from .plugins import HashDataStore as datastore
+
+    mode = Choice('auto', 'run', 'load', hidden=True)

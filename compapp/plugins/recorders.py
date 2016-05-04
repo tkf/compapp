@@ -67,10 +67,10 @@ class DumpResults(Plugin):
     >>> sorted(glob(app.datastore.path('results.*')))
     ['out/results.hdf5', 'out/results.json', 'out/results.npz']
 
-    Now let's load these results.  Running the same app using the same
-    ``app.datastore.dir`` automatically loads the results.
+    Now let's load these results.
 
     >>> app2 = MyApp()
+    >>> app2.mode = 'load'
     >>> app2.datastore.dir = 'out'
     >>> app2.execute()
     >>> app2.isrun
@@ -245,10 +245,11 @@ class DumpParameters(Plugin):
     >>> os.path.exists('out/params.json')
     True
 
-    Running the same app using the same ``app.datastore.dir``
-    automatically loads the parameters:
+    Running the app using `mode='load' <Assembler.mode>` automatically
+    loads the parameters:
 
     >>> app2 = MyApp()
+    >>> app2.mode = 'load'
     >>> app2.datastore.dir = 'out'
     >>> app2.execute()
     >>> app2.i
