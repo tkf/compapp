@@ -1,11 +1,11 @@
-from distutils.core import setup
+from setuptools import setup, find_packages
 
 import compapp
 
 setup(
     name='compapp',
     version=compapp.__version__,
-    packages=['compapp'],
+    packages=find_packages(),
     author=compapp.__author__,
     author_email='aka.tkf@gmail.com',
     # url='https://github.com/tkf/compapp',
