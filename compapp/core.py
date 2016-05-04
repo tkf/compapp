@@ -532,10 +532,7 @@ class Defer(object):
             self.callbacks.clear()
         else:
             callbacks = self.callbacks.pop(key, ())
-        with MultiException.recorder() as mexc:
-            for c in callbacks:
-                with mexc.record():
-                    c()
+        MultiException.run(callbacks)
 
 
 class Executable(Parametric):
@@ -585,11 +582,10 @@ class Executable(Parametric):
         #     self.onerror(err)
         #     raise
         finally:
-            with MultiException.recorder() as mexc:
-                with mexc.record():
-                    call_plugins(self, '_defer_call')
-                with mexc.record():
-                    self.defer.call()
+            MultiException.run([
+                (call_plugins, self, '_defer_call'),
+                self.defer.call,
+            ])
 
     def is_loadable(self):
         """

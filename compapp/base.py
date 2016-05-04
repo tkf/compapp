@@ -73,6 +73,34 @@ class MultiException(Exception):
         if self.errors:
             raise self
 
+    @classmethod
+    @__fix_doc
+    def run(cls, callbacks, *args, **kwds):
+        """
+        Run all `callbacks` ignoring exceptions and raise at the end (if any).
+
+        >>> def raiser(e):
+        ...     raise e
+        >>> MultiException.run([
+        ...     # takes tuple (func, arg1, arg2, ...):
+        ...     (raiser, ValueError(1)),
+        ...     # or a function without any argument:
+        ...     lambda: raiser(RuntimeError(2)),
+        ... ])
+        Traceback (most recent call last):
+          ...
+        compapp.base.MultiException: Multiple exceptions are raised:
+        * ValueError: 1
+        * RuntimeError: 2
+
+        """
+        pairs = ((c[0], c[1:]) if isinstance(c, tuple) else (c, ())
+                 for c in callbacks)
+        with cls.recorder() as mexc:
+            for (f, args) in pairs:
+                with mexc.record():
+                    f(*args)
+
 
 class DictObject(object):
 
