@@ -6,7 +6,7 @@ import inspect
 
 from .base import DictObject
 from .core import Executable
-from .descriptors import OfType, Choice
+from .descriptors import OfType, Choice, Link
 from .plugins import PluginWrapper, Figure, \
     SubDataStore, DirectoryDataStore
 
@@ -49,9 +49,11 @@ class Assembler(Executable):
     """
 
     from .plugins import (
-        Debug as dbg,
+        Debug as debug,
         Logger as log,
     )
+
+    dbg = Link('.debug.ns')
 
     class figure(Figure):
         """

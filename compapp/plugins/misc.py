@@ -2,6 +2,7 @@ import copy
 import itertools
 import logging
 import logging.config
+import weakref
 
 from ..core import simple_types, attrs_of, \
     call_plugins, private, Plugin, Executable
@@ -176,9 +177,23 @@ class Logger(Plugin):
         return self.ownconfig
 
 
+class DebugNS(object):
+
+    def __init__(self, debug):
+        self.__debug = weakref.proxy(debug)
+
+    def __setattr__(self, name, value):
+        if name.startswith('_'):
+            super(DebugNS, self).__setattr__(name, value)
+        if self.__debug.is_enabled():
+            if self.__debug.is_logging_debug():
+                self.__debug.log.debug('{0} = {1!r}'.format(name, value))
+            super(DebugNS, self).__setattr__(name, value)
+
+
 class Debug(Plugin):
 
-    """
+    r"""
     Debug helper plugin.
 
     Since `.Computer` does not allow random attributes to be set,
@@ -194,25 +209,70 @@ class Debug(Plugin):
 
     Example
     -------
-    ::
 
-      class MySimulator(Computer):
-          dbg = Debug
+    >>> from compapp import Computer
+    >>> class MySimulator(Computer):
+    ...
+    ...     def run(self):
+    ...         tmp = list(range(3))
+    ...         self.dbg.tmp = tmp
+    ...         self.result = [x / len(tmp) for x in tmp]
+    ...
+    >>> app = MySimulator()
+    >>> app.log.level = 'DEBUG'
 
-          def run(self):
-              tmp = calculate()
-              self.dbg.tmp = tmp
-              self.result = tmp / len(tmp)
+    Before ``app.execute()``, let's tweak logger output so
+    that output is concise:
 
-    The assignment ``self.dbg.tmp = tmp``:
+    >>> app.log.formatters['default']['format'] = \
+    ...     '%(levelname)s %(name)s | %(message)s'
+    >>> app.log.handlers['console']['stream'] = 'ext://sys.stdout'
 
-    - triggers ``logger.debug(...)``
-    - holds the value if debug flag is provided
+    .. Some infernal hack to make the doctest consistent:
+       >>> app.log._idgen = itertools.count()
+
+    Finally...:
+
+    >>> app.execute()
+    DEBUG compapp.plugins.misc.MySimulator.0 | tmp = [0, 1, 2]
+
+    >>> app.dbg.tmp
+    [0, 1, 2]
+
+    Note that executing the same app without ``.log.level = 'DEBUG'``
+    suppress the logging and storing the temporary variable.  The
+    Debug plugin also can be disabled independent of the log level by
+    setting its `.enable` to `False`.
+
+    >>> app = MySimulator()
+    >>> app.execute()
+    >>> app.dbg.tmp
+    Traceback (most recent call last):
+      ...
+    AttributeError: 'DebugNS' object has no attribute 'tmp'
 
     """
 
-    logger = Delegate()
-    store = True
+    log = Link('..log')
+    enable = Choice('auto', True, False)
+    """
+    If ``'auto'`` (default), enable this plugin if the log level of
+    `Logger` plugin is ``'DEBUG'`` or lower.  `True` (`False`) enables
+    (disables) this plugin independent of the log level.
+    """
+
+    def __init__(self, *args, **kwds):
+        super(Debug, self).__init__(*args, **kwds)
+        self.ns = DebugNS(self)
+
+    def is_logging_debug(self):
+        return hasattr(self, 'log') and \
+            self.log.logger.getEffectiveLevel() <= logging.DEBUG
+
+    def is_enabled(self):
+        if self.enable == 'auto':
+            return self.is_logging_debug()
+        return self.enable
 
 
 class Figure(Plugin):
