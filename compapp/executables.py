@@ -27,7 +27,7 @@ class Assembler(Executable):
     `.Executable` bundled with useful plugins.
     """
 
-    mode = Choice('run', 'load', 'auto', hidden=True)
+    mode = Choice('run', 'load', 'auto', isparam=False)
     """
     Execution mode.  The mode ``'run'`` and ``'load'`` means to call
     `.run` and `.load`, respectively.  When ``'auto'`` is specified,

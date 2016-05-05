@@ -187,11 +187,11 @@ class Descriptor(object):
 
 class DataDescriptor(Descriptor):
 
-    hidden = False
+    isparam = True
 
     def __init__(self, **kwds):
-        if 'hidden' in kwds:
-            self.hidden = kwds.pop('hidden')
+        if 'isparam' in kwds:
+            self.isparam = kwds.pop('isparam')
         super(DataDescriptor, self).__init__(**kwds)
         self.key = self
 
@@ -443,7 +443,7 @@ class Parametric(Parameter):
                     params[name] = val
             elif isinstance(val, basic_types):
                 params[name] = val
-            elif isinstance(val, DataDescriptor) and not val.hidden:
+            elif isinstance(val, DataDescriptor) and val.isparam:
                 if val.default is not Unspecified:
                     params[name] = val.default
         return params

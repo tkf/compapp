@@ -150,4 +150,4 @@ class Memoizer(Computer):
 
     from .plugins import HashDataStore as datastore
 
-    mode = Choice('auto', 'run', 'load', hidden=True)
+    mode = Choice('auto', 'run', 'load', isparam=False)
