@@ -3,7 +3,8 @@ import itertools
 import logging
 import logging.config
 
-from ..core import attrs_of, call_plugins, private, Plugin, Executable
+from ..core import simple_types, attrs_of, \
+    call_plugins, private, Plugin, Executable
 from ..descriptors import Link, Delegate, Or, Choice, OfType, List, Dict
 
 
@@ -54,9 +55,13 @@ class Logger(Plugin):
                       Link('...log.configurator'))
 
     handlers = Or(List(str),
-                  Dict(str, Dict(str, str)),
+                  Dict(str, Dict(str, simple_types)),
                   Link('...log.handlers'),
-                  default=dict(
+                  # Next Dict trait is same as the one above; it's
+                  # just for holding the default value.  Dict is used
+                  # instead of passing `default=` to Or to make a new
+                  # instance for each instance of Logger.
+                  Dict(str, Dict(str, simple_types), init=lambda: dict(
                       console={
                           'class': 'logging.StreamHandler',
                           'formatter': 'default',
@@ -67,10 +72,9 @@ class Logger(Plugin):
                           'formatter': 'verbose',
                           'datastore': True,
                           'filename': 'run.log',
-                      },
-                  ))
+                      })))
 
-    formatters = Or(Dict(str, Dict(str, str)), default=dict(
+    formatters = Dict(str, Dict(str, str), init=lambda: dict(
         basic=dict(format=logging.BASIC_FORMAT),
         default=dict(
             format='%(levelname)s %(asctime)s %(name)s | %(message)s',
