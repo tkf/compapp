@@ -1,5 +1,5 @@
 from ..base import Unspecified
-from ..core import DataDescriptor
+from ..core import private, DataDescriptor
 
 
 def tupleoftypes(t):
@@ -278,6 +278,58 @@ class Dict(OfType):
                 self.valuetrait.verify(obj, v,
                                        myname='{0}[{1!r}]'.format(myname, k))
         return value
+
+
+class Optional(OfType):
+
+    """
+    Optional parameter.
+
+    Examples
+    --------
+
+    >>> from compapp.core import Parametric
+    >>> class MyParametric(Parametric):
+    ...     i = Optional(int)
+    ...     j = Optional(int)
+    >>> MyParametric.paramnames()
+    []
+    >>> MyParametric().params()
+    {}
+    >>> MyParametric(i=1).params()
+    {'i': 1}
+    >>> MyParametric(j=2).params()
+    {'j': 2}
+    >>> assert MyParametric(i=1, j=2).params() == {'i': 1, 'j': 2}
+    >>> MyParametric(i='alpha')
+    Traceback (most recent call last):
+      ...
+    ValueError: MyParametric.i only accepts type of int: got 'alpha'
+
+    This is useful when writing `Parametric` interface to external
+    library because you would like to avoid writing all default
+    parameters in this case.  A simple interface to
+    `matplotlib.pyplot.hist` can be written as:
+
+    >>> class Hist(Parametric):
+    ...
+    ...     bins = Optional(int)
+    ...     normed = Optional(bool)
+    ...
+    ...     def plot(self, ax, x):
+    ...         ax.hist(x, **self.params())
+    ...
+    >>> from matplotlib import pyplot
+    >>> fig, ax = pyplot.subplots()
+    >>> Hist(bins=100, normed=True).plot(ax, range(100))
+    >>> pyplot.close(fig)
+
+    """
+
+    def verify(self, obj, value, myname=None):
+        ret = super(Optional, self).verify(obj, value, myname)
+        private(obj).optparams.append(self.myname(obj, error=True))
+        return ret
 
 
 class Choice(DataDescriptor):

@@ -121,6 +121,7 @@ class Private(object):
 
     def __init__(self):
         self.data = {}
+        self.optparams = []
 
     def set_context(self, owner, myname):
         self.myname = myname
@@ -363,7 +364,8 @@ class Parametric(Parameter):
             nametypes = type + (Parametric,)
 
         params = {}
-        for name in self.paramnames(type=nametypes):
+        for name in (set(self.paramnames(type=nametypes)) |
+                     set(private(self).optparams)):
             val = getattr(self, name)
             if isinstance(val, Parametric):
                 if nested:
