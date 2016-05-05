@@ -49,6 +49,22 @@ class Logger(Plugin):
     >>> app.execute()
     ERROR compapp.plugins.misc.MyAppForLoggerDemo.0 | error message
 
+    .. attribute:: log
+
+       An instance of `logging.Logger`.
+       This is accessible in and after `.Executable.run` or
+       `.Executable.load` hooks.
+
+       .. todo:: Make it accessible all the time.
+
+    .. attribute:: critical
+                   error
+                   warn
+                   info
+                   debug
+
+       Shortcut for `.log`\ `.debug <logging.Logger.debug>` etc.
+
     """
 
     configurator = Or(OfType(logging.config.BaseConfigurator),
@@ -73,6 +89,16 @@ class Logger(Plugin):
                           'datastore': True,
                           'filename': 'run.log',
                       })))
+    """
+    The dictionary *handlers* of the `logging configuration
+    dictionary`_.  Each handler may contain a special configuration
+    ``'datastore': True`` indicating that this handler is configured
+    only if datastore is accessible.  For nested classes, this
+    attribute is ignored if `.ownconfig` is not `True` (default is
+    ``'auto'``).
+
+    .. _`logging configuration dictionary`: https://docs.python.org/library/logging.config.html#dictionary-schema-details
+    """
 
     formatters = Dict(str, Dict(str, str), init=lambda: dict(
         basic=dict(format=logging.BASIC_FORMAT),
@@ -84,8 +110,24 @@ class Logger(Plugin):
             format='%(asctime)s:' + logging.BASIC_FORMAT,
         ),
     ))
+    """
+    The dictionary *formatters* of the `logging configuration
+    dictionary`_.  See also `.handlers`.
+    """
+
+    ownconfig = Choice('auto', True, False)
+    """
+    If ``'auto'`` (default), configure handlers if the owner is the
+    root app and reuse the handlers of owner's logger otherwise.  The
+    value `True` forces this logger plugin to make own handlers.  The
+    value `False` forces the reuse (which is an error if the owner is
+    the root app).
+    """
 
     level = _loglevel('ERROR')
+    """
+    Logger level.  Default is ``'ERROR'``.
+    """
 
     critical = Link('.logger.critical')
     error = Link('.logger.error')
@@ -103,14 +145,10 @@ class Logger(Plugin):
             self=private(self).owner, id=next(self._idgen)))
         self.logger.setLevel(_level_as_int(self.level))
 
-        if not hasattr(self, 'configurator'):
+        if self.should_configure():
             assert isinstance(self.handlers, dict)
             self.configure()
-            handlers = list(self.configurator.config['handlers'])
-        else:
-            handlers = list(set(self.handlers) &
-                            set(self.configurator.config['handlers']))
-
+        handlers = list(self.configurator.config['handlers'])
         self.configurator.add_handlers(self.logger, handlers)
 
     def configure(self):
@@ -131,6 +169,11 @@ class Logger(Plugin):
             disable_existing_loggers=False,
         ))
         self.configurator.configure()
+
+    def should_configure(self):
+        if self.ownconfig == 'auto':
+            return not hasattr(self, 'configurator')
+        return self.ownconfig
 
 
 class Debug(Plugin):
