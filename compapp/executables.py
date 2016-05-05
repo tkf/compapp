@@ -50,7 +50,7 @@ class Assembler(Executable):
 
     from .plugins import (
         Debug as dbg,
-        Logger as logger,
+        Logger as log,
     )
 
     class figure(Figure):
@@ -77,11 +77,12 @@ class Assembler(Executable):
         """
         |TO BE EXTENDED| Return `True` if `self` is loadable.
 
-        Default implementation calls `self.datastore.exists()
+        Default implementation calls
+        `self.datastore.exists('params.json')
         <.DirectoryDataStore.exists>`.
 
         """
-        return self.datastore.exists()
+        return self.datastore.exists('params.json')
 
     @property
     def argrange(self):

@@ -232,5 +232,12 @@ def setnestedattr(obj, dct, emptydict=False):
     for keys, val in nesteditems(dct, emptydict=emptydict):
         holder = obj
         for k in keys[:-1]:
-            holder = getattr(holder, k)
-        setattr(holder, keys[-1], val)
+            if hasattr(holder, k):
+                holder = getattr(holder, k)
+            else:
+                holder = holder[k]
+            # FIXME: find a better approach (& rename setnestedattr)
+        try:
+            setattr(holder, keys[-1], val)
+        except AttributeError:
+            holder[keys[-1]] = val

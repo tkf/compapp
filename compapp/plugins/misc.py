@@ -1,10 +1,31 @@
+import copy
+import itertools
+import logging
+import logging.config
+
 from ..core import attrs_of, call_plugins, private, Plugin, Executable
-from ..descriptors import Link, Delegate, Or, OfType
+from ..descriptors import Link, Delegate, Or, Choice, OfType, List, Dict
+
+
+_loglevels = ['CRITICAL', 'FATAL', 'ERROR', 'WARNING', 'WARN',
+              'INFO', 'DEBUG', 'NOTSET']
+
+
+def _loglevel(default=0, *alternatives):
+    levels = _loglevels + list(map(str.lower, _loglevels))
+    ts = (Choice(*levels, nodefault=True), OfType(int)) + alternatives
+    return Or(*ts, default=default)
+
+
+def _level_as_int(lvl):
+    if isinstance(lvl, int):
+        return lvl
+    return getattr(logging, lvl.upper())
 
 
 class Logger(Plugin):
 
-    """
+    r"""
     Interface to pre-configured `logging.Logger`.
 
     It does the following automatically:
@@ -12,16 +33,100 @@ class Logger(Plugin):
     - make a logger with an appropriate dotted name
     - set up handler
 
+    .. Some infernal hack to make the doctest consistent:
+       >>> Logger._idgen = itertools.count()
+
+    >>> from compapp import Computer
+    >>> class MyAppForLoggerDemo(Computer):
+    ...     def run(self):
+    ...         self.log.error('error message')
+    ...         self.log.info('info message')
+    >>> app = MyAppForLoggerDemo()
+    >>> app.log.formatters['default']['format'] = \
+    ...     '%(levelname)s %(name)s | %(message)s'
+    >>> app.log.handlers['console']['stream'] = 'ext://sys.stdout'
+    >>> app.execute()
+    ERROR compapp.plugins.misc.MyAppForLoggerDemo.0 | error message
+
     """
 
+    configurator = Or(OfType(logging.config.BaseConfigurator),
+                      Link('...log.configurator'))
+
+    handlers = Or(List(str),
+                  Dict(str, Dict(str, str)),
+                  Link('...log.handlers'),
+                  default=dict(
+                      console={
+                          'class': 'logging.StreamHandler',
+                          'formatter': 'default',
+                          'stream': 'ext://sys.stderr',
+                      },
+                      file={
+                          'class': 'logging.FileHandler',
+                          'formatter': 'verbose',
+                          'datastore': True,
+                          'filename': 'run.log',
+                      },
+                  ))
+
+    formatters = Or(Dict(str, Dict(str, str)), default=dict(
+        basic=dict(format=logging.BASIC_FORMAT),
+        default=dict(
+            format='%(levelname)s %(asctime)s %(name)s | %(message)s',
+            datefmt="%Y-%m-%d %H:%M:%S",
+        ),
+        verbose=dict(
+            format='%(asctime)s:' + logging.BASIC_FORMAT,
+        ),
+    ))
+
+    level = _loglevel('ERROR')
+
+    critical = Link('.logger.critical')
+    error = Link('.logger.error')
+    warn = Link('.logger.warn')
+    info = Link('.logger.info')
+    debug = Link('.logger.debug')
+
     datastore = Delegate()
-    handler = Link('logger.handler')
-    # FIXME: how to resolve reference-to-self?
+
+    nametemplate = '{self.__class__.__module__}.{self.__class__.__name__}.{id}'
+    _idgen = itertools.count()
 
     def prepare(self):
-        return                  # FIXME: Implement Logger.prepare
-        path = self.datastore.path('run.log')
-        self.setup_file_stream_handler(path)
+        self.logger = logging.getLogger(self.nametemplate.format(
+            self=private(self).owner, id=next(self._idgen)))
+        self.logger.setLevel(_level_as_int(self.level))
+
+        if not hasattr(self, 'configurator'):
+            assert isinstance(self.handlers, dict)
+            self.configure()
+            handlers = list(self.configurator.config['handlers'])
+        else:
+            handlers = list(set(self.handlers) &
+                            set(self.configurator.config['handlers']))
+
+        self.configurator.add_handlers(self.logger, handlers)
+
+    def configure(self):
+        handlers = copy.deepcopy(self.handlers)
+        is_writable = (hasattr(self, 'datastore') and
+                       self.datastore.is_writable())
+        for key, hndlr in list(handlers.items()):
+            if hndlr.pop('datastore', False):
+                if is_writable:
+                    hndlr['filename'] = self.datastore.path(hndlr['filename'])
+                else:
+                    del handlers[key]
+
+        self.configurator = logging.config.DictConfigurator(dict(
+            version=1,
+            formatters=self.formatters,
+            handlers=handlers,
+            disable_existing_loggers=False,
+        ))
+        self.configurator.configure()
 
 
 class Debug(Plugin):
@@ -155,7 +260,8 @@ class Figure(Plugin):
     >>> app.datastore.dir = 'out'
     >>> app.execute()
     >>> sorted(os.listdir('out'))     # doctest: +NORMALIZE_WHITESPACE
-    ['figure-0.png', 'figure-alpha.png', 'figure-beta.png', 'params.json']
+    ['figure-0.png', 'figure-alpha.png', 'figure-beta.png',
+     'params.json', 'run.log']
 
     See also
     --------
