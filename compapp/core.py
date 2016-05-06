@@ -401,7 +401,10 @@ class Parametric(Parameter):
         # FIXME: optimize!
         names = list(cls.defaultparams(type=type))
         for name, val in itervars(cls):
-            if isinstance(val, _type) and issubclass(val, Parametric):
+            if (isinstance(val, _type) and issubclass(val, Parametric)) \
+               or (isinstance(val, DataDescriptor) and
+                   val.isparam and
+                   val.default is Unspecified):
                 if type is None or issubclass(val, type):
                     names.append(name)
         return names
