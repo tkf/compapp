@@ -1,7 +1,26 @@
+import pytest
+
 from . import utils
 from ..apps import Computer
 from ..base import deepmixdicts
 from ..descriptors import OfType, Dict, List, Or
+
+
+@pytest.fixture
+def paramfile_j3(request, tmpdir):
+    if request.param == 'json':
+        paramfile = tmpdir.join('param.json')
+        paramfile.write('{"j": 3}')
+    elif request.param == 'yaml':
+        paramfile = tmpdir.join('param.yaml')
+        paramfile.write('j: 3')
+    return paramfile
+# https://pytest.org/latest/example/parametrize.html#deferring-the-setup-of-parametrized-resources
+
+
+def pytest_generate_tests(metafunc):
+    if 'paramfile_j3' in metafunc.fixturenames:
+        metafunc.parametrize('paramfile_j3', ['json', 'yaml'], indirect=True)
 
 
 class NoOp(Computer):
@@ -140,55 +159,43 @@ class TestCLISetItem(TestCLINestedSimpleTypes):
     ]
 
 
-def test_file_modifier_for_level1_par(tmpdir):
+def test_file_modifier_for_level1_par(paramfile_j3):
     class MyApp(Computer):
         class sub(Computer):
             i = 1
             j = 2
 
-    paramfile = tmpdir.join('param.json')
-    paramfile.write('{"j": 3}')
-
     app = MyApp()
-    app.cli(['--sub:file', paramfile.strpath])
+    app.cli(['--sub:file', paramfile_j3.strpath])
     assert app.sub.params() == dict(i=1, j=3)
 
 
-def test_file_modifier_for_level2_par(tmpdir):
+def test_file_modifier_for_level2_par(paramfile_j3):
     class MyApp(Computer):
         class sub(Computer):
             class sub(Computer):
                 i = 1
                 j = 2
 
-    paramfile = tmpdir.join('param.json')
-    paramfile.write('{"j": 3}')
-
     app = MyApp()
-    app.cli(['--sub.sub:file', paramfile.strpath])
+    app.cli(['--sub.sub:file', paramfile_j3.strpath])
     assert app.sub.sub.params() == dict(i=1, j=3)
 
 
-def test_file_modifier_for_level1_dict(tmpdir):
+def test_file_modifier_for_level1_dict(paramfile_j3):
     class MyApp(Computer):
         d = Dict(default=dict(i=1, j=2))
 
-    paramfile = tmpdir.join('param.json')
-    paramfile.write('{"j": 3}')
-
     app = MyApp()
-    app.cli(['--d:file', paramfile.strpath])
+    app.cli(['--d:file', paramfile_j3.strpath])
     assert app.params() == dict(d=dict(i=1, j=3))
 
 
-def test_file_modifier_for_level2_dict(tmpdir):
+def test_file_modifier_for_level2_dict(paramfile_j3):
     class MyApp(Computer):
         class sub(Computer):
             d = Dict(default=dict(i=1, j=2))
 
-    paramfile = tmpdir.join('param.json')
-    paramfile.write('{"j": 3}')
-
     app = MyApp()
-    app.cli(['--sub.d:file', paramfile.strpath])
+    app.cli(['--sub.d:file', paramfile_j3.strpath])
     assert app.sub.params() == dict(d=dict(i=1, j=3))

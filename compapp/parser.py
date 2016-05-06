@@ -162,7 +162,7 @@ def load_any(path):
         loader = json.load
     elif ext in ('.yaml', '.yml'):
         import yaml
-        loader = yaml.laod
+        loader = yaml.load
     else:
         raise ValueError('file extension of "{0}" is not recognized'
                          .format(path))
