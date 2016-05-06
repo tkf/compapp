@@ -1,6 +1,7 @@
 import ast
 import mock
 
+from . import utils
 from ..parser import Option, parse_assignment_options, assign_option
 
 
@@ -26,7 +27,7 @@ def assert_opt_eq(actual, desired):
     assert actual[1:] == desired[1:]
 
 
-class TestOneOpt(object):
+class TestOneOpt(utils.DataChecker):
 
     def check(self, arguments, lhs, rhs, modifier):
         desired = Option(ast.parse(lhs), rhs, modifier)
@@ -34,10 +35,6 @@ class TestOneOpt(object):
         assert args == []
         assert len(opts) == 1
         assert_opt_eq(opts[0], desired)
-
-    def test(self):
-        for data in self.data:
-            yield (self.check,) + data
 
     data = [
         (['--a=x'], 'a', 'x', None),
@@ -53,7 +50,7 @@ class TestOneOpt(object):
     ]
 
 
-class TestPositional(TestOneOpt):
+class TestPositional(utils.DataChecker):
 
     def check(self, arguments, opts, poss):
         opts_got, poss_got = parse_assignment_options(arguments)
@@ -72,7 +69,7 @@ class TestPositional(TestOneOpt):
     ]
 
 
-class TestAssignOptionEndsWithAttr(TestOneOpt):
+class TestAssignOptionEndsWithAttr(utils.DataChecker):
 
     def check(self, code, rhs=1):
         obj = mock.MagicMock()
@@ -90,7 +87,7 @@ class TestAssignOptionEndsWithAttr(TestOneOpt):
     ]
 
 
-class TestAssignOptionEndsWithItem(TestOneOpt):
+class TestAssignOptionEndsWithItem(utils.DataChecker):
 
     def check(self, head, key, rhs=1):
         code = head + '[' + repr(key) + ']'
