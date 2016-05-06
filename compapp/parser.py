@@ -8,14 +8,12 @@ Option = namedtuple('Option', ['lhs', 'rhs', 'modifier'])
 
 def parse_key(key):
     try:
-        mod = ast.parse(key)
+        expr = ast.parse(key, mode='eval')
     except SyntaxError as err:
         n = err.offset-1
-        if key[n] == ':':
-            return (ast.parse(key[:n]), ':', key[n+1:])
-        lhs, rest = key[:n].rsplit('=', 1)
-        return (ast.parse(lhs), '=', rest + key[n:])
-    (node,) = mod.body
+        assert key[n] in (':', '=')
+        return (ast.parse(key[:n], mode='eval'), key[n], key[n+1:])
+    node = expr.body
     if isinstance(node, ast.Assign):
         assert len(node.targets) == 1
         return (node.targets[0], '=', key[node.value.col_offset:])

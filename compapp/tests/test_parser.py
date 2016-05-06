@@ -9,6 +9,8 @@ def assert_ast_eq(actual, desired):
         if isinstance(n, ast.Module):
             assert len(n.body) == 1
             n = n.body[0]
+        if isinstance(n, ast.Expression):
+            n = n.body
         if isinstance(n, ast.Expr):
             n = n.value
         return n
