@@ -16,7 +16,10 @@ def parse_key(key):
     node = expr.body
     if isinstance(node, ast.Assign):
         assert len(node.targets) == 1
-        return (node.targets[0], '=', key[node.value.col_offset:])
+        lhs = node.targets[0]
+        lhs.ctx = expr.ctx
+        return (lhs, '=', key[node.value.col_offset:])
+    node.ctx = expr.body.ctx
     return (node, None, None)
 
 
@@ -66,7 +69,14 @@ def parse_assignment_options(arguments):
 
 
 def assign_option(obj, lhs, rhs):
+    try:
+        ctx = lhs.ctx
+    except AttributeError:
+        ctx = lhs.body.ctx
+
     node = lhs
+    if isinstance(node, ast.Expression):
+        node = node.body
     if isinstance(node, ast.Expr):
         node = node.value
     if isinstance(node, ast.Name):
@@ -80,11 +90,11 @@ def assign_option(obj, lhs, rhs):
             break
         else:
             prev, node = node, node.value
-    prev.value = ast.Attribute(value=ast.Name(id='self', ctx=lhs.ctx),
+    prev.value = ast.Attribute(value=ast.Name(id='self', ctx=ctx),
                                attr=node.id)
     ast.fix_missing_locations(root.value)
     for child in ast.walk(root.value):
-        child.ctx = lhs.ctx
+        child.ctx = ctx
     holder = eval(compile(ast.Expression(body=root.value),
                           '<compapp-parser>',
                           'eval'),
