@@ -8,11 +8,20 @@ Application base classes.
 
 """
 
+import pprint
 import sys
 
 from .descriptors import Choice
 from .executables import Assembler
 from .parser import make_parser, process_assignment_options, parseargs
+
+
+def print_full_help(app):
+    if app.__doc__ is not None:
+        print(app.__doc__)
+        print("\n")
+    print("Parameters:\n")
+    pprint.pprint(app.params(nested=True))
 
 
 class Computer(Assembler):
@@ -71,7 +80,7 @@ class Computer(Assembler):
         parser.add_argument('--params', nargs='+', default=[])
         ns, opts, poss = parseargs(parser, args)
         if ns.help_full:
-            raise NotImplementedError
+            print_full_help(self)
             sys.exit()
         if ns.params:
             raise NotImplementedError
