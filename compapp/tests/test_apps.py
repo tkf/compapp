@@ -138,3 +138,32 @@ class TestCLISetItem(TestCLINestedSimpleTypes):
         (['--strs[1]=B'], dict(strs=['a', 'B', 'c'])),
         (['--dict["a"]=b'], dict(dict=dict(a='b'))),
     ]
+
+
+def test_file_modifier_for_level1_par(tmpdir):
+    class MyApp(Computer):
+        class sub(Computer):
+            i = 1
+            j = 2
+
+    paramfile = tmpdir.join('param.json')
+    paramfile.write('{"j": 3}')
+
+    app = MyApp()
+    app.cli(['--sub:file', paramfile.strpath])
+    assert app.sub.params() == dict(i=1, j=3)
+
+
+def test_file_modifier_for_level2_par(tmpdir):
+    class MyApp(Computer):
+        class sub(Computer):
+            class sub(Computer):
+                i = 1
+                j = 2
+
+    paramfile = tmpdir.join('param.json')
+    paramfile.write('{"j": 3}')
+
+    app = MyApp()
+    app.cli(['--sub.sub:file', paramfile.strpath])
+    assert app.sub.sub.params() == dict(i=1, j=3)
