@@ -11,9 +11,11 @@ Application base classes.
 import pprint
 import sys
 
+from .base import deepmixdicts, setnestedattr
 from .descriptors import Choice
 from .executables import Assembler
-from .parser import make_parser, process_assignment_options, parseargs
+from .parser import make_parser, process_assignment_options, parseargs, \
+    load_any
 
 
 def print_full_help(app):
@@ -49,7 +51,7 @@ class Computer(Assembler):
             myapp.py --params parameters.yaml
 
         If multiple parameter files are given, they will be mixed together
-        before giving to the class::
+        before given to the class::
 
             myapp.py --params base.yaml extension.yaml
 
@@ -83,7 +85,7 @@ class Computer(Assembler):
             print_full_help(self)
             sys.exit()
         if ns.params:
-            raise NotImplementedError
+            setnestedattr(self, deepmixdicts(*map(load_any, ns.params)))
         process_assignment_options(self, opts)
         self.execute(*poss)
         return self
