@@ -154,9 +154,11 @@ def load_any(path):
     Load any data file from given path.
     """
     ext = os.path.splitext(path)[1].lower()
+    mode = 'r'
     if ext == '.pickle':
         import pickle
         loader = pickle.load
+        mode = 'rb'
     elif ext == '.json':
         import json
         loader = json.load
@@ -166,7 +168,7 @@ def load_any(path):
     else:
         raise ValueError('file extension of "{0}" is not recognized'
                          .format(path))
-    with open(path) as file:
+    with open(path, mode) as file:
         return loader(file)
 
 

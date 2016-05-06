@@ -1,3 +1,4 @@
+import pickle
 import pytest
 
 from . import utils
@@ -14,13 +15,19 @@ def paramfile_j3(request, tmpdir):
     elif request.param == 'yaml':
         paramfile = tmpdir.join('param.yaml')
         paramfile.write('j: 3')
+    elif request.param == 'pickle':
+        paramfile = tmpdir.join('param.pickle')
+        with paramfile.open(mode='wb') as file:
+            pickle.dump({'j': 3}, file)
     return paramfile
 # https://pytest.org/latest/example/parametrize.html#deferring-the-setup-of-parametrized-resources
 
 
 def pytest_generate_tests(metafunc):
     if 'paramfile_j3' in metafunc.fixturenames:
-        metafunc.parametrize('paramfile_j3', ['json', 'yaml'], indirect=True)
+        metafunc.parametrize('paramfile_j3',
+                             ['json', 'yaml', 'pickle'],
+                             indirect=True)
 
 
 class NoOp(Computer):
