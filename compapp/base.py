@@ -241,3 +241,28 @@ def setnestedattr(obj, dct, emptydict=False):
             setattr(holder, keys[-1], val)
         except AttributeError:
             holder[keys[-1]] = val
+
+
+def deepmixdicts(*dicts):
+    """
+    Deeply mix dictionaries.
+
+    >>> deepmixdicts(
+    ...     {'a': 1, 'b': 2, 'sub': {'x': 1, 'y': 2, 'sub': {'v': 1}}},
+    ...     {'a': 2, 'c': 3, 'sub': {'x': 2, 'z': 3, 'sub': {'v': 2}}},
+    ... ) == {
+    ...     'a': 2, 'b': 2, 'c': 3,
+    ...     'sub': {
+    ...         'x': 2, 'y': 2, 'z': 3,
+    ...         'sub': {'v': 2},
+    ...     },
+    ... }
+    True
+    """
+    mixed = {}
+    for d in dicts:
+        for k, v in d.items():
+            if isinstance(v, dict):
+                v = deepmixdicts(mixed.get(k, {}), v)
+            mixed[k] = v
+    return mixed
