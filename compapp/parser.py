@@ -63,3 +63,37 @@ def parse_assignment_options(arguments):
                 options.append(Option(lhs, next(argiter), None))
         else:
             positional.append(arg)
+
+
+def assign_option(obj, lhs, rhs):
+    node = lhs
+    if isinstance(node, ast.Expr):
+        node = node.value
+    if isinstance(node, ast.Name):
+        setattr(obj, node.id, rhs)
+        return
+
+    root = node
+    prev = None
+    while True:
+        if isinstance(node, ast.Name):
+            break
+        else:
+            prev, node = node, node.value
+    prev.value = ast.Attribute(value=ast.Name(id='self', ctx=lhs.ctx),
+                               attr=node.id)
+    ast.fix_missing_locations(root.value)
+    for child in ast.walk(root.value):
+        child.ctx = lhs.ctx
+    holder = eval(compile(ast.Expression(body=root.value),
+                          '<compapp-parser>',
+                          'eval'),
+                  dict(self=obj))
+
+    if isinstance(root, ast.Attribute):
+        setattr(holder, root.attr, rhs)
+    elif isinstance(root, ast.Subscript):
+        idx = ast.literal_eval(root.slice.value)
+        holder[idx] = rhs
+    else:
+        raise ValueError("Unsupported: {0}".format(lhs))

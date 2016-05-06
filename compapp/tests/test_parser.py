@@ -1,6 +1,7 @@
 import ast
+import mock
 
-from ..parser import Option, parse_assignment_options
+from ..parser import Option, parse_assignment_options, assign_option
 
 
 def assert_ast_eq(actual, desired):
@@ -66,4 +67,38 @@ class TestPositional(TestOneOpt):
         (['a', '--b', 'c', 'd'],
          [Option(ast.parse('b'), 'c', None)],
          ['a', 'd']),
+    ]
+
+
+class TestAssignOptionEndsWithAttr(TestOneOpt):
+
+    def check(self, code, rhs=1):
+        obj = mock.MagicMock()
+        lhs = ast.parse(code, mode='eval').body
+        assign_option(obj, lhs, rhs)
+        got = eval("obj." + code, dict(obj=obj))
+        assert got == rhs
+
+    data = [
+        ('a',),
+        ('a.b',),
+        ('a.b.c',),
+        ('a.b.c.d',),
+        ('a[1].b',),
+    ]
+
+
+class TestAssignOptionEndsWithItem(TestOneOpt):
+
+    def check(self, head, key, rhs=1):
+        code = head + '[' + repr(key) + ']'
+        obj = mock.MagicMock()
+        lhs = ast.parse(code, mode='eval').body
+        assign_option(obj, lhs, rhs)
+        got = eval("obj." + head, dict(obj=obj))
+        got.__setitem__.assert_called_once_with(key, rhs)
+
+    data = [
+        ('a', 1),
+        ('a[1].b', 2),
     ]
