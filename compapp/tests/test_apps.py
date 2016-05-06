@@ -167,3 +167,28 @@ def test_file_modifier_for_level2_par(tmpdir):
     app = MyApp()
     app.cli(['--sub.sub:file', paramfile.strpath])
     assert app.sub.sub.params() == dict(i=1, j=3)
+
+
+def test_file_modifier_for_level1_dict(tmpdir):
+    class MyApp(Computer):
+        d = Dict(default=dict(i=1, j=2))
+
+    paramfile = tmpdir.join('param.json')
+    paramfile.write('{"j": 3}')
+
+    app = MyApp()
+    app.cli(['--d:file', paramfile.strpath])
+    assert app.params() == dict(d=dict(i=1, j=3))
+
+
+def test_file_modifier_for_level2_dict(tmpdir):
+    class MyApp(Computer):
+        class sub(Computer):
+            d = Dict(default=dict(i=1, j=2))
+
+    paramfile = tmpdir.join('param.json')
+    paramfile.write('{"j": 3}')
+
+    app = MyApp()
+    app.cli(['--sub.d:file', paramfile.strpath])
+    assert app.sub.params() == dict(d=dict(i=1, j=3))

@@ -1,3 +1,5 @@
+import functools
+
 from ..base import Unspecified
 from ..core import private, DataDescriptor
 from ..parser import parse_bool
@@ -8,6 +10,15 @@ def tupleoftypes(t):
         return (t,)
     assert isinstance(t, tuple)
     return t
+
+
+def skip_non_str(func):
+    @functools.wraps(func)
+    def wrapper(self, value):
+        if not isinstance(value, str):
+            return value
+        return func(self, value)
+    return wrapper
 
 
 class OfType(DataDescriptor):
@@ -102,6 +113,7 @@ class OfType(DataDescriptor):
             self.__set__(obj, got)
         return got
 
+    @skip_non_str
     def parse(self, string):
         for cls in self.allowed:
             try:
@@ -487,6 +499,7 @@ class Or(DataDescriptor):
                 return got
         return self.default
 
+    @skip_non_str
     def parse(self, string):
         for trait in self.traits:
             try:
