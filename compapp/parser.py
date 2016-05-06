@@ -3,6 +3,8 @@ import ast
 import os
 from collections import namedtuple
 
+from .core import simple_types
+
 Option = namedtuple('Option', ['lhs', 'rhs', 'modifier'])
 
 
@@ -68,6 +70,34 @@ def parse_assignment_options(arguments):
             positional.append(arg)
 
 
+def parse_bool(value):
+    if not isinstance(value, str):
+        return value
+    val = value.lower()
+    if val in ('1', 'yes', 'true'):
+        return True
+    elif val in ('0', 'no', 'false'):
+        return False
+    return value
+
+
+def parse_value(holder, name, value):
+    desc = None
+    try:
+        desc = getattr(type(holder), name)
+        parse = desc.parse
+    except AttributeError:
+        if isinstance(desc, str):
+            return value
+        elif isinstance(desc, bool):
+            return parse_bool(value)
+        elif isinstance(desc, simple_types):
+            return type(desc)(value)
+    else:
+        return parse(value)
+    return value
+
+
 def assign_option(obj, lhs, rhs):
     try:
         ctx = lhs.ctx
@@ -80,7 +110,7 @@ def assign_option(obj, lhs, rhs):
     if isinstance(node, ast.Expr):
         node = node.value
     if isinstance(node, ast.Name):
-        setattr(obj, node.id, rhs)
+        setattr(obj, node.id, parse_value(obj, node.id, rhs))
         return
 
     root = node
@@ -101,10 +131,11 @@ def assign_option(obj, lhs, rhs):
                   dict(self=obj))
 
     if isinstance(root, ast.Attribute):
-        setattr(holder, root.attr, rhs)
+        setattr(holder, root.attr, parse_value(holder, root.attr, rhs))
     elif isinstance(root, ast.Subscript):
         idx = ast.literal_eval(root.slice.value)
         holder[idx] = rhs
+        # FIXME: somehow parse_value has to be called like above, but how?
     else:
         raise ValueError("Unsupported: {0}".format(lhs))
 

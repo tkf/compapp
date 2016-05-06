@@ -1,5 +1,6 @@
 from ..base import Unspecified
 from ..core import private, DataDescriptor
+from ..parser import parse_bool
 
 
 def tupleoftypes(t):
@@ -100,6 +101,19 @@ class OfType(DataDescriptor):
             got = self.init()
             self.__set__(obj, got)
         return got
+
+    def parse(self, string):
+        for cls in self.allowed:
+            try:
+                if cls is bool:
+                    val = parse_bool(string)
+                    if isinstance(val, bool):
+                        return val
+                    continue
+                return cls(string)
+            except ValueError:
+                pass
+        raise ValueError("{0} cannot parse {1!r}".format(self.allowed, string))
 
 
 class Required(DataDescriptor):
@@ -472,3 +486,15 @@ class Or(DataDescriptor):
             if got is not Unspecified:
                 return got
         return self.default
+
+    def parse(self, string):
+        for trait in self.traits:
+            try:
+                parse = trait.parse
+            except AttributeError:
+                continue
+            try:
+                return parse(string)
+            except ValueError:
+                continue
+        raise ValueError("{0} cannot parse {1!r}".format(self.traits, string))
