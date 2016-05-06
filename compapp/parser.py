@@ -1,4 +1,6 @@
+import argparse
 import ast
+import os
 from collections import namedtuple
 
 Option = namedtuple('Option', ['lhs', 'rhs', 'modifier'])
@@ -97,3 +99,69 @@ def assign_option(obj, lhs, rhs):
         holder[idx] = rhs
     else:
         raise ValueError("Unsupported: {0}".format(lhs))
+
+
+def load_any(path):
+    """
+    Load any data file from given path.
+    """
+    ext = os.path.splitext(path)[1].lower()
+    if ext == '.pickle':
+        import pickle
+        loader = pickle.load
+    elif ext == '.json':
+        import json
+        loader = json.load
+    elif ext in ('.yaml', '.yml'):
+        import yaml
+        loader = yaml.laod
+    else:
+        raise ValueError('file extension of "{0}" is not recognized'
+                         .format(path))
+    with open(path) as file:
+        return loader(file)
+
+
+def process_modifier(lhs, rhs, modifier):
+    if isinstance(modifier, int) or modifier is None:
+        pass
+    elif modifier == 'leval':
+        rhs = ast.literal_eval(rhs)
+    elif modifier == 'file':
+        rhs = load_any(rhs)
+    else:
+        raise ValueError("Unsupported modifier: {0}".format(modifier))
+    return lhs, rhs
+
+
+def process_assignment_options(obj, options):
+    for opt in options:
+        assign_option(obj, *process_modifier(*opt))
+
+
+def make_parser(doc=None):
+    kwds = dict(description=doc, allow_abbrev=False)
+    try:
+        parser = argparse.ArgumentParser(**kwds)  # >= Python 3.5
+    except TypeError:
+        del kwds['allow_abbrev']
+        parser = argparse.ArgumentParser(**kwds)
+    parser.add_argument('--help-full', '-H', action='store_true',
+                        help="""
+                        Show full help including the full list of parameters
+                        """)
+    '''
+    parser.add_argument('--compapp-debug', action='store_true',
+                        help="""
+                        Enable debugging of compapp internals.  It turn on
+                        the debug flag so that errors are raised immediately
+                        and various internal logs are shown in stderr.
+                        """)
+    '''
+    return parser
+
+
+def parseargs(parser, args=None):
+    ns, unknown = parser.parse_known_args(args)
+    opts, poss = parse_assignment_options(unknown)
+    return (ns, opts, poss)

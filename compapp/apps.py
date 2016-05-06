@@ -8,8 +8,11 @@ Application base classes.
 
 """
 
+import sys
+
 from .descriptors import Choice
 from .executables import Assembler
+from .parser import make_parser, process_assignment_options, parseargs
 
 
 class Computer(Assembler):
@@ -23,8 +26,7 @@ class Computer(Assembler):
 
     """
 
-    @classmethod
-    def cli(cls, args=None):
+    def cli(self, args=None):
         """
         Run Command Line Interface of this class.
 
@@ -35,12 +37,12 @@ class Computer(Assembler):
             myapp.py --datastore.dir OUT
             myapp.py --sub.floats[0] 10
             myapp.py --sub.plotters[0].bin 100
-            myapp.py parameters.yaml
+            myapp.py --params parameters.yaml
 
         If multiple parameter files are given, they will be mixed together
         before giving to the class::
 
-            myapp.py base.yaml extension.yaml
+            myapp.py --params base.yaml extension.yaml
 
         Data file for nested classes (``:file=`` modifier)::
 
@@ -65,10 +67,21 @@ class Computer(Assembler):
             myapp.py --help-all
 
         """
+        parser = self.get_parser()
+        parser.add_argument('--params', nargs='+', default=[])
+        ns, opts, poss = parseargs(parser, args)
+        if ns.help_full:
+            raise NotImplementedError
+            sys.exit()
+        if ns.params:
+            raise NotImplementedError
+        process_assignment_options(self, opts)
+        self.execute(*poss)
+        return self
 
     @classmethod
     def get_parser(cls):
-        pass
+        return make_parser(cls.__doc__)
 
     @classmethod
     def from_param(cls, param, require_all=False, filter_param=False):

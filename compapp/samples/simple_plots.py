@@ -14,4 +14,5 @@ class MyApp(Computer):
 
 
 if __name__ == '__main__':
-    MyApp().execute()
+    app = MyApp()
+    app.cli()
