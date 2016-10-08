@@ -73,7 +73,7 @@ source/examples:
 	ln -s ../../../compapp/samples source/examples/code
 	source/genexamples.py
 
-html: source/api
+html: source/api source/examples
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
