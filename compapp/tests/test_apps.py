@@ -1,7 +1,6 @@
 import pickle
 import pytest
 
-from . import utils
 from ..apps import Computer
 from ..base import deepmixdicts
 from ..descriptors import OfType, Dict, List, Or
@@ -42,23 +41,24 @@ def test_nested_empty_computer():
     app.execute()
 
 
-class TestCLISimpleTypes(utils.DataChecker):
+class SampleCLISimpleTypes(Computer):
+    i = 1
+    x = 1.0
+    z = 1.0j
+    s = 'a'
+    b = True
 
-    def check(self, args, nondefaults):
-        desired = dict(self.appclass.defaultparams(), **nondefaults)
-        app = self.appclass()
-        app.cli(args)
-        actual = app.params()
-        assert actual == desired
 
-    class appclass(Computer):
-        i = 1
-        x = 1.0
-        z = 1.0j
-        s = 'a'
-        b = True
+class SampleCLISimpleOfType(Computer):
+    i = OfType(int, default=1)
+    x = OfType(float, default=1.0)
+    z = OfType(complex, default=1.0j)
+    s = OfType(str, default='a')
+    b = OfType(bool, default=True)
 
-    data = [
+
+@pytest.mark.parametrize(
+    "args, nondefaults", [
         ([], {}),
         (['--i=2'], dict(i=2)),
         (['--i', '2'], dict(i=2)),
@@ -88,82 +88,87 @@ class TestCLISimpleTypes(utils.DataChecker):
         (['--b', '0'], dict(b=False)),
         (['--b:leval=False'], dict(b=False)),
         (['--b:leval', 'False'], dict(b=False)),
-    ]
+    ])
+@pytest.mark.parametrize("appclass", [
+    SampleCLISimpleTypes,
+    SampleCLISimpleOfType,
+])
+def test_cli_simple(args, nondefaults, appclass):
+    desired = dict(appclass.defaultparams(), **nondefaults)
+    app = appclass()
+    app.cli(args)
+    actual = app.params()
+    assert actual == desired
 
 
-class TestCLISimpleOfType(TestCLISimpleTypes):
+class SampleCLICompositeTraits(Computer):
+    anysimple = Or(OfType(int),
+                   OfType(float),
+                   OfType(complex),
+                   OfType(bool),  # must be before str
+                   OfType(str),
+                   default=1)
 
-    class appclass(Computer):
-        i = OfType(int, default=1)
-        x = OfType(float, default=1.0)
-        z = OfType(complex, default=1.0j)
-        s = OfType(str, default='a')
-        b = OfType(bool, default=True)
 
-
-class TestCLICompositeTraits(TestCLISimpleTypes):
-    class appclass(Computer):
-        anysimple = Or(OfType(int),
-                       OfType(float),
-                       OfType(complex),
-                       OfType(bool),  # must be before str
-                       OfType(str),
-                       default=1)
-
-    data = [
+@pytest.mark.parametrize(
+    "args, nondefaults", [
         ([], {}),
         (['--anysimple=2'], dict(anysimple=2)),
         (['--anysimple=2.0'], dict(anysimple=2.0)),
         (['--anysimple=2.0j'], dict(anysimple=2.0j)),
         (['--anysimple=a'], dict(anysimple='a')),
         (['--anysimple=yes'], dict(anysimple=True)),
-    ]
+    ])
+def test_cli_composite_traits(args, nondefaults):
+    test_cli_simple(args, nondefaults, SampleCLICompositeTraits)
 
 
-class TestCLINestedSimpleTypes(utils.DataChecker):
+class SampleCLINestedSimpleTypes(Computer):
+    i = 1
 
-    def check(self, args, nondefaults):
-        desired = deepmixdicts(self.appclass.defaultparams(nested=True),
-                               nondefaults)
-        app = self.appclass()
-        app.cli(args)
-        actual = app.params(nested=True)
-        assert actual == desired
-
-    class appclass(Computer):
-        i = 1
+    class sub(Computer):
+        j = 2
 
         class sub(Computer):
-            j = 2
+            k = 3
 
             class sub(Computer):
-                k = 3
+                l = 4
 
-                class sub(Computer):
-                    l = 4
 
-    data = [
+@pytest.mark.parametrize(
+    "args, nondefaults", [
         ([], {}),
         (['--i', '10'], dict(i=10)),
         (['--sub.j', '10'], dict(sub=dict(j=10))),
         (['--sub.sub.k', '10'], dict(sub=dict(sub=dict(k=10)))),
         (['--sub.sub.sub.l', '10'], dict(sub=dict(sub=dict(sub=dict(l=10))))),
-    ]
+    ])
+def test_cli_nested_simple_types(args, nondefaults,
+                                 appclass=SampleCLINestedSimpleTypes):
+    desired = deepmixdicts(appclass.defaultparams(nested=True),
+                           nondefaults)
+    app = appclass()
+    app.cli(args)
+    actual = app.params(nested=True)
+    assert actual == desired
 
 
-class TestCLISetItem(TestCLINestedSimpleTypes):
+class SampleCLISetItem(Computer):
+    strs = List(str, default=['a', 'b', 'c'])
+    dict = Dict(str, str, default={})
+    # FIXME: "default=" should not be used here; use "init=" for
+    # the same reason why "init=" is used in Logger plugin.
 
-    class appclass(Computer):
-        strs = List(str, default=['a', 'b', 'c'])
-        dict = Dict(str, str, default={})
-        # FIXME: "default=" should not be used here; use "init=" for
-        # the same reason why "init=" is used in Logger plugin.
 
-    data = [
+@pytest.mark.parametrize(
+    "args, nondefaults", [
         ([], {}),
         (['--strs[1]=B'], dict(strs=['a', 'B', 'c'])),
         (['--dict["a"]=b'], dict(dict=dict(a='b'))),
-    ]
+    ])
+def test_cli_set_item(args, nondefaults):
+    test_cli_nested_simple_types(args, nondefaults, SampleCLISetItem)
 
 
 def test_file_modifier_for_level1_par(paramfile_j3):

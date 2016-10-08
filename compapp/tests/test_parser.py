@@ -1,7 +1,8 @@
 import ast
 import mock
 
-from . import utils
+import pytest
+
 from ..parser import Option, parse_assignment_options, assign_option
 
 
@@ -27,16 +28,8 @@ def assert_opt_eq(actual, desired):
     assert actual[1:] == desired[1:]
 
 
-class TestOneOpt(utils.DataChecker):
-
-    def check(self, arguments, lhs, rhs, modifier):
-        desired = Option(ast.parse(lhs), rhs, modifier)
-        opts, args = parse_assignment_options(arguments)
-        assert args == []
-        assert len(opts) == 1
-        assert_opt_eq(opts[0], desired)
-
-    data = [
+@pytest.mark.parametrize(
+    "arguments, lhs, rhs, modifier", [
         (['--a=x'], 'a', 'x', None),
         (['--a', 'x'], 'a', 'x', None),
         (['--a:1=x'], 'a', ('x',), 1),
@@ -47,57 +40,57 @@ class TestOneOpt(utils.DataChecker):
         (['--a:b', 'x'], 'a', 'x', 'b'),
         (['--a["k"]=x'], 'a["k"]', 'x', None),
         (['--a["k"]:1=x'], 'a["k"]', ('x',), 1),
-    ]
+    ])
+def test_one_opt(arguments, lhs, rhs, modifier):
+    desired = Option(ast.parse(lhs), rhs, modifier)
+    opts, args = parse_assignment_options(arguments)
+    assert args == []
+    assert len(opts) == 1
+    assert_opt_eq(opts[0], desired)
 
 
-class TestPositional(utils.DataChecker):
-
-    def check(self, arguments, opts, poss):
-        opts_got, poss_got = parse_assignment_options(arguments)
-        assert poss_got == poss
-        assert len(opts_got) == len(opts)
-        for actual, desired in zip(opts_got, opts):
-            assert_opt_eq(actual, desired)
-
-    data = [
+@pytest.mark.parametrize(
+    "arguments, opts, poss", [
         ([], [], []),
         (['a'], [], ['a']),
         (['a', '--', '--b', 'c'], [], ['a', '--b', 'c']),
         (['a', '--b', 'c', 'd'],
          [Option(ast.parse('b'), 'c', None)],
          ['a', 'd']),
-    ]
+    ])
+def test_positional(arguments, opts, poss):
+    opts_got, poss_got = parse_assignment_options(arguments)
+    assert poss_got == poss
+    assert len(opts_got) == len(opts)
+    for actual, desired in zip(opts_got, opts):
+        assert_opt_eq(actual, desired)
 
 
-class TestAssignOptionEndsWithAttr(utils.DataChecker):
-
-    def check(self, code, rhs=1):
-        obj = mock.MagicMock()
-        lhs = ast.parse(code, mode='eval').body
-        assign_option(obj, lhs, rhs)
-        got = eval("obj." + code, dict(obj=obj))
-        assert got == rhs
-
-    data = [
-        ('a',),
-        ('a.b',),
-        ('a.b.c',),
-        ('a.b.c.d',),
-        ('a[1].b',),
-    ]
+@pytest.mark.parametrize(
+    "code", [
+        'a',
+        'a.b',
+        'a.b.c',
+        'a.b.c.d',
+        'a[1].b',
+    ])
+def test_assign_option_ends_with_attr(code, rhs=1):
+    obj = mock.MagicMock()
+    lhs = ast.parse(code, mode='eval').body
+    assign_option(obj, lhs, rhs)
+    got = eval("obj." + code, dict(obj=obj))
+    assert got == rhs
 
 
-class TestAssignOptionEndsWithItem(utils.DataChecker):
-
-    def check(self, head, key, rhs=1):
-        code = head + '[' + repr(key) + ']'
-        obj = mock.MagicMock()
-        lhs = ast.parse(code, mode='eval').body
-        assign_option(obj, lhs, rhs)
-        got = eval("obj." + head, dict(obj=obj))
-        got.__setitem__.assert_called_once_with(key, rhs)
-
-    data = [
+@pytest.mark.parametrize(
+    "head, key", [
         ('a', 1),
         ('a[1].b', 2),
-    ]
+    ])
+def test_assign_option_ends_with_item(head, key, rhs=1):
+    code = head + '[' + repr(key) + ']'
+    obj = mock.MagicMock()
+    lhs = ast.parse(code, mode='eval').body
+    assign_option(obj, lhs, rhs)
+    got = eval("obj." + head, dict(obj=obj))
+    got.__setitem__.assert_called_once_with(key, rhs)
