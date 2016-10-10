@@ -69,7 +69,8 @@ class Logger(Plugin):
     """
 
     configurator = Or(OfType(logging.config.BaseConfigurator),
-                      Link('...log.configurator'))
+                      Link('...log.configurator'),
+                      isparam=False)
 
     handlers = Or(List(str),
                   Dict(str, Dict(str, simple_types)),
