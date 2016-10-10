@@ -122,6 +122,7 @@ class Private(object):
     def __init__(self):
         self.data = {}
         self.optparams = []
+        # FIXME: remove self.optparams
 
     def set_context(self, owner, myname):
         self.myname = myname
@@ -365,8 +366,15 @@ class Parametric(Parameter):
 
         params = {}
         for name in (set(self.paramnames(type=nametypes)) |
+                     # FIXME: I think now below set(...optparams) is
+                     # not necessary due to the change in
+                     # self.paramnames(); confirm this and remove the
+                     # following line:
                      set(private(self).optparams)):
-            val = getattr(self, name)
+            try:
+                val = getattr(self, name)
+            except AttributeError:
+                continue
             if isinstance(val, Parametric):
                 if nested:
                     params[name] = val.params(nested=nested, type=type)
