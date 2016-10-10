@@ -209,10 +209,6 @@ class DataDescriptor(Descriptor):
         private(obj).data[self.key] = self.verify(obj, value)
 
 
-def is_param_descriptor(desc):
-    return isinstance(desc, Descriptor) and desc.isparam
-
-
 class Parametric(Parameter):
 
     """
@@ -412,14 +408,17 @@ class Parametric(Parameter):
         ['x']
 
         """
-        # FIXME: optimize!
-        names = list(cls.defaultparams(type=type))
+        names = []
         for name, val in itervars(cls):
             if (isinstance(val, _type) and issubclass(val, Parametric)) \
-               or (is_param_descriptor(val) and
-                   val.default is Unspecified):
+               or (isinstance(val, Descriptor) and val.isparam):
                 if type is None or issubclass(val, type):
                     names.append(name)
+            elif type is not None:
+                if isinstance(val, type):
+                    names.append(name)
+            elif isinstance(val, basic_types):
+                names.append(name)
         return names
 
     @classmethod
@@ -451,20 +450,7 @@ class Parametric(Parameter):
         True
 
         """
-        params = {}
-        for name, val in itervars(cls):
-            if isinstance(val, _type) and issubclass(val, Parametric):
-                if nested:
-                    params[name] = val.defaultparams(nested=nested, type=type)
-            elif type is not None:
-                if isinstance(val, type):
-                    params[name] = val
-            elif isinstance(val, basic_types):
-                params[name] = val
-            elif is_param_descriptor(val):
-                if val.default is not Unspecified:
-                    params[name] = val.default
-        return params
+        return cls().params(nested=nested, type=type)
 
 
 class Defer(object):
