@@ -162,7 +162,11 @@ def private(par):
 
 class Descriptor(object):
 
-    def __init__(self, default=Unspecified):
+    isparam = False
+
+    def __init__(self, default=Unspecified, isparam=Unspecified):
+        if isparam is not Unspecified:
+            self.isparam = isparam
         self.default = default
 
     def myname(self, obj, error=False):
@@ -192,8 +196,6 @@ class DataDescriptor(Descriptor):
     isparam = True
 
     def __init__(self, **kwds):
-        if 'isparam' in kwds:
-            self.isparam = kwds.pop('isparam')
         super(DataDescriptor, self).__init__(**kwds)
         self.key = self
 
@@ -205,6 +207,10 @@ class DataDescriptor(Descriptor):
 
     def __set__(self, obj, value):
         private(obj).data[self.key] = self.verify(obj, value)
+
+
+def is_param_descriptor(desc):
+    return isinstance(desc, Descriptor) and desc.isparam
 
 
 class Parametric(Parameter):
@@ -410,8 +416,7 @@ class Parametric(Parameter):
         names = list(cls.defaultparams(type=type))
         for name, val in itervars(cls):
             if (isinstance(val, _type) and issubclass(val, Parametric)) \
-               or (isinstance(val, DataDescriptor) and
-                   val.isparam and
+               or (is_param_descriptor(val) and
                    val.default is Unspecified):
                 if type is None or issubclass(val, type):
                     names.append(name)
@@ -456,7 +461,7 @@ class Parametric(Parameter):
                     params[name] = val
             elif isinstance(val, basic_types):
                 params[name] = val
-            elif isinstance(val, DataDescriptor) and val.isparam:
+            elif is_param_descriptor(val):
                 if val.default is not Unspecified:
                     params[name] = val.default
         return params

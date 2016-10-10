@@ -43,15 +43,16 @@ def test_or_default():
     assert x0 == x1
 
 
-@pytest.mark.skip(reason="spec not decided")
 def test_link_default():
     class MyApp(Parametric):
         x = 1
 
         class sub(Parametric):
-            x = Link('..x')
+            x = Link('..x', isparam=True)
 
     assert sorted(MyApp.paramnames()) == ['sub', 'x']
     defaultparams = MyApp.defaultparams(nested=True)
     params = MyApp().params(nested=True)
-    assert defaultparams == params == {'x': 1, 'sub': {'x': 1}}
+    assert params == {'x': 1, 'sub': {'x': 1}}
+    pytest.skip("known bug")
+    assert defaultparams == {'x': 1, 'sub': {'x': 1}}
