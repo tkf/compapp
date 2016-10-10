@@ -1,3 +1,4 @@
+import copy
 import functools
 
 from ..base import Unspecified
@@ -110,6 +111,9 @@ class OfType(DataDescriptor):
         got = super(OfType, self).get(obj)
         if got is Unspecified and self.init is not None:
             got = self.init()
+            self.__set__(obj, got)
+        if got is not Unspecified and got is self.default:
+            got = copy.deepcopy(got)
             self.__set__(obj, got)
         return got
 
@@ -318,8 +322,8 @@ class Optional(OfType):
     >>> class MyParametric(Parametric):
     ...     i = Optional(int)
     ...     j = Optional(int)
-    >>> MyParametric.paramnames()
-    []
+    >>> sorted(MyParametric.paramnames())
+    ['i', 'j']
     >>> MyParametric().params()
     {}
     >>> MyParametric(i=1).params()

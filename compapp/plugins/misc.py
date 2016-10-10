@@ -79,7 +79,7 @@ class Logger(Plugin):
                   # just for holding the default value.  Dict is used
                   # instead of passing `default=` to Or to make a new
                   # instance for each instance of Logger.
-                  Dict(str, Dict(str, simple_types), init=lambda: dict(
+                  Dict(str, Dict(str, simple_types), default=dict(
                       console={
                           'class': 'logging.StreamHandler',
                           'formatter': 'default',
@@ -102,7 +102,7 @@ class Logger(Plugin):
     .. _`logging configuration dictionary`: https://docs.python.org/library/logging.config.html#dictionary-schema-details
     """
 
-    formatters = Dict(str, Dict(str, str), init=lambda: dict(
+    formatters = Dict(str, Dict(str, str), default=dict(
         basic=dict(format=logging.BASIC_FORMAT),
         default=dict(
             format='%(levelname)s %(asctime)s %(name)s | %(message)s',
