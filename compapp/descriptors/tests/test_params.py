@@ -1,5 +1,3 @@
-import pytest
-
 from ...core import Parametric
 from .. import Dict, List, Or, Link
 
@@ -53,5 +51,4 @@ def test_link_default():
     defaultparams = MyApp.defaultparams(nested=True)
     params = MyApp().params(nested=True)
     assert params == {'x': 1, 'sub': {'x': 1}}
-    pytest.skip("known bug")
     assert defaultparams == {'x': 1, 'sub': {'x': 1}}
