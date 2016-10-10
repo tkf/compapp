@@ -4,18 +4,6 @@ from ...core import Parametric
 from .. import Dict, List, Or, Link
 
 
-def test_dict_with_default():
-    class MyApp(Parametric):
-        x = Dict(default=dict(y=dict(z=1)))
-
-    assert MyApp.paramnames() == ['x']
-    x0 = MyApp.defaultparams()['x']
-    x1 = MyApp().params()['x']
-    assert x0 is not x1
-    assert x0['y'] is not x1['y']
-    assert x0 == x1
-
-
 def test_dict_wo_default():
     class MyApp(Parametric):
         x = Dict()
@@ -30,17 +18,28 @@ def test_list_wo_default():
     assert MyApp.paramnames() == ['x']
 
 
-def test_or_default():
-    class MyApp(Parametric):
-        x = Or(List(),
-               Dict(default=dict(y=dict(z=1))))
+class TestDictWithDefault(object):
 
-    assert MyApp.paramnames() == ['x']
-    x0 = MyApp.defaultparams()['x']
-    x1 = MyApp().params()['x']
-    assert x0 is not x1
-    assert x0['y'] is not x1['y']
-    assert x0 == x1
+    class MyApp(Parametric):
+        _desired = dict(y=dict(z=1))
+        x = Dict(default=_desired)
+
+    def test(self):
+        MyApp = self.MyApp
+        desired = MyApp._desired
+        assert MyApp.paramnames() == ['x']
+        x0 = MyApp.defaultparams()['x']
+        x1 = MyApp().params()['x']
+        assert x0 is not x1
+        assert x0['y'] is not x1['y']
+        assert x0 == x1 == desired
+
+
+class TestOrDefault(TestDictWithDefault):
+
+    class MyApp(Parametric):
+        _desired = dict(y=dict(z=1))
+        x = Or(List(), Dict(default=_desired))
 
 
 def test_link_default():
