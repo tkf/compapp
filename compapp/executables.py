@@ -35,7 +35,7 @@ class Assembler(Executable):
     `.load`.
     """
 
-    results = OfType(init=DictObject)
+    results = OfType(init=DictObject, isparam=False)
     """
     Attributes set to this property are saved to `.datastore` by
     `.DumpResults` plugin.  Downstream classes *must* rely only on the

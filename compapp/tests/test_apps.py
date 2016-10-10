@@ -157,8 +157,6 @@ def test_cli_nested_simple_types(args, nondefaults,
 class SampleCLISetItem(Computer):
     strs = List(str, default=['a', 'b', 'c'])
     dict = Dict(str, str, default={})
-    # FIXME: "default=" should not be used here; use "init=" for
-    # the same reason why "init=" is used in Logger plugin.
 
 
 @pytest.mark.parametrize(
