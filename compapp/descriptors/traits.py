@@ -515,3 +515,17 @@ class Or(DataDescriptor):
             except ValueError:
                 continue
         raise ValueError("{0} cannot parse {1!r}".format(self.traits, string))
+
+    @property
+    def default(self):
+        default = getattr(self, '_default', Unspecified)
+        if default is not Unspecified:
+            return default
+        for trait in self.traits:
+            if trait.default is not Unspecified:
+                return trait.default
+        return Unspecified
+
+    @default.setter
+    def default(self, value):
+        self._default = value
