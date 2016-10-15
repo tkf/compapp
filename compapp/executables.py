@@ -38,7 +38,7 @@ class Assembler(Executable):
     results = OfType(init=DictObject, isparam=False)
     """
     Attributes set to this property are saved to `.datastore` by
-    `.DumpResults` plugin.  Downstream classes *must* rely only on the
+    `.DumpResults` plugin.  Downstream classes must rely *only* on the
     data under this property.  For debugging purpose, use `.dbg` to
     store intermediate variables.
     """

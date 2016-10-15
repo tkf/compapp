@@ -107,6 +107,16 @@ class DumpResults(Plugin):
         self.defer.call()
 
     def _save(self):
+        """
+        Actual saving logic to be called from `.save` via `.defer`.
+
+        The saving logic is not implemented directly in `.save` method
+        since the results have to be saved even though some error has
+        been occurred during computation in owner's `run` method.
+        This `._save` method is guaranteed to be called since it is
+        recorded in `.defer`.
+
+        """
         owner = private(self).owner
         if not owner.datastore.exists():
             return

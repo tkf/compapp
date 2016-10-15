@@ -145,14 +145,15 @@ Here is the list of plugins provided by `compapp.plugins`:
 .. currentmodule:: compapp.plugins
 
 .. autosummary::
+   :nosignatures:
 
-   DirectoryDataStore
-   SubDataStore
-   HashDataStore
-   Logger
-   Debug
-   AutoDump
-   Figure
-   RecordVCS
-   RecordTiming
-   DumpParameters
+   recorders.DumpResults
+   recorders.DumpParameters
+   recorders.RecordVCS
+   recorders.RecordTiming
+   misc.Logger
+   misc.Debug
+   misc.Figure
+   datastores.DirectoryDataStore
+   datastores.SubDataStore
+   datastores.HashDataStore
