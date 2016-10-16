@@ -149,8 +149,8 @@ Here is the list of plugins provided by `compapp.plugins`:
 
    recorders.DumpResults
    recorders.DumpParameters
-   recorders.RecordVCS
    recorders.RecordTiming
+   vcs.RecordVCS
    misc.Logger
    misc.Debug
    misc.Figure

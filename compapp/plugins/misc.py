@@ -234,7 +234,8 @@ class Debug(Plugin):
 
     Finally...:
 
-    >>> app.execute()
+    >>> app.execute()                                  # doctest: +ELLIPSIS
+    DEBUG compapp.plugins.misc.MySimulator.0 | Datastore is not available. ...
     DEBUG compapp.plugins.misc.MySimulator.0 | tmp = [0, 1, 2]
 
     >>> app.dbg.tmp
@@ -367,9 +368,8 @@ class Figure(Plugin):
     >>> app = MyApp()
     >>> app.datastore.dir = 'out'
     >>> app.execute()
-    >>> sorted(os.listdir('out'))     # doctest: +NORMALIZE_WHITESPACE
-    ['figure-0.png', 'figure-alpha.png', 'figure-beta.png',
-     'params.json', 'run.log']
+    >>> sorted(f for f in os.listdir('out') if f.startswith('figure-'))
+    ['figure-0.png', 'figure-alpha.png', 'figure-beta.png']
 
     See also
     --------
@@ -595,3 +595,10 @@ for method in set(dir(Plugin)) - set(dir(Plugin.mro()[1])):
         continue
     setattr(PluginWrapper, method, makemethod(method))
 del method
+
+
+def real_owner(self):
+    owner = private(self).owner
+    if isinstance(owner, PluginWrapper):  # FIXME: ugly special case
+        owner = private(owner).owner
+    return owner

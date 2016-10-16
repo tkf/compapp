@@ -5,7 +5,7 @@ import sys
 
 from ..base import setnestedattr, MultiException
 from ..core import basic_types, private, Plugin
-from .misc import PluginWrapper
+from .misc import real_owner
 
 
 class DumpResults(Plugin):
@@ -267,10 +267,8 @@ class DumpParameters(Plugin):
 
     def _verified_owner(self):
         prv = private(self)
-        owner = prv.owner
         root = prv.getroot()
-        if isinstance(owner, PluginWrapper):  # FIXME: ugly special case
-            owner = private(owner).owner
+        owner = real_owner(self)
         if owner is root and owner.datastore.dir:
             return owner
 
@@ -288,15 +286,6 @@ class DumpParameters(Plugin):
         with open(owner.datastore.path('params.json')) as file:
             data = json.load(file)
         setnestedattr(owner, data)  # FIXME: use emptydict=True
-
-
-class RecordVCS(Plugin):
-
-    """
-    Record VCS revision automatically.
-    """
-
-    vcs = 'git'
 
 
 class RecordTiming(Plugin):
