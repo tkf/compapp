@@ -235,8 +235,9 @@ class Debug(Plugin):
     Finally...:
 
     >>> app.execute()                                  # doctest: +ELLIPSIS
-    DEBUG compapp.plugins.misc.MySimulator.0 | Datastore is not available. ...
+    DEBUG compapp.plugins.misc.MySimulator.0 | ...
     DEBUG compapp.plugins.misc.MySimulator.0 | tmp = [0, 1, 2]
+    DEBUG compapp.plugins.misc.MySimulator.0 | ...
 
     >>> app.dbg.tmp
     [0, 1, 2]

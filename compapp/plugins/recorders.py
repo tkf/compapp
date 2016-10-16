@@ -286,16 +286,3 @@ class DumpParameters(Plugin):
         with open(owner.datastore.path('params.json')) as file:
             data = json.load(file)
         setnestedattr(owner, data)  # FIXME: use emptydict=True
-
-
-class RecordTiming(Plugin):
-
-    """
-    Record timing information.
-    """
-
-    def pre_run(self):
-        pass
-
-    def post_run(self):
-        pass
