@@ -13,7 +13,7 @@ from .plugins import PluginWrapper, Figure, \
 
 class MagicPlugins(PluginWrapper):
     from .plugins import (
-        MetaStore as metastore,
+        MetaStore as meta,
         DumpResults as dumpresults,
         RecordVCS as recordvcs,
         RecordTiming as recordtiming,

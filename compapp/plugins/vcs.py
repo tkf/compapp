@@ -68,7 +68,7 @@ class RecordVCS(Plugin):
     >>> app = Computer()
     >>> app.datastore.dir = 'out'
     >>> app.execute()
-    >>> vcsinfo = app.magics.metastore.data['vcs']
+    >>> vcsinfo = app.magics.meta.data['vcs']
     >>> sorted(vcsinfo)
     ['filepath', 'isclean', 'revision', 'root', 'vcs']
     >>> from compapp import apps
@@ -83,16 +83,16 @@ class RecordVCS(Plugin):
     >>> app2.mode = 'load'
     >>> app2.datastore.dir = 'out'
     >>> app2.execute()
-    >>> app2.magics.metastore.data['vcs'] == vcsinfo
+    >>> app2.magics.meta.data['vcs'] == vcsinfo
     True
 
     """
 
-    metastore = Link('..metastore')
+    meta = Link('..meta')
 
     def pre_run(self):
         cls = type(real_owner(self))
         filepath = sys.modules[cls.__module__].__file__
         vcs = getvcs(filepath)
         if vcs:
-            self.metastore.record('vcs', vcs.vcsinfo())
+            self.meta.record('vcs', vcs.vcsinfo())

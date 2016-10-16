@@ -1,14 +1,19 @@
 import json
-import glob
-import os
 
 from ..descriptors import Link
 from ..core import Plugin
+from .datastores import SubDataStore
 
 
 class MetaStore(Plugin):
 
-    _parentstore = Link('...datastore')
+    # FIXME: The plugin hooks of this (below) datastore are not
+    #        called.  Probably all plugins have to be derived from
+    #        `PluginWrapper` (after appropriate rename) so that nested
+    #        plugins like below are handled properly?  At the moment,
+    #        not calling plugin hooks of `datastore` is fine since
+    #        almost nothing is done in the hooks.
+    datastore = SubDataStore
     log = Link('...log')
 
     def prepare(self):
@@ -16,19 +21,17 @@ class MetaStore(Plugin):
 
     def record(self, name, data):
         self.data[name] = data
-        if not self._parentstore.is_writable():
+        if not self.datastore.is_writable():
             self.log.debug(
                 'Datastore is not available. Not saving meta data {}'
                 .format(name))
             return
-        path = self._parentstore.path('meta-{}.json'.format(name))
+        path = self.datastore.path('{}.json'.format(name))
         with open(path, 'w') as file:
             json.dump(data, file)
 
     def load(self):
-        files = glob.glob(self._parentstore.path('meta-*.json', mkdir=False))
-        for path in files:
-            filename = os.path.basename(path)
-            name = filename[len('meta-'):-len('.json')]
+        for filename, path in self.datastore.globitems('*.json'):
+            name = filename[:-len('.json')]
             with open(path) as file:
                 self.data[name] = json.load(file)

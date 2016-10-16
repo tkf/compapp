@@ -1,3 +1,4 @@
+import glob
 import hashlib
 import json
 import os
@@ -164,6 +165,11 @@ class DirectoryDataStore(BaseDataStore):
     def exists(self, *path):
         return self.dir and os.path.exists(self.path(*path, mkdir=False))
 
+    def globitems(self, pattern):
+        files = glob.glob(self.path(pattern, mkdir=False))
+        for path in files:
+            yield os.path.basename(path), path
+
 
 class SubDataStore(DirectoryDataStore):
 
@@ -219,6 +225,10 @@ class SubDataStore(DirectoryDataStore):
             return self._parent.path(self._ownername)
         part0 = self._ownername + self.sep + args[0]
         return self._parent.path(part0, *args[1:], **kwds)
+
+    def globitems(self, pattern):
+        for filename, path in super(SubDataStore, self).globitems(pattern):
+            yield filename[len(self._ownername + self.sep):], path
 
 
 def hexdigest(jsonable):

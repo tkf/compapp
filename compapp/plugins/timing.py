@@ -60,7 +60,7 @@ class RecordTiming(Plugin):
     >>> app = MyApp()
     >>> app.execute()
 
-    >>> timing = app.magics.metastore.data['timing']
+    >>> timing = app.magics.meta.data['timing']
     >>> (timing['post']['rusage']['ru_utime']
     ... + timing['post']['rusage']['ru_stime']
     ... - timing['pre']['rusage']['ru_utime']
@@ -71,7 +71,7 @@ class RecordTiming(Plugin):
 
     """
 
-    metastore = Link('..metastore')
+    meta = Link('..meta')
 
     def pre_run(self):
         self.timing = {}
@@ -79,4 +79,4 @@ class RecordTiming(Plugin):
 
     def post_run(self):
         self.timing['post'] = gettimings()
-        self.metastore.record('timing', self.timing)
+        self.meta.record('timing', self.timing)
