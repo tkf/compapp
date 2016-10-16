@@ -527,7 +527,7 @@ class Figure(Plugin):
 
         """
         from matplotlib import pyplot
-        name = str(kwds.pop('name', None))
+        name = kwds.pop('name', None)
         assert name not in self._figures
         ret = fig, _ = pyplot.subplots(*args, **kwds)
         self._set_fig(name, fig)
