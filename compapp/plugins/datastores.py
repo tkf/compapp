@@ -102,9 +102,12 @@ class DirectoryDataStore(BaseDataStore):
     _ownername = OwnerName()
     overwrite = True
     clear_before_run = True
+    on = True
 
     @property
     def dir(self):
+        if not self.on:
+            return None
         try:
             return self._dir
         except AttributeError:
