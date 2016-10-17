@@ -1,4 +1,4 @@
-from ..core import DataDescriptor
+from ..core import Unspecified, DataDescriptor
 from ..utils.importer import import_object
 
 
@@ -35,7 +35,7 @@ class ClassPlaceholder(DataDescriptor):
         if isinstance(value, cls):
             return value
 
-        newval = cls(value)
+        newval = cls() if value is Unspecified else cls(value)
         self.__set__(obj, newval)
         return newval
 
