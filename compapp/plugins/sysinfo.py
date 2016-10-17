@@ -2,6 +2,7 @@ from socket import gethostname
 import os
 import sys
 
+from .. import __version__
 from ..core import Plugin
 from ..descriptors import Link, Root
 from .misc import real_owner
@@ -31,4 +32,5 @@ class RecordSysInfo(Plugin):
             cwd=os.getcwd(),
             environ=dict(os.environ),
             sys=sysdict,
+            compapp_version=__version__,
         ))
