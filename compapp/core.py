@@ -54,7 +54,10 @@ def itervars(obj):
     for name in dir(obj):
         if name.startswith('_'):
             continue
-        yield name, getattr(obj, name)
+        try:
+            yield name, getattr(obj, name)
+        except AttributeError:
+            continue
 
 
 def attrs_of(obj, type):
