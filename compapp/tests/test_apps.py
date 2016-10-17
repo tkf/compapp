@@ -3,7 +3,8 @@ import pytest
 
 from ..apps import Computer
 from ..base import deepmixdicts
-from ..descriptors import OfType, Dict, List, Or
+from ..descriptors import OfType, Dict, List, Or, Required, Choice
+from ..plugins.misc import _loglevel
 
 
 @pytest.fixture
@@ -99,6 +100,40 @@ def test_cli_simple(args, nondefaults, appclass):
     app.cli(args)
     actual = app.params()
     assert actual == desired
+
+
+class SampleCLIWithRequired(Computer):
+    required = Required(int)
+
+
+@pytest.mark.parametrize(
+    "args, nondefaults", [
+        ([], {}),
+        (['--required=1'], dict(required=1)),
+    ])
+def test_cli_with_required(args, nondefaults):
+    test_cli_simple(args, nondefaults, SampleCLIWithRequired)
+
+
+class SampleCLIMicTraits(Computer):
+    choice = Choice(1.0, 2, "3", True)
+    choice_or_int = Or(Choice("a", "b", "c"), OfType(int))
+    loglevel = _loglevel()
+
+
+@pytest.mark.parametrize(
+    "args, nondefaults", [
+        ([], {}),
+        (['--choice=1'], dict(choice=1.0)),
+        (['--choice=2'], dict(choice=2)),
+        (['--choice=3'], dict(choice="3")),
+        (['--choice=yes'], dict(choice=True)),
+        (['--choice_or_int=a'], dict(choice_or_int='a')),
+        (['--choice_or_int=1'], dict(choice_or_int=1)),
+        (['--loglevel=debug'], dict(loglevel='debug')),
+    ])
+def test_cli_misc_traits(args, nondefaults):
+    test_cli_simple(args, nondefaults, SampleCLIMicTraits)
 
 
 class SampleCLICompositeTraits(Computer):

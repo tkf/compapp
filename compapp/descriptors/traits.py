@@ -175,6 +175,7 @@ class Required(DataDescriptor):
         if desc:
             # self.get = desc.get
             self.verify = desc.verify
+            self.parse = desc.parse
             desc.myname = self.myname
 
 
@@ -414,6 +415,22 @@ class Choice(DataDescriptor):
                     self.choices,
                     value))
         return value
+
+    @skip_non_str
+    def parse(self, string):
+        for choice in self.choices:
+            if isinstance(choice, str):
+                val = string
+            elif isinstance(choice, bool):
+                val = parse_bool(string)
+            else:
+                try:
+                    val = type(choice)(string)
+                except ValueError:
+                    continue
+            if val == choice:
+                return choice
+        raise ValueError("{0} cannot parse {1!r}".format(self, string))
 
 
 class Or(DataDescriptor):
