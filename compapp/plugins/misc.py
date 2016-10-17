@@ -4,6 +4,7 @@ import logging
 import logging.config
 import weakref
 
+from ..base import Unspecified
 from ..core import simple_types, attrs_of, \
     call_plugins, private, Plugin, Executable
 from ..descriptors import Link, Delegate, Or, Choice, OfType, List, Dict
@@ -13,7 +14,7 @@ _loglevels = ['CRITICAL', 'FATAL', 'ERROR', 'WARNING', 'WARN',
               'INFO', 'DEBUG', 'NOTSET']
 
 
-def _loglevel(default=0, *alternatives):
+def _loglevel(default=Unspecified, *alternatives):
     levels = _loglevels + list(map(str.lower, _loglevels))
     ts = (Choice(*levels, nodefault=True), OfType(int)) + alternatives
     return Or(*ts, default=default)
@@ -126,7 +127,7 @@ class Logger(Plugin):
     the root app).
     """
 
-    level = _loglevel('ERROR')
+    level = Or(_loglevel(), Link('...log.level'), default='ERROR')
     """
     Logger level.  Default is ``'ERROR'``.
     """

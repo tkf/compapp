@@ -492,11 +492,49 @@ class Or(DataDescriptor):
     """
 
     def __init__(self, *traits, **kwds):
+        self.traits = traits  # has to come before __init__ (see key.setter)
         super(Or, self).__init__(**kwds)
-        self.traits = traits
-        for trait in traits:
-            trait.key = self.key
-            trait.myname = self.myname  # FIXME: an awful hack
+        self.myname = self.myname  # FIXME: an awful hack
+
+    # The value of `.key` and `.myname` are propagated to the
+    # component traits (`.traits`).  To allow nested Or trait, it is
+    # done in the setter descriptor.
+
+    # Propagation of self.myname in __init__ is an awful hack.  I need
+    # to fix interface (use of myname, etc.) at some point.  But it
+    # works for now...
+
+    # Here is how it works: key.setter (and also myname.setter) is
+    # called in two ways.  (1) The setter is called in __init__().
+    # This time, it is set to the default implementation
+    # "Descriptor.key()".  (2) The setter is called from the setter of
+    # parent descriptor (i.e., via Or.__init__() of the parent).  The
+    # outmost Or descriptor only hits the case (1).  All inner Or
+    # descriptors are hit by the case (2) recursively.  This way, key
+    # is propagated to all inner descriptors.
+
+    @property
+    def key(self):
+        return self._key
+
+    @key.setter
+    def key(self, value):
+        self._key = value
+        for trait in self.traits:
+            trait.key = value
+
+    def _myname(self, *args, **kwds):
+        return super(Or, self).myname(*args, **kwds)
+
+    @property
+    def myname(self):
+        return self._myname
+
+    @myname.setter
+    def myname(self, value):
+        self._myname = value
+        for trait in self.traits:
+            trait.myname = value
 
     def verify(self, obj, value, myname=None):
         myname = myname or self.myname(obj)

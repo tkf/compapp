@@ -1,3 +1,4 @@
+import copy
 import pickle
 import pytest
 
@@ -202,6 +203,28 @@ class SampleCLISetItem(Computer):
     ])
 def test_cli_set_item(args, nondefaults):
     test_cli_nested_simple_types(args, nondefaults, SampleCLISetItem)
+
+
+def test_cli_log_level_propagated():
+    app = SampleCLINestedSimpleTypes()
+    app.cli(['--log.level=debug'])
+    assert (
+        app.log.level,
+        app.sub.log.level,
+        app.sub.sub.log.level,
+        app.sub.sub.sub.log.level,
+    ) == ('debug',) * 4
+
+
+def test_cli_log_level_blocked_propagation():
+    app = SampleCLINestedSimpleTypes()
+    app.cli(['--log.level=debug', '--sub.sub.log.level=critical'])
+    assert (
+        app.log.level,
+        app.sub.log.level,
+        app.sub.sub.log.level,
+        app.sub.sub.sub.log.level,
+    ) == ('debug', 'debug', 'critical', 'critical')
 
 
 def test_file_modifier_for_level1_par(paramfile_j3):
