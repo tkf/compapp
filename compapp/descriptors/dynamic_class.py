@@ -1,3 +1,5 @@
+import sys
+
 from ..core import Unspecified, DataDescriptor, private, Parameter
 from ..utils.importer import import_object
 
@@ -81,5 +83,7 @@ def dynamic_class(path, prefix=None, **kwds):
        >>> del mod.ClassB
 
     """
+    if isinstance(path, type):
+        path = sys.modules[path.__module__].__name__ + '.' + path.__name__
     cpath = ClassPath(default=path, prefix=prefix)
     return ClassPlaceholder(cpath, **kwds), cpath

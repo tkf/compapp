@@ -11,3 +11,4 @@ from .executables import *
 from .descriptors import *
 from .plugins import *
 from .apps import *
+from .variator import Variator

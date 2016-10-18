@@ -27,11 +27,29 @@ Basic Python types.
 """
 
 cast_map = {}
-cast_map[float] = (int,)
-cast_map[complex] = (int, float)
+cast_map[int] = ()
+cast_map[float] = ()
+cast_map[complex] = ()
+
+try:
+    import numpy
+except ImportError:
+    pass
+else:
+    cast_map[int] += (
+        numpy.int16, numpy.int32, numpy.int64, numpy.int64,
+        numpy.uint16, numpy.uint32, numpy.uint64, numpy.uint64,
+    )
+    cast_map[float] += (numpy.float16, numpy.float32, numpy.float64)
+    cast_map[complex] += (numpy.complex64, numpy.complex128)
+    del numpy
+
+cast_map[float] = (int,) + cast_map[int]
+cast_map[complex] = (float,) + cast_map[float]
+
 try:
     cast_map[float] += (long,)
-    cast_map[long] = (int,)
+    cast_map[long] = (int,) + cast_map[int]
     cast_map[unicode] = (str,)
     cast_map[str] = (unicode,)  # FIXME: find a better way
 except NameError:
