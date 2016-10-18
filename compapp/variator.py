@@ -1,7 +1,7 @@
 import itertools
 
-from .base import dotted_to_nested
-from .core import Parametric, mixdicts
+from .base import dotted_to_nested, deepmixdicts
+from .core import Parametric
 from .apps import Computer
 from .descriptors import Dict, Choice, dynamic_class
 
@@ -71,5 +71,5 @@ class Variator(Computer):
         self.variants = list(pmap(
             execute,
             ((self.__class__.classpath.getclass(self),
-              mixdicts([base, auxparam(i), param]))
+              deepmixdicts(base, auxparam(i), param))
              for i, param in enumerate(self.builder.build_params()))))
