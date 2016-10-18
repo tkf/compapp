@@ -58,6 +58,10 @@ class Variator(Computer):
             pool = Pool(processes)
             pmap = pool.map
 
+            self.defer()(pool.close)
+            # Got "RuntimeError: can't start new thread" if I don't
+            # close the pool.
+
         base = self.base.params(nested=True)
 
         if self.datastore.is_writable():
