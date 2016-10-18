@@ -20,4 +20,7 @@ setup(
     install_requires=[
         # 'SOME_PACKAGE',
     ],
+    entry_points={
+        'console_scripts': ['capp = compapp.cli:main'],
+    },
 )
