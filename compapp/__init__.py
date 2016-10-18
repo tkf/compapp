@@ -12,3 +12,4 @@ from .descriptors import *
 from .plugins import *
 from .apps import *
 from .variator import Variator
+from .interactive import *
