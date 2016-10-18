@@ -39,3 +39,23 @@ def test_sumab_with_datastore(executor, tmpdir):
 
     exists = [tmpdir.join(str(i)).check() for i in range(10)]
     assert all(exists)
+
+
+class Sums(Computer):
+    x = SumAB
+    y = SumAB
+
+    def run(self):
+        self.x.execute()
+        self.y.execute()
+
+
+@pytest.mark.parametrize('executor', executor_choices)
+def test_nested(executor):
+    app = Variator(
+        classpath=__name__ + '.Sums',
+        builder=dict(ranges={'x.a': (10,)}),
+        executor=executor,
+    )
+    app.execute()
+    assert [v.x.results.c for v in app.variants] == list(range(2, 12))

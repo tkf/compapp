@@ -1,5 +1,6 @@
 import itertools
 
+from .base import dotted_to_nested
 from .core import Parametric, mixdicts
 from .apps import Computer
 from .descriptors import Dict, Choice, dynamic_class
@@ -24,7 +25,8 @@ class ParamBuilder(Parametric):
         for key, args in self.logspaces.items():
             names.append(key)
             values.append(numpy.logspace(*args))
-        return (dict(zip(names, xs)) for xs in itertools.product(*values))
+        return (dotted_to_nested(dict(zip(names, xs)))
+                for xs in itertools.product(*values))
 
 
 def execute(arg):

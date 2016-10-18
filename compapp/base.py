@@ -243,6 +243,29 @@ def setnestedattr(obj, dct, emptydict=False):
             holder[keys[-1]] = val
 
 
+def dotted_to_nested(ddict):
+    """
+    Convert dotted dictionary to nested dictionary.
+
+    >>> assert dotted_to_nested({
+    ...     'a.b.c': 1,
+    ...     'a.d': 2,
+    ... }) == dict(
+    ...     a=dict(b=dict(c=1),
+    ...            d=2),
+    ... )
+
+    """
+    ndict = {}
+    for path, val in ddict.items():
+        keys = path.split('.')
+        holder = ndict
+        for k in keys[:-1]:
+            holder = holder.setdefault(k, {})
+        holder[keys[-1]] = val
+    return ndict
+
+
 def deepmixdicts(*dicts):
     """
     Deeply mix dictionaries.
