@@ -36,6 +36,19 @@ class ClassPlaceholder(DataDescriptor):
         cls = self.cpath.getclass(obj)
         if isinstance(value, cls):
             return value
+        elif value is Unspecified or isinstance(value, dict):
+            pass
+        else:
+            vname = self.myname(obj)
+            pname = self.cpath.myname(obj)
+            classpath = self.cpath.get(obj)
+            raise ValueError(
+                "Trying to get obj.{vname}={value!r} but it does not"
+                " match with class path obj.{pname}={classpath}.\n"
+                "The class path obj.{pname} might be changed after the"
+                " first access of obj.{vname}.\n"
+                "Note: obj={obj!r}."
+                .format(**locals()))
 
         newval = cls() if value is Unspecified else cls(value)
         self.__set__(obj, newval)

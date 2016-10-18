@@ -1,3 +1,5 @@
+import pytest
+
 from ...core import Parametric
 from .. import Delegate, dynamic_class
 
@@ -30,3 +32,26 @@ def test_link():
     assert par.sub.x == 1.0
     par.x = 2.0
     assert par.sub.x == 2.0
+
+
+def test_declarative_nest():
+    par = DynamicParam(sub_class='.DynamicParam',
+                       sub=dict(sub_class='.SubparamB'))
+    assert isinstance(par.sub, DynamicParam)
+    assert isinstance(par.sub.sub, SubparamB)
+
+
+def test_imperative_nest():
+    par = DynamicParam()
+    par.sub_class = '.DynamicParam'
+    par.sub.sub_class = '.SubparamB'
+    assert isinstance(par.sub, DynamicParam)
+    assert isinstance(par.sub.sub, SubparamB)
+
+
+def test_error_on_reset():
+    par = DynamicParam()
+    assert isinstance(par.sub, SubparamA)
+    par.sub_class = '.SubparamB'
+    with pytest.raises(ValueError):
+        par.sub
