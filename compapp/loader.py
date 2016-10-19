@@ -54,7 +54,7 @@ def load(path):
     metapath = _meta_path(path)
     with open(metapath) as file:
         meta = json.load(file)
-    classname = meta['programinfo']['classname']
+    classname = meta['programinfo']['class']
     module = meta['programinfo']['module']
     cls = import_object(module + '.' + classname)
     app = cls()

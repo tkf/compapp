@@ -10,8 +10,8 @@ class RecordProgramInfo(Plugin):
 
     def save(self):
         cls = type(real_owner(self))
-        self.meta.record('programinfo', dict(
-            classname=cls.__name__,
-            module=cls.__module__,
-            filepath=sys.modules[cls.__module__].__file__,
-        ))
+        self.meta.record('programinfo', {
+            'class': cls.__name__,
+            'module': cls.__module__,
+            'file': sys.modules[cls.__module__].__file__,
+        })
