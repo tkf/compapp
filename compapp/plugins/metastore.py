@@ -1,20 +1,18 @@
 import json
 
-from ..descriptors import Link
+from ..descriptors import Delegate
 from ..core import Plugin
-from .datastores import SubDataStore
 
 
 class MetaStore(Plugin):
 
-    # FIXME: The plugin hooks of this (below) datastore are not
-    #        called.  Probably all plugins have to be derived from
-    #        `PluginWrapper` (after appropriate rename) so that nested
-    #        plugins like below are handled properly?  At the moment,
-    #        not calling plugin hooks of `datastore` is fine since
-    #        almost nothing is done in the hooks.
-    datastore = SubDataStore
-    log = Link('...log')
+    metafile = 'meta.json'
+    datastore = Delegate()
+    log = Delegate()
+
+    @property
+    def metafilepath(self):
+        return self.datastore.path(self.metafile)
 
     def prepare(self):
         self.data = {}
@@ -26,12 +24,9 @@ class MetaStore(Plugin):
                 'Datastore is not available. Not saving meta data {}'
                 .format(name))
             return
-        path = self.datastore.path('{}.json'.format(name))
-        with open(path, 'w') as file:
-            json.dump(data, file)
+        with open(self.metafilepath, 'w') as file:
+            json.dump(self.data, file)
 
     def load(self):
-        for filename, path in self.datastore.globitems('*.json'):
-            name = filename[:-len('.json')]
-            with open(path) as file:
-                self.data[name] = json.load(file)
+        with open(self.metafilepath) as file:
+            self.data = json.load(file)
