@@ -596,6 +596,30 @@ class Executable(Parametric):
         self.defer = Defer()
 
     def execute(self, *args):
+        """
+        Execute this instance.
+
+        Basically, this function does this:
+
+        .. parsed-literal::
+
+           `.prepare()`
+           `Plugin.prepare()`
+           if `.should_load()`:
+               `.load()`
+               `Plugin.load()`
+           else:
+               `Plugin.pre_run()`
+               `.run()`
+               `Plugin.post_run()`
+               `.save()`
+               `Plugin.save()`
+           `Plugin.finish()`
+           `.finish()`
+
+        Note that ``Plugin.<method>()`` are run for all plugins.
+
+        """
         try:
             self.prepare()
             call_plugins(self, 'prepare')
@@ -674,19 +698,31 @@ class Plugin(Parametric):
         self.defer.call()
 
     def prepare(self):
-        pass
+        """
+        |TO BE EXTENDED| For a task immediately *after* `Executable.prepare`.
+        """
 
     def pre_run(self):
-        pass
+        """
+        |TO BE EXTENDED| For a task immediately before `Executable.run`.
+        """
 
     def post_run(self):
-        pass
+        """
+        |TO BE EXTENDED| For a task immediately after `Executable.run`.
+        """
 
     def save(self):
-        pass
+        """
+        |TO BE EXTENDED| For a task immediately *after* `Executable.save`.
+        """
 
     def load(self):
-        pass
+        """
+        |TO BE EXTENDED| For a task immediately *before* `Executable.load`.
+        """
 
     def finish(self):
-        pass
+        """
+        |TO BE EXTENDED| For a task immediately *before* `Executable.finish`.
+        """

@@ -14,10 +14,13 @@ Contents:
    examples.rst
    executables.rst
    api.rst
-   api/compapp.rst
    inheritance-diagram.rst
    glossary.rst
 
+.. toctree::
+   :maxdepth: 1
+
+   Module reference <api/compapp.rst>
 
 .. toctree::
    :hidden:

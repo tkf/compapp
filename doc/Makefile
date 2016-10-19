@@ -61,7 +61,8 @@ api:
 	$(MAKE) source/api
 
 source/api: ../compapp
-	$(SPHINXAPIDOC) --force --separate --private -o $@ $<
+	$(SPHINXAPIDOC) --force --separate --private -o $@ $< \
+		../compapp/__main__.py
 	touch $@
 
 examples:
