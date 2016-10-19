@@ -13,3 +13,4 @@ from .plugins import *
 from .apps import *
 from .variator import Variator
 from .interactive import *
+from .loader import load

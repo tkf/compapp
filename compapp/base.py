@@ -182,6 +182,10 @@ class DictObject(object):
     def __repr__(self):
         return '{0}({1!r})'.format(self.__class__.__name__, self.__dict__)
 
+    def __eq__(self, other):
+        return isinstance(other, type(self)) and \
+            self.__dict__ == other.__dict__
+
 
 def nesteditems(dct, emptydict=False):
     """
