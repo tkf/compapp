@@ -89,7 +89,7 @@ class MultiException(Exception):
 
     @classmethod
     @__fix_doc
-    def run(cls, callbacks, *args, **kwds):
+    def run(cls, callbacks):
         """
         Run all `callbacks` ignoring exceptions and raise at the end (if any).
 
