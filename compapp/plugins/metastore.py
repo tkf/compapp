@@ -2,6 +2,7 @@ import json
 
 from ..descriptors import Delegate
 from ..core import Plugin
+from ..utils.files import safewrite
 
 
 class MetaStore(Plugin):
@@ -24,7 +25,7 @@ class MetaStore(Plugin):
                 'Datastore is not available. Not saving meta data {}'
                 .format(name))
             return
-        with open(self.metafilepath, 'w') as file:
+        with safewrite(self.metafilepath) as file:
             json.dump(self.data, file)
 
     def load(self):
