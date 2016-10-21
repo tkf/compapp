@@ -44,8 +44,8 @@ else:
     cast_map[complex] += (numpy.complex64, numpy.complex128)
     del numpy
 
-cast_map[float] = (int,) + cast_map[int]
-cast_map[complex] = (float,) + cast_map[float]
+cast_map[float] += (int,) + cast_map[int]
+cast_map[complex] += (float,) + cast_map[float]
 
 try:
     cast_map[float] += (long,)

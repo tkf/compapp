@@ -69,6 +69,18 @@ class OfType(DataDescriptor):
     >>> mp.i
     0
 
+    Castable values are cast automatically:
+
+    >>> class MyParametric(Parametric):
+    ...     x = OfType(float)
+    ...
+    >>> mp = MyParametric()
+    >>> mp.x = 1                          # assigning an int...
+    >>> assert isinstance(mp.x, float)    # ... cast to a float
+    >>> import numpy
+    >>> mp.x = numpy.float16(2.0)         # assigning a numpy float...
+    >>> assert isinstance(mp.x, float)    # ... cast to a float
+
     """
 
     def __init__(self, *classes, **kwds):
