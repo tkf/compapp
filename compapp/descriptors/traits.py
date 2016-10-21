@@ -2,7 +2,7 @@ import copy
 import functools
 
 from ..base import Unspecified
-from ..core import private, DataDescriptor
+from ..core import cast_map, private, DataDescriptor
 from ..parser import parse_bool
 
 
@@ -37,7 +37,7 @@ class OfType(DataDescriptor):
     >>> MyParametric(i='a')
     Traceback (most recent call last):
       ...
-    ValueError: MyParametric.i only accepts type of int: got 'a'
+    ValueError: MyParametric.i only accepts type of int: got 'a' of type str
 
     `OfType` can take multiple classes:
 
@@ -46,10 +46,11 @@ class OfType(DataDescriptor):
     ...
     >>> mp = MyParametric()
     >>> mp.i = 'a'
-    >>> mp.i = 1j
+    >>> mp.i = 1j                          # doctest: +NORMALIZE_WHITESPACE
     Traceback (most recent call last):
       ...
     ValueError: MyParametric.i only accepts type of int, float or str: got 1j
+    of type complex
 
     It is an error to access unset an `OfType` attribute:
 
@@ -89,7 +90,12 @@ class OfType(DataDescriptor):
         self._allowed = value
 
     def verify(self, obj, value, myname=None):
-        if self.allowed and not isinstance(value, self.allowed):
+        for t in self.allowed:
+            if isinstance(value, t):
+                return value
+            if t in cast_map and isinstance(value, cast_map[t]):
+                return t(value)
+        if self.allowed:
             if isinstance(self.allowed, tuple):
                 if len(self.allowed) > 1:
                     classes = ', '.join(
@@ -100,11 +106,14 @@ class OfType(DataDescriptor):
             else:
                 classes = self.allowed.__name__
             raise ValueError(
-                "{0}.{1} only accepts type of {2}: got {3!r}".format(
+                "{0}.{1} only accepts type of {2}: got {3!r} of type {4}"
+                .format(
                     obj.__class__.__name__,
                     myname or self.myname(obj),
                     classes,
-                    value))
+                    value,
+                    type(value).__name__,
+                ))
         return value
 
     def get(self, obj):
@@ -160,7 +169,7 @@ class Required(DataDescriptor):
     >>> mp.i = '1'
     Traceback (most recent call last):
       ...
-    ValueError: MyParametric.i only accepts type of int: got '1'
+    ValueError: MyParametric.i only accepts type of int: got '1' of type str
     >>> mp.i = 1
     >>> has_required_attributes(mp)
     True
@@ -214,15 +223,17 @@ class List(OfType):
     >>> mp.anylist = [1]
     >>> mp.anylist = ['a']
     >>> mp.intlist = [1]
-    >>> mp.intlist = [0, 1, '2']
+    >>> mp.intlist = [0, 1, '2']            # doctest: +NORMALIZE_WHITESPACE
     Traceback (most recent call last):
       ...
     ValueError: MyParametric.intlist[2] only accepts type of int: got '2'
+    of type str
 
-    >>> mp.intlist = (1,)
+    >>> mp.intlist = (1,)                  # doctest: +NORMALIZE_WHITESPACE
     Traceback (most recent call last):
       ...
     ValueError: MyParametric.intlist only accepts type of list: got (1,)
+    of type tuple
     >>> mp.castlist = (1,)
     >>> mp.castlist
     [1]
@@ -270,14 +281,16 @@ class Dict(OfType):
     >>> mp = MyParametric()
     >>> mp.anydict = {'a': 1}
     >>> mp.strint = {'a': 1}
-    >>> mp.strint = {1: 1}
+    >>> mp.strint = {1: 1}                 # doctest: +NORMALIZE_WHITESPACE
     Traceback (most recent call last):
       ...
     ValueError: MyParametric.strint[...] only accepts type of str: got 1
-    >>> mp.strint = {'a': 'b'}
+    of type int
+    >>> mp.strint = {'a': 'b'}             # doctest: +NORMALIZE_WHITESPACE
     Traceback (most recent call last):
       ...
     ValueError: MyParametric.strint['a'] only accepts type of int: got 'b'
+    of type str
 
     """
 
@@ -332,10 +345,11 @@ class Optional(OfType):
     >>> MyParametric(j=2).params()
     {'j': 2}
     >>> assert MyParametric(i=1, j=2).params() == {'i': 1, 'j': 2}
-    >>> MyParametric(i='alpha')
+    >>> MyParametric(i='alpha')            # doctest: +NORMALIZE_WHITESPACE
     Traceback (most recent call last):
       ...
     ValueError: MyParametric.i only accepts type of int: got 'alpha'
+    of type str
 
     This is useful when writing `Parametric` interface to external
     library because you would like to avoid writing all default
