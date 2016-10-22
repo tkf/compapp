@@ -25,7 +25,7 @@ class Git(object):
     def _get_root(self):
         try:
             return self.git('rev-parse', '--show-toplevel').strip()
-        except subprocess.CalledProcessError:
+        except (subprocess.CalledProcessError, OSError):
             return None
 
     def revision(self):

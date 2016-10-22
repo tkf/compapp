@@ -106,6 +106,9 @@ class DirectoryDataStore(BaseDataStore):
 
     @property
     def dir(self):
+        """
+        Path to datastore directory (optional).
+        """
         if not self.on:
             return None
         try:

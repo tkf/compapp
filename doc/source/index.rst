@@ -11,6 +11,7 @@ Contents:
 .. toctree::
 
    features.rst
+   tutorial.rst
    examples.rst
    executables.rst
    api.rst

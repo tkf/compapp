@@ -77,18 +77,22 @@ provides a very easy way to configure such type checks.  The main idea
 implemented in `.Parametric` is that, for simple Python data types,
 the default values define required data type:
 
+>>> from compapp import Parametric
 >>> class MyParametric(Parametric):
 ...     i = 1
 ...     x = 2.0
->>> MyParametric(i=1.0)
+>>> MyParametric(i=1.0)          # doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
 Traceback (most recent call last):
     ...
-ValueError: i must be an int
->>> MyParametric(x='2.0')
+ValueError: Value 1.0 (type: float) cannot be assigned to the variable
+MyParametric.i (default: 1) which only accepts one of the following types:
+int, int16, ...
+>>> MyParametric(x='2.0')        # doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
 Traceback (most recent call last):
     ...
-ValueError: x must be a float
-
+ValueError: Value '2.0' (type: str) cannot be assigned to the variable
+MyParametric.x (default: 2.0) which only accepts one of the following types:
+float, float16, ...
 
 For more complex control, there are :term:`descriptors <descriptor>`
 such as `.Instance`, `.Required`, `.Optional`, etc.  Collection-type
