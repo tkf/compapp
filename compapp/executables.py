@@ -92,7 +92,7 @@ class Assembler(Executable):
     @property
     def argrange(self):
         """
-        Number of arguments of the `.run` method accept.
+        Number of arguments that the `.run` method accepts.
 
         >>> class MyComp00(Assembler):
         ...     def run(self):
