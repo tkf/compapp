@@ -39,8 +39,9 @@
      An owner class happened to be a subclass of `.Computer` is
      called an *owner app*.
 
-     .. todo:: Check if this terminology is compatible with the owner
-        argument of `object.__get__` etc. (for :term:`descriptor`).
+     (Side note: the term *owner* is from the interface of Python
+     :term:`descriptor`; the `object.__get__` method receives the
+     owner class as its last argument.)
 
    TBE
    to be extended
