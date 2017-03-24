@@ -293,3 +293,26 @@ def deepmixdicts(*dicts):
                 v = deepmixdicts(mixed.get(k, {}), v)
             mixed[k] = v
     return mixed
+
+
+def itervars(obj):
+    for name in dir(obj):
+        if name.startswith('_'):
+            continue
+        try:
+            yield name, getattr(obj, name)
+        except AttributeError:
+            continue
+
+
+def attrs_of(obj, type):
+    for _, val in itervars(obj):
+        if isinstance(val, type):
+            yield val
+
+
+def mixdicts(dicts):
+    mixed = {}
+    for d in dicts:
+        mixed.update(d)
+    return mixed

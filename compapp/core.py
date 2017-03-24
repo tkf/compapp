@@ -3,7 +3,7 @@ from __future__ import print_function
 import logging
 import weakref
 
-from .base import Unspecified, MultiException
+from .base import Unspecified, MultiException, itervars, attrs_of, mixdicts
 
 
 logger = logging.getLogger(__name__)
@@ -66,29 +66,6 @@ def simple_type_check(default, actual, errfmt, **fmtkwds):
     castablenames = ', '.join(c.__name__ for c in castables)
     kwds = dict(fmtkwds, actualtype=type(actual), **locals())
     raise ValueError(errfmt.format(**kwds))
-
-
-def itervars(obj):
-    for name in dir(obj):
-        if name.startswith('_'):
-            continue
-        try:
-            yield name, getattr(obj, name)
-        except AttributeError:
-            continue
-
-
-def attrs_of(obj, type):
-    for _, val in itervars(obj):
-        if isinstance(val, type):
-            yield val
-
-
-def mixdicts(dicts):
-    mixed = {}
-    for d in dicts:
-        mixed.update(d)
-    return mixed
 
 
 def automixin(owner, key, params):
