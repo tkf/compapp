@@ -120,6 +120,9 @@ def make_parser(doc=__doc__):
         '--pdb', dest='debugger', action='store_const', const='pdb',
     )
 
+    # Required for Python 3:
+    parser.set_defaults(func=lambda **_: parser.error('too few arguments'))
+
     subparsers = parser.add_subparsers()
 
     def subp(command, func):
