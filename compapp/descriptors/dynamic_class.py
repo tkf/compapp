@@ -74,11 +74,17 @@ def dynamic_class(path, prefix=None, **kwds):
     """
     Dynamic class loading helper.
 
+    .. hack to make it work in doctest:
+       >>> import mock
+       >>> __name__ = '{module name}'
+       >>> mod = sys.modules[__name__] = mock.Mock()
+       >>> mod.__name__ = __name__
+
     >>> from compapp import Parametric, dynamic_class
     >>> class MyApp(Parametric):
     ...     obj, path = dynamic_class('.ClassA', prefix=__name__, default={})
     ...
-    >>> class ClassA:
+    >>> class ClassA(object):
     ...     def __init__(self, params):
     ...         self.params = params
     ...
@@ -87,26 +93,29 @@ def dynamic_class(path, prefix=None, **kwds):
     ...
 
     .. hack to make it work in doctest:
-       >>> import sys
-       >>> mod = sys.modules[__name__]
        >>> mod.ClassA = ClassA
        >>> mod.ClassB = ClassB
+       >>> ClassA.__module__ = ClassB.__module__ = __name__
 
     >>> app = MyApp()
     >>> app.obj                                        # doctest: +ELLIPSIS
-    <....ClassA ... at 0x...>
+    <{module name}.ClassA object at 0x...>
     >>> app.obj.params
     {}
 
     >>> app2 = MyApp(obj={'a': 1}, path='.ClassB')
     >>> app2.obj                                       # doctest: +ELLIPSIS
-    <....ClassB ... at 0x...>
+    <{module name}.ClassB object at 0x...>
     >>> app2.obj.params
     {'a': 1}
 
+    >>> app3 = MyApp()
+    >>> app3.obj = ClassB({})
+    >>> app3.path
+    '{module name}.ClassB'
+
     .. undo the hack:
-       >>> del mod.ClassA
-       >>> del mod.ClassB
+       >>> del sys.modules[__name__]
 
     """
     if isinstance(path, type):
