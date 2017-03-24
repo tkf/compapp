@@ -99,3 +99,13 @@ Descriptors
    ~dynamic_class.dynamic_class
    ~dynamic_class.ClassPath
    ~dynamic_class.ClassPlaceholder
+
+
+Utilities
+=========
+
+.. currentmodule:: compapp
+
+.. autosummary::
+
+   ~interactive.setup_interactive
