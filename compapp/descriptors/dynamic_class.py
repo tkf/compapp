@@ -104,6 +104,21 @@ def dynamic_class(path, prefix=None, **kwds):
     """
     Dynamic class loading helper.
 
+    Parameters
+    ----------
+    path : `str` or `type`
+        The path to default class.  The actual class can also be passed.
+    prefix : `str` or `NoneType`
+        The module path at which the relative `path` is resolved.
+    default : `dict`
+        The default parameter that is passed to the `__init__` method
+        of the class at `path`.
+    isparam : bool
+        If `False`, do not include the class in parameter.
+
+    Examples
+    --------
+
     .. hack to make it work in doctest:
        >>> import mock
        >>> __name__ = '{module name}'
@@ -127,17 +142,26 @@ def dynamic_class(path, prefix=None, **kwds):
        >>> mod.ClassB = ClassB
        >>> ClassA.__module__ = ClassB.__module__ = __name__
 
+    An instance of a class is automatically loaded at ``app.obj``:
+
     >>> app = MyApp()
     >>> app.obj                                        # doctest: +ELLIPSIS
     <{module name}.ClassA object at 0x...>
     >>> app.obj.params
     {}
 
+    The class to be loaded can be changed dynamically by specifying
+    the ``path`` attribute/parameter.  The path can be full or
+    relative, if the `prefix` argument is specified.
+
     >>> app2 = MyApp(obj={'a': 1}, path='.ClassB')
     >>> app2.obj                                       # doctest: +ELLIPSIS
     <{module name}.ClassB object at 0x...>
     >>> app2.obj.params
     {'a': 1}
+
+    The object can also be set manually.  In that case, the
+    corresponding path would be set to the full dotted path.
 
     >>> app3 = MyApp()
     >>> app3.obj = ClassB({})
