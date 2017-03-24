@@ -51,10 +51,23 @@ class ClassPlaceholder(DataDescriptor):
                 .format(**locals()))
 
         newval = cls() if value is Unspecified else cls(value)
-        self.__set__(obj, newval)
+
+        # Set the instantiated newval now.  Calling
+        # DataDescriptor.__set__ instead of self.__set__ to avoid
+        # resetting ClassPath.
+        super(ClassPlaceholder, self).__set__(obj, newval)
+
         if isinstance(newval, Parameter):
             private(newval).set_context(obj, self.myname(obj, error=True))
         return newval
+
+    def __set__(self, obj, value):
+        super(ClassPlaceholder, self).__set__(obj, value)
+        if isinstance(value, dict):
+            return
+        cls = type(value)
+        path = sys.modules[cls.__module__].__name__ + '.' + cls.__name__
+        self.cpath.__set__(obj, path)
 
 
 def dynamic_class(path, prefix=None, **kwds):

@@ -20,11 +20,13 @@ class DynamicParam(Parametric):
 def test_default():
     par = DynamicParam()
     assert isinstance(par.sub, SubparamA)
+    assert par.sub_class == '.SubparamA'
 
 
 def test_dynamics():
     par = DynamicParam(sub_class='.SubparamB')
     assert isinstance(par.sub, SubparamB)
+    assert par.sub_class == '.SubparamB'
 
 
 def test_link():
@@ -55,3 +57,9 @@ def test_error_on_reset():
     par.sub_class = '.SubparamB'
     with pytest.raises(ValueError):
         par.sub
+
+
+def test_direct_set():
+    par = DynamicParam()
+    par.sub = SubparamB()
+    assert par.sub_class.endswith('.SubparamB')
