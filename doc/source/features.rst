@@ -47,8 +47,6 @@ in this document) is hard.
        compapp provides :ref:`command line interface <cli>` to help
        house-keeping.
 
-.. todo:: How should I support "in-memory" datastore?
-
 
 Parameter management
 ====================
@@ -57,9 +55,6 @@ Simulations and data analysis require various parameters for each run.
 Those parameters often have nested sub-parameters reflecting
 sub-simulations and sub-analysis.  compapp naturally supports such
 nested parameters using :term:`nested class`.  See `.Parametric`.
-
-.. todo:: Explain data file mixin also.  But I should provide it in a
-   separated module.
 
 When parameters have deeply nested structure, it is hard to run a
 simulation or analysis with slightly different parameters.
