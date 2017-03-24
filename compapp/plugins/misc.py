@@ -218,7 +218,7 @@ class Debug(Plugin):
     ...     def run(self):
     ...         tmp = list(range(3))
     ...         self.dbg.tmp = tmp
-    ...         self.result = [x / len(tmp) for x in tmp]
+    ...         self.results.div = [x / len(tmp) for x in tmp]
     ...
     >>> app = MySimulator()
     >>> app.log.level = 'DEBUG'

@@ -28,7 +28,7 @@ class Greeter(Computer):
     message = 'hello'
 
     def run(self):
-        self.isrun = True
+        self.results.isrun = True
 
         for lvl in LEVELS:
             getattr(self.log, lvl.lower())(self.message)

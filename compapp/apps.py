@@ -133,6 +133,7 @@ class Memoizer(Computer):
     >>> class UpStream1(Memoizer):
     ...
     ...     parameter = 1
+    ...     isrun = None
     ...
     ...     def run(self):
     ...         self.results.data = 'result of intense computation'

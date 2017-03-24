@@ -7,20 +7,20 @@ ORDER = []
 
 class AlwaysReady(Assembler):
     def run(self):
-        self.done = True
+        self.results.done = True
         ORDER.append(self.__class__)
 
 
 class DependsOnAlwaysReady(AlwaysReady):
-    alwaysready_done = Link('..alwaysready.done')
+    alwaysready_done = Link('..alwaysready.results.done')
 
 
 class DependsOnDepAR(AlwaysReady):
-    depar_done = Link('..depar.done')
+    depar_done = Link('..depar.results.done')
 
 
 class DependsOnTwo(DependsOnDepAR):
-    depdepar_done = Link('..depdepar.done')
+    depdepar_done = Link('..depdepar.results.done')
 
 
 class RootApp(Assembler):

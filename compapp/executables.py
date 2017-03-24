@@ -5,10 +5,11 @@ Executable subclasses.
 import inspect
 
 from .base import DictObject
-from .core import Executable
+from .core import Executable, Defer
 from .descriptors import OfType, Choice, Link
 from .plugins import PluginWrapper, Figure, \
     SubDataStore, DirectoryDataStore
+from .strict import MixinStrict
 
 
 class MagicPlugins(PluginWrapper):
@@ -24,11 +25,13 @@ class MagicPlugins(PluginWrapper):
     )
 
 
-class Assembler(Executable):
+class Assembler(MixinStrict, Executable):
 
     """
     `.Executable` bundled with useful plugins.
     """
+
+    defer = OfType(Defer, isparam=False)
 
     mode = Choice('run', 'load', 'auto', isparam=False)
     """

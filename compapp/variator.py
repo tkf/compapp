@@ -3,7 +3,7 @@ import itertools
 from .base import dotted_to_nested, deepmixdicts
 from .core import Parametric
 from .apps import Computer
-from .descriptors import Dict, Choice, dynamic_class
+from .descriptors import Dict, OfType, Choice, dynamic_class
 
 
 class ParamBuilder(Parametric):
@@ -43,6 +43,7 @@ class Variator(Computer):
     processes = -1
     executor = Choice('thread', 'process', 'dumb')
     datastore_format = '{}'
+    variants = OfType(list, isparam=False)
 
     def run(self):
         processes = None if self.processes == -1 else self.processes
