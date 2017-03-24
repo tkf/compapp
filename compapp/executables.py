@@ -9,7 +9,6 @@ from .core import Executable, Defer
 from .descriptors import OfType, Choice, Link
 from .plugins import PluginWrapper, Figure, \
     SubDataStore, DirectoryDataStore
-from .strict import MixinStrict
 
 
 class MagicPlugins(PluginWrapper):
@@ -25,7 +24,7 @@ class MagicPlugins(PluginWrapper):
     )
 
 
-class Assembler(MixinStrict, Executable):
+class Assembler(Executable):
 
     """
     `.Executable` bundled with useful plugins.

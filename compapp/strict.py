@@ -1,4 +1,4 @@
-from . import core
+from .base import itervars
 
 
 class MixinStrict(object):
@@ -19,7 +19,7 @@ class MixinStrict(object):
             pass
 
         names = self.paramnames()
-        names.extend(name for name, _ in core.itervars(self.__class__))
+        names.extend(name for name, _ in itervars(self.__class__))
         names = set(names)
 
         self.__attrnames_cached = names

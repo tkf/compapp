@@ -4,6 +4,7 @@ from ..datastores import DirectoryDataStore
 
 class WithStore(Executable):
     datastore = DirectoryDataStore
+    exists = None
 
     def run(self):
         if self.datastore.dir is None:

@@ -4,6 +4,7 @@ import logging
 import weakref
 
 from .base import Unspecified, MultiException, itervars, attrs_of, mixdicts
+from .strict import MixinStrict
 
 
 logger = logging.getLogger(__name__)
@@ -544,7 +545,7 @@ class Defer(object):
         MultiException.run(callbacks)
 
 
-class Executable(Parametric):
+class Executable(MixinStrict, Parametric):
 
     """
     The base class supporting execution and plugin mechanism.
@@ -567,6 +568,8 @@ class Executable(Parametric):
     Run: MyExec
 
     """
+
+    defer = None  # FIXME: use OfType(Defer, isparam=False)
 
     def __init__(self, *args, **kwds):
         super(Executable, self).__init__(*args, **kwds)

@@ -10,6 +10,7 @@ from ..core import Executable, Plugin
 
 
 class MixinMockHooks(object):
+    rootmock = None
 
     def __init__(self, *args, **kwds):
         super(MixinMockHooks, self).__init__(*args, **kwds)
