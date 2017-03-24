@@ -59,10 +59,6 @@ class Computer(Assembler):
 
             myapp.py --simulator:file=param.yaml --plotter:file=plotter.json
 
-        Loading subset of data using JSON pointer::
-
-            myapp.py --simulator:file=param.yaml#/param/simulator
-
         Literal eval (``:leval=`` modifier)::
 
             myapp.py --alpha:leval='2**3'
