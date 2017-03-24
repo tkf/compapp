@@ -4,9 +4,9 @@ import logging
 import logging.config
 import weakref
 
-from ..base import Unspecified
-from ..core import simple_types, attrs_of, \
-    call_plugins, private, Plugin, Executable
+from ..base import Unspecified, attrs_of
+from ..core import simple_types, private
+from ..interface import Plugin, Executable, call_plugins
 from ..descriptors import Link, Delegate, Or, Choice, OfType, List, Dict
 
 

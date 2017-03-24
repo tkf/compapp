@@ -1,7 +1,7 @@
 import json
 
 from ..descriptors import Delegate
-from ..core import Plugin
+from ..interface import Plugin
 from ..utils.files import safewrite
 
 

@@ -6,7 +6,7 @@ except ImportError:
 import pytest
 
 from ..base import MultiException
-from ..core import Executable, Plugin
+from ..interface import Executable, Plugin
 
 
 class MixinMockHooks(object):

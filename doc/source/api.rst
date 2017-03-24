@@ -19,17 +19,22 @@ Core
 Executables
 ===========
 
+.. currentmodule:: compapp.interface
+
+.. autosummary::
+
+   Executable
+   Executable.prepare
+   Executable.run
+   Executable.save
+   Executable.load
+   Executable.finish
+   Executable.execute
+
 .. currentmodule:: compapp
 
 .. autosummary::
 
-   core.Executable
-   core.Executable.prepare
-   core.Executable.run
-   core.Executable.save
-   core.Executable.load
-   core.Executable.finish
-   core.Executable.execute
    executables.Loader
    executables.Plotter
    apps
@@ -41,7 +46,7 @@ Executables
 Plugins
 =======
 
-.. currentmodule:: compapp.core
+.. currentmodule:: compapp.interface
 
 .. autosummary::
 

@@ -1,4 +1,4 @@
-from ...core import Executable
+from ...interface import Executable
 from ..datastores import DirectoryDataStore
 
 

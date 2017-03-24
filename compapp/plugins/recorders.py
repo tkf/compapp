@@ -4,7 +4,8 @@ import os
 import sys
 
 from ..base import setnestedattr, MultiException
-from ..core import basic_types, private, Plugin
+from ..core import basic_types, private
+from ..interface import Plugin
 from .misc import real_owner
 
 

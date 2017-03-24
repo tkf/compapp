@@ -3,7 +3,8 @@ import hashlib
 import json
 import os
 
-from ..core import private, Plugin
+from ..core import private
+from ..interface import Plugin
 from ..descriptors import Link, OwnerName
 
 

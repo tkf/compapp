@@ -3,7 +3,7 @@ import os
 import sys
 
 from .. import __version__
-from ..core import Plugin
+from ..interface import Plugin
 from ..descriptors import Link, Root
 from .misc import real_owner
 

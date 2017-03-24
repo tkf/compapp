@@ -2,7 +2,7 @@ import os
 import subprocess
 import sys
 
-from ..core import Plugin
+from ..interface import Plugin
 from ..descriptors import Link
 from .misc import real_owner
 

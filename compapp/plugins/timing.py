@@ -4,7 +4,7 @@ try:
 except ImportError:
     resource = None
 
-from ..core import Plugin
+from ..interface import Plugin
 from ..descriptors import Link
 
 _utc_zero = datetime.datetime.utcfromtimestamp(0)
