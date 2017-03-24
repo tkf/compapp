@@ -1,3 +1,21 @@
+"""
+Descriptors for dynamic class loading
+=====================================
+
+Implementation details
+----------------------
+
+`dynamic_class` works by defining a pair of descriptors for holding
+"class path" (`ClassPath`) and the instance of the class
+(`ClassPlaceholder`).  Those descriptors make sure that they are
+consistent; changing `ClassPath` "sets" the class of the objects at
+`ClassPlaceholder` and setting the instance directly at
+`ClassPlaceholder` changes `ClassPath`.  Accessing the value at
+`ClassPlaceholder` when it is inconsistent with `ClassPath` raises a
+`ValueError`.
+
+"""
+
 import sys
 
 from ..core import Unspecified, DataDescriptor, private, Parameter
@@ -5,6 +23,10 @@ from ..utils.importer import import_object
 
 
 class ClassPath(DataDescriptor):
+
+    """
+    Class path descriptor that imports specified class on change.
+    """
 
     def __init__(self, default, prefix=None):
         super(ClassPath, self).__init__(default=default)
@@ -26,6 +48,14 @@ class ClassPath(DataDescriptor):
 
 
 class ClassPlaceholder(DataDescriptor):
+
+    """
+    Placeholder for an instance of the class specified by `.ClassPath`.
+
+    The actual instantiation process is delayed until it is accessed
+    (i.e., `__get__` method is called).
+
+    """
 
     def __init__(self, cpath, **kwds):
         super(ClassPlaceholder, self).__init__(**kwds)
