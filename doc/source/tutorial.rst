@@ -66,7 +66,8 @@ directory:
 True
 
 In interactive environments, the figures are also shown via default
-matplotlib backend (e.g., as inline figures in Jupyter notebook).
+matplotlib backend (e.g., as inline figures in Jupyter/IPython
+notebook), provided that `.setup_interactive` is called first.
 
 
 Composition of computations
