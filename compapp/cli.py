@@ -87,7 +87,6 @@ def cli_run(path, args):
     cls = import_appclass(path)
     app = cls()
     app.cli(args)
-    return app
 
 
 def cli_mrun(path, args):
@@ -103,7 +102,6 @@ def cli_mrun(path, args):
     classpath = cls.__module__ + '.' + cls.__name__
     app = Variator(classpath=classpath)
     app.cli(args)
-    return app
 
 
 def make_parser(doc=__doc__):
@@ -176,4 +174,4 @@ def main(args=None):
 
 
 if __name__ == '__main__':
-    app = main()
+    main()
