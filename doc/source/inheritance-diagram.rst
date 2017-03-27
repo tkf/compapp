@@ -6,7 +6,7 @@
 
 .. inheritance-diagram::
    compapp.core.Parametric
-   compapp.core.Executable
+   compapp.interface.Executable
    compapp.executables.Plotter
    compapp.apps.Computer
    compapp.apps.Memoizer
