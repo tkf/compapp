@@ -405,6 +405,12 @@ class Figure(Plugin):
         self._figures = {}
         self._num = 0
 
+    def register(self, fig, name=None):
+        """
+        Register `fig` so that it is automatically saved, showed and closed.
+        """
+        self._set_fig(name, fig)
+
     def _set_fig(self, name, fig):
         from matplotlib import pyplot
 
