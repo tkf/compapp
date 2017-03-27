@@ -40,7 +40,9 @@ def import_appclass(path, supcls=Computer):
         return import_appclass(_guess_module(path), supcls=supcls)
 
     candidates = []
-    for _, can in vars(cls).items():
+    for name, can in vars(cls).items():
+        if name == 'main' and issubclass(can, supcls):
+            return can
         if not (isinstance(can, type) and issubclass(can, supcls)):
             continue
         try:
@@ -75,6 +77,10 @@ def cli_run(path, args):
 
       run compapp.samples.simple_plots.MyApp
       run compapp.samples.simple_plots
+
+    If there are multiple classes, a "main" class for a module can be
+    declared simply by setting it to a variable called ``main``, i.e.,
+    by ``main = MyApp``.
 
     When ``A/B/C/D.py`` is passed as `path` and ``A/B/`` (say) is a
     project root, i.e., there is a ``A/B/setup.py`` file, then it is
