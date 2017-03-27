@@ -1,4 +1,4 @@
-import datetime
+import time
 try:
     import resource
 except ImportError:
@@ -6,24 +6,6 @@ except ImportError:
 
 from ..interface import Plugin
 from ..descriptors import Link
-
-_utc_zero = datetime.datetime.utcfromtimestamp(0)
-
-
-def unixtimenow():
-    """
-    Return current Unix time as a float.
-
-    Unix time (aka POSIX time or Epoch time) is defined as:
-
-      the number of seconds that have elapsed since 00:00:00
-      Coordinated Universal Time (UTC), Thursday, 1 January 1970, not
-      counting leap seconds
-
-      --- https://en.wikipedia.org/wiki/Unix_time
-
-    """
-    return (datetime.datetime.utcnow() - _utc_zero).total_seconds()
 
 
 def _getrusage_self():
@@ -42,7 +24,7 @@ else:
 
 def gettimings():
     return dict(
-        unixtime=unixtimenow(),
+        time=time.time(),
         rusage=getrusage_self(),
     )
 
@@ -66,7 +48,7 @@ class RecordTiming(Plugin):
     ... - timing['pre']['rusage']['ru_utime']
     ... - timing['pre']['rusage']['ru_stime']) < 1.5
     True
-    >>> 0.5 < timing['post']['unixtime'] - timing['pre']['unixtime'] < 1.5
+    >>> 0.5 < timing['post']['time'] - timing['pre']['time'] < 1.5
     True
 
     """
