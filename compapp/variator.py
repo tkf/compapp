@@ -8,14 +8,15 @@ from .descriptors import Dict, OfType, Choice, dynamic_class
 
 class ParamBuilder(Parametric):
 
+    choices = Dict(str, (list, tuple), default={})
     ranges = Dict(str, (list, tuple), default={})
     linspaces = Dict(str, (list, tuple), default={})
     logspaces = Dict(str, (list, tuple), default={})
 
     def build_params(self):
         import numpy
-        names = []
-        values = []
+        names = list(self.choices)
+        values = [self.choices[k] for k in names]
         for key, args in self.ranges.items():
             names.append(key)
             values.append(numpy.arange(*args))
@@ -27,6 +28,14 @@ class ParamBuilder(Parametric):
             values.append(numpy.logspace(*args))
         return (dotted_to_nested(dict(zip(names, xs)))
                 for xs in itertools.product(*values))
+
+    def keys(self):
+        return itertools.chain(
+            self.choices,
+            self.ranges,
+            self.linspaces,
+            self.logspaces,
+        )
 
 
 def execute(arg):
