@@ -1,8 +1,13 @@
 Base classes for simulation/analysis "apps"
 ===========================================
 
-|docs| |build-status| |coveralls|
+|pypi| |docs| |build-status| |coveralls|
 
+
+.. |pypi|
+   image:: https://badge.fury.io/py/compapp.svg
+   :target: https://badge.fury.io/py/compapp
+   :alt: Python Package Index
 
 .. |docs|
    image:: https://readthedocs.org/projects/compapp/badge/?version=latest
