@@ -1,1 +1,4 @@
+matplotlib
+numpy
+sphinx
 sphinx-better-theme
