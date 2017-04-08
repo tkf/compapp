@@ -1,17 +1,16 @@
 from setuptools import setup, find_packages
 
-import compapp
-
 setup(
     name='compapp',
-    version=compapp.__version__,
-    packages=find_packages(),
-    author=compapp.__author__,
+    version='0.0.0',
+    packages=find_packages('src'),
+    package_dir={'': 'src'},
+    author='Takafumi Arakaki',
     author_email='aka.tkf@gmail.com',
     # url='https://github.com/tkf/compapp',
-    license=compapp.__license__,
+    # license=,
     # description='compapp - THIS DOES WHAT',
-    long_description=compapp.__doc__,
+    long_description=open("README.rst").read(),
     # keywords='KEYWORD, KEYWORD, KEYWORD',
     classifiers=[
         "Development Status :: 3 - Alpha",
