@@ -11,3 +11,5 @@ def cleancwd(tmpdir, request):
     @request.addfinalizer
     def goback():
         os.chdir(origdir)
+
+collect_ignore = ["__main__.py"]

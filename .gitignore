@@ -1,5 +1,4 @@
 *.pyc
-/*.egg-info
 /.cache
 /.tox
 /MANIFEST
@@ -7,3 +6,4 @@
 /doc/build
 /doc/source/api
 /doc/source/examples
+/src/*.egg-info
