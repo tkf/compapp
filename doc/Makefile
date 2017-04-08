@@ -60,9 +60,9 @@ api:
 	-rm -rf source/api
 	$(MAKE) source/api
 
-source/api: ../compapp
+source/api: ../src/compapp
 	$(SPHINXAPIDOC) --force --separate --private -o $@ $< \
-		../compapp/__main__.py
+		../src/compapp/__main__.py
 	touch $@
 
 examples:
@@ -71,7 +71,7 @@ examples:
 
 source/examples:
 	mkdir source/examples
-	ln -s ../../../compapp/samples source/examples/code
+	ln -s ../../../src/compapp/samples source/examples/code
 	source/genexamples.py
 
 html: source/api source/examples
