@@ -12,6 +12,8 @@ matrix:
     - python: "3.5"
       env: TOXENV=doc
 before_install:
-  - pip install --quiet tox-travis
+  - pip install --quiet tox-travis coveralls
 script:
-  - tox
+  - tox -- --cov compapp
+after_success:
+  - coveralls
