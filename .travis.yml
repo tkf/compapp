@@ -4,6 +4,13 @@ python:
   - "2.7"
   - "3.5"
   - "3.6"
+env:
+  -
+  - TOXENV=doc
+matrix:
+  exclude:
+    - python: "3.5"
+      env: TOXENV=doc
 before_install:
   - pip install --quiet tox-travis
 script:
