@@ -1,4 +1,3 @@
-import copy
 import pickle
 import pytest
 
@@ -256,7 +255,7 @@ def test_file_modifier_for_level1_dict(paramfile_j3):
 
     app = MyApp()
     app.cli(['--d:file', paramfile_j3.strpath])
-    assert app.params() == dict(d=dict(i=1, j=3))
+    assert app.params() == dict(d=dict(j=3))
 
 
 def test_file_modifier_for_level2_dict(paramfile_j3):
@@ -266,7 +265,7 @@ def test_file_modifier_for_level2_dict(paramfile_j3):
 
     app = MyApp()
     app.cli(['--sub.d:file', paramfile_j3.strpath])
-    assert app.sub.params() == dict(d=dict(i=1, j=3))
+    assert app.sub.params() == dict(d=dict(j=3))
 
 
 def test_params_option_one_file(paramfile_j3):

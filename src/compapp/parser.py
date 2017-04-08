@@ -3,8 +3,8 @@ import ast
 import os
 from collections import namedtuple
 
-from .base import setnestedattr, Unspecified
 from .core import simple_types
+from .setters import rec_setattr
 
 Option = namedtuple('Option', ['lhs', 'rhs', 'modifier'])
 
@@ -99,14 +99,6 @@ def parse_value(holder, name, value):
     return value
 
 
-def assign_to_attr(obj, attr, value):
-    par = getattr(obj, attr, Unspecified)
-    if par is not Unspecified and isinstance(value, dict):
-        setnestedattr(par, value)
-    else:
-        setattr(obj, attr, value)
-
-
 def assign_option(obj, lhs, rhs):
     try:
         ctx = lhs.ctx
@@ -119,7 +111,7 @@ def assign_option(obj, lhs, rhs):
     if isinstance(node, ast.Expr):
         node = node.value
     if isinstance(node, ast.Name):
-        assign_to_attr(obj, node.id, parse_value(obj, node.id, rhs))
+        rec_setattr(obj, node.id, parse_value(obj, node.id, rhs))
         return
 
     root = node
@@ -140,7 +132,7 @@ def assign_option(obj, lhs, rhs):
                   dict(self=obj))
 
     if isinstance(root, ast.Attribute):
-        assign_to_attr(holder, root.attr, parse_value(holder, root.attr, rhs))
+        rec_setattr(holder, root.attr, parse_value(holder, root.attr, rhs))
     elif isinstance(root, ast.Subscript):
         idx = ast.literal_eval(root.slice.value)
         holder[idx] = rhs

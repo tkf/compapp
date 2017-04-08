@@ -11,11 +11,12 @@ Application base classes.
 import pprint
 import sys
 
-from .base import deepmixdicts, setnestedattr
+from .base import deepmixdicts
 from .descriptors import Choice
 from .executables import Assembler
 from .parser import make_parser, process_assignment_options, parseargs, \
     load_any
+from .setters import rec_setattrs
 
 
 def print_full_help(app):
@@ -81,7 +82,7 @@ class Computer(Assembler):
             print_full_help(self)
             sys.exit()
         if ns.params:
-            setnestedattr(self, deepmixdicts(*map(load_any, ns.params)))
+            rec_setattrs(self, deepmixdicts(*map(load_any, ns.params)))
         process_assignment_options(self, opts)
         self.execute(*poss)
         return self

@@ -3,9 +3,10 @@ import json
 import os
 import sys
 
-from ..base import setnestedattr, MultiException
+from ..base import MultiException
 from ..core import basic_types, private
 from ..interface import Plugin
+from ..setters import rec_setattrs
 from .misc import real_owner
 
 
@@ -286,4 +287,4 @@ class DumpParameters(Plugin):
             return
         with open(owner.datastore.path('params.json')) as file:
             data = json.load(file)
-        setnestedattr(owner, data)  # FIXME: use emptydict=True
+        rec_setattrs(owner, data)
