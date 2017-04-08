@@ -1,5 +1,6 @@
 *.pyc
 /.cache
+/.coverage
 /.tox
 /MANIFEST
 /dist

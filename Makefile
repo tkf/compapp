@@ -6,6 +6,13 @@ PROJECT = compapp
 test: inject-readme
 	tox
 
+test-cov: test-cov-py27 test-cov-py36
+
+test-cov-py27 test-cov-py36: \
+test-cov-%: inject-readme
+	tox -e $* -- --cov compapp --cov-report term \
+		--cov-report html:$(PWD)/.tox/$*/tmp/cov_html
+
 clean: clean-pycache
 	rm -rf src/*.egg-info .tox MANIFEST
 
