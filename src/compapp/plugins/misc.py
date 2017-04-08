@@ -1,5 +1,6 @@
 import copy
 import itertools
+import os
 import logging
 import logging.config
 import weakref
@@ -155,15 +156,25 @@ class Logger(Plugin):
         self.configurator.add_handlers(self.logger, handlers)
 
     def configure(self):
+        messages = []
         handlers = copy.deepcopy(self.handlers)
         is_writable = (hasattr(self, 'datastore') and
                        self.datastore.is_writable())
         for key, hndlr in list(handlers.items()):
             if hndlr.pop('datastore', False):
                 if is_writable:
-                    hndlr['filename'] = self.datastore.path(hndlr['filename'])
-                else:
-                    del handlers[key]
+                    filename = self.datastore.path(hndlr['filename'],
+                                                   mkdir=False)
+                    if not os.path.exists(filename) or \
+                            os.access(filename, os.W_OK):
+                        hndlr['filename'] = \
+                            self.datastore.path(hndlr['filename'])
+                        continue
+                    messages.append(
+                        "Handler {key} cannot be configured since "
+                        " {filename} is not writable.".format(
+                            key=key, filename=filename))
+                del handlers[key]
 
         self.configurator = logging.config.DictConfigurator(dict(
             version=1,
@@ -172,6 +183,8 @@ class Logger(Plugin):
             disable_existing_loggers=False,
         ))
         self.configurator.configure()
+        for m in messages:
+            self.warn(m)
 
     def should_configure(self):
         if self.ownconfig == 'auto':

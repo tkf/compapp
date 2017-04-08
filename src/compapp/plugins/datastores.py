@@ -101,6 +101,7 @@ class DirectoryDataStore(BaseDataStore):
 
     _parent = Link('...datastore')
     _ownername = OwnerName()
+    _should_load = Link('..should_load')
     overwrite = True
     clear_before_run = True
     on = True
@@ -134,9 +135,16 @@ class DirectoryDataStore(BaseDataStore):
         return self.dir and iswritable(self.dir)
 
     def prepare(self):
-        if hasattr(self, '_dir') and not iswritable(self._dir):
-            raise RuntimeError("Directory {0} is not writable."
-                               .format(self._dir))
+        if hasattr(self, '_dir'):
+            if self._should_load():
+                if not self._dir:
+                    raise RuntimeError("Directory is not set.")
+                elif not os.path.exists(self._dir):
+                    raise RuntimeError("Directory {0} does not exist."
+                                       .format(self._dir))
+            elif not iswritable(self._dir):
+                raise RuntimeError("Directory {0} is not writable."
+                                   .format(self._dir))
 
     def path(self, *args, **kwds):
         """
