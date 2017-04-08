@@ -96,7 +96,7 @@ class Executable(MixinStrict, Parametric):
 
     def prepare(self):
         """
-        |TO BE EXTENDED| Do anything to be done before `run`.
+        |TO BE EXTENDED| Prepare for `run`/`load`; e.g., execute upstreams.
         """
 
     def run(self, *args):
