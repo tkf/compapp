@@ -1,5 +1,7 @@
-# [[[cog import cog; cog.outl('"""\n%s\n"""' % file('../README.rst').read())]]]
-# [[[end]]]
+"""
+Bases classes for simulation/analysis "apps"
+============================================
+"""
 
 __version__ = '0.0.0'
 __author__ = 'Takafumi Arakaki'
