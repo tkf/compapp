@@ -6,16 +6,15 @@ from ..setters import rec_setattrs
 
 
 class MyApp(Computer):
-    dynamic, classpath = dynamic_class('.ClassA', prefix=__name__, default={})
+    dynamic, classpath = dynamic_class('.ClassA', prefix=__name__)
 
 
-class ClassA(object):
-    def __init__(self, params):
-        self.params = params
+class ClassA(Computer):
+    x = 0
 
 
 class ClassB(ClassA):
-    pass
+    x = 2
 
 
 def test_subs_dynamic_class():
