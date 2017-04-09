@@ -470,7 +470,7 @@ class Defer(object):
 
     >>> defer.call()
 
-    Of coerce, decorator syntax is not mandatory:
+    Of course, decorator syntax is not mandatory:
 
     >>> defer('x:', 1)(print)                          # doctest: +ELLIPSIS
     <function ...>
