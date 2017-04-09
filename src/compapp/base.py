@@ -245,10 +245,19 @@ def itervars(obj):
             continue
 
 
-def attrs_of(obj, type):
-    for _, val in itervars(obj):
-        if isinstance(val, type):
-            yield val
+def props_of(obj, _type):
+    """
+    Yield attributes of type `_type` which already exist at the "class-level".
+    """
+    # Note: DON'T access attributes of `self` directly; otherwise, it
+    # may invoke `ClassPlaceholder.__get__` and make it impossible to
+    # load app with `dynamic_class`.  See `test_load_dynamic_class`
+    # for an example of such case.
+    cls = type(obj)
+    for name in dir(cls):
+        prop = getattr(cls, name)
+        if isinstance(prop, type) and issubclass(prop, _type):
+            yield getattr(obj, name)
 
 
 def mixdicts(dicts):

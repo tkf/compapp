@@ -5,7 +5,7 @@ import logging
 import logging.config
 import weakref
 
-from ..base import Unspecified, attrs_of
+from ..base import Unspecified, props_of
 from ..core import simple_types, private
 from ..interface import Plugin, Executable, call_plugins
 from ..descriptors import Link, Delegate, Or, Choice, OfType, List, Dict
@@ -577,7 +577,7 @@ class AutoUpstreams(Plugin):
 
     def prepare(self):
         owner = private(self).owner
-        executables = list(attrs_of(owner, Executable))
+        executables = list(props_of(owner, Executable))
         while executables:
             for i, excbl in enumerate(executables):
                 if self.is_runnable(excbl):

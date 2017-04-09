@@ -1,6 +1,6 @@
 from __future__ import print_function
 
-from .base import MultiException
+from .base import MultiException, props_of
 from .core import Parametric, Defer
 from .descriptors import OfType
 from .strict import MixinStrict
@@ -121,15 +121,8 @@ class Executable(MixinStrict, Parametric):
 
 
 def call_plugins(self, method):
-    # Note: DON'T access attributes of `self` directly; otherwise, it
-    # may invoke `ClassPlaceholder.__get__` and make it impossible to
-    # load app with `dynamic_class`.  See `test_load_dynamic_class`
-    # for an example of such case.
-    cls = type(self)
-    for name in dir(cls):
-        prop = getattr(cls, name)
-        if isinstance(prop, type) and issubclass(prop, Plugin):
-            getattr(getattr(self, name), method)()
+    for plugin in props_of(self, Plugin):
+        getattr(plugin, method)()
 
 
 class Plugin(Parametric):
