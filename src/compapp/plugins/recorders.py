@@ -119,6 +119,13 @@ class DumpResults(Plugin):
         recorded in `.defer`.
 
         """
+        self._wait_bg()
+        self.save_now()
+
+    def save_now(self):
+        """
+        Save results to disk immediately.
+        """
         owner = private(self).owner
         if not owner.datastore.exists():
             return
@@ -210,6 +217,29 @@ class DumpResults(Plugin):
             for key in store.keys():
                 yield key.lstrip('/'), store[key]
     # http://pandas.pydata.org/pandas-docs/stable/io.html#hdf5-pytables
+
+    def save_maybe(self):
+        """
+        Save results in a background thread, if the thread is not busy.
+        """
+        if not private(self).owner.datastore.exists():
+            return
+        if not hasattr(self, '_bg_pool'):
+            from multiprocessing.dummy import Pool
+            self._bg_pool = Pool(1)
+        if not hasattr(self, '_bg_result') or \
+                self._bg_result.ready() and self._bg_result.successful():
+            self._bg_result = self._bg_pool.apply_async(self.save_now)
+
+    def _wait_bg(self):
+        if not private(self).owner.datastore.exists():
+            return
+        if hasattr(self, '_bg_result'):
+            try:
+                self._bg_result.get()
+            finally:
+                self._bg_pool.close()
+                self._bg_pool.join()
 
 
 class DumpParameters(Plugin):
