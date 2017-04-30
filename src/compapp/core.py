@@ -487,18 +487,18 @@ class Defer(object):
     One category can be run by specifying ``key`` argument of `.call`.
 
     >>> defer.call(('cat', 1))
-    x = 1
     y = 1
+    x = 1
 
     Calling without ``key`` argument means "call everything".  Note
     that the category 1 callbacks are not called below, since they
     were already called.
 
     >>> defer.call()
-    x = 0
-    y = 0
-    x = 2
     y = 2
+    x = 2
+    y = 0
+    x = 0
 
     """
 
@@ -541,4 +541,4 @@ class Defer(object):
                 else:
                     rest.append((k, f))
             self._callbacks[:] = rest
-        MultiException.run(callbacks)
+        MultiException.run(reversed(callbacks))

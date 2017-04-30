@@ -167,7 +167,7 @@ def test_plugin_hooks_two_errors_in_deferred_call():
     excbl.mockplugin.defer()(excbl.rootmock.mockplugin.defer.call2)
     with pytest.raises(MultiException) as excinfo:
         excbl.execute()
-    assert excinfo.value.errors[0].errors == [raised1, raised2]
+    assert excinfo.value.errors[0].errors == [raised2, raised1]
     assert excbl.rootmock.method_calls == [
         mock.call.prepare(),
         mock.call.mockplugin.prepare(),
@@ -179,6 +179,6 @@ def test_plugin_hooks_two_errors_in_deferred_call():
         mock.call.mockplugin.save(),
         mock.call.mockplugin.finish(),
         mock.call.finish(),
-        mock.call.mockplugin.defer.call1(),
         mock.call.mockplugin.defer.call2(),
+        mock.call.mockplugin.defer.call1(),
     ]
