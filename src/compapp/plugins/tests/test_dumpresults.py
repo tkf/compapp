@@ -6,6 +6,27 @@ from ... import Computer
 from ...testing import assert_equal
 
 
+@pytest.mark.parametrize('data', [
+    numpy.arange(3),
+    pandas.DataFrame([1]),
+])
+def test_save_load(data, tmpdir):
+    class App(Computer):
+        def run(self):
+            self.results.data = data
+
+    app = App()
+    app.datastore.dir = str(tmpdir)
+    app.execute()
+
+    loader = App()
+    loader.datastore.dir = app.datastore.dir
+    loader.mode = 'load'
+    loader.execute()
+    assert_equal(loader.results.data, data)
+    assert set(loader.results()) == {'data'}
+
+
 @pytest.mark.parametrize('results', [
     [dict(a=1), dict(a=2)],
     [dict(a=numpy.arange(3)), dict(a=numpy.arange(3) + 1)],
