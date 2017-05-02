@@ -8,7 +8,7 @@ from .misc import real_owner
 class RecordProgramInfo(Plugin):
     meta = Link('..meta')
 
-    def save(self):
+    def pre_run(self):
         cls = type(real_owner(self))
         self.meta.record('programinfo', {
             'class': cls.__name__,

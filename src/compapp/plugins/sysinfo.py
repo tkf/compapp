@@ -12,7 +12,7 @@ class RecordSysInfo(Plugin):
     meta = Link('..meta')
     root = Root()
 
-    def save(self):
+    def pre_run(self):
         owner = real_owner(self)
         if owner is not self.root:
             return
