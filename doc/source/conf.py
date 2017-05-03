@@ -324,3 +324,44 @@ autodoc_default_flags = ['members', 'special-members']
 # -- Inheritance diagram ------------------------------------------------------
 
 inheritance_graph_attrs = dict(rankdir="TB")
+
+
+# -- Run custom pre-build commands -------------------------------------------
+
+def run_apidoc(_):
+    """
+    Run sphinx-apidoc
+
+    See:
+    http://www.sphinx-doc.org/en/stable/extdev/appapi.html
+    https://github.com/rtfd/readthedocs.org/issues/1139
+    """
+    from sphinx.apidoc import main
+    here = os.path.dirname(os.path.abspath(__file__))
+    root = os.path.dirname(os.path.dirname(here))
+    main(['--force', '--separate', '--private',
+          '--output-dir', os.path.join(here, 'api'),
+          # Module path:
+          os.path.join(root, 'src', 'compapp'),
+          # Exclude:
+          os.path.join(root, 'src', 'compapp', '__main__.py')])
+
+
+def run_genexamples(_):
+    """ Run ./genexamples.py to create examples/ """
+    here = os.path.dirname(os.path.abspath(__file__))
+    sys.path.insert(0, os.path.abspath(here))
+    from genexamples import main
+    link = os.path.join(here, 'examples', 'code')
+    target = os.path.join(os.path.pardir, os.path.pardir, os.path.pardir,
+                          'src', 'compapp', 'samples')
+    if not os.path.exists(os.path.dirname(link)):
+        os.makedirs(os.path.dirname(link))
+    if not os.path.exists(link):
+        os.symlink(target, link)
+    main([])
+
+
+def setup(app):
+    app.connect('builder-inited', run_apidoc)
+    app.connect('builder-inited', run_genexamples)
