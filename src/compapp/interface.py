@@ -121,7 +121,17 @@ class Executable(MixinStrict, Parametric):
 
 
 def call_plugins(self, method):
-    for plugin in props_of(self, Plugin):
+    from .plugins import BaseDataStore
+    from .plugins import Logger
+    order = {
+        BaseDataStore: 0,
+        Logger: 1,
+    }
+    # FIXME: Remove sorting or turn this into a public API.  This is a
+    # hack to ensure that datastore is available before any .prepare
+    # methods, specifically in Logger.prepare.
+    for plugin in sorted(props_of(self, Plugin),
+                         key=lambda plugin: order.get(type(plugin), 100)):
         getattr(plugin, method)()
 
 
