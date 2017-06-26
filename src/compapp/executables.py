@@ -82,12 +82,13 @@ class Assembler(Executable):
         """
         |TO BE EXTENDED| Return `True` if `self` is loadable.
 
-        Default implementation calls
-        `self.datastore.exists('params.json')
-        <.DirectoryDataStore.exists>`.
+        Default implementation returns the value of
+        `.datastore.is_loadable <.DirectoryDataStore.is_loadable>`
+        which reflects whether or not params.json exists in the
+        `.datastore.dir <.DirectoryDataStore.dir>`.
 
         """
-        return self.datastore.exists('params.json')
+        return self.datastore.is_loadable
 
     @property
     def argrange(self):

@@ -14,6 +14,7 @@
    nested class
    owner class
    owner app
+   owner
 
      Schematically,::
 
@@ -36,8 +37,9 @@
      - `SubSimulator` is a nested class of `MySimulator`.
      - `MySimulator` is a nested class of `MyApp`.
 
-     An owner class happened to be a subclass of `.Computer` is
-     called an *owner app*.
+     An owner class happened to be a subclass of `.Computer` is called
+     an *owner app*.  An instance of a owner class is simply called an
+     *owner*.
 
      (Side note: the term *owner* is from the interface of Python
      :term:`descriptor`; the `object.__get__` method receives the

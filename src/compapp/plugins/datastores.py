@@ -132,9 +132,34 @@ class DirectoryDataStore(BaseDataStore):
         self._dir = value
 
     def is_writable(self):
-        return self.dir and iswritable(self.dir)
+        """
+        Return true if `.dir` is writable and the owner is in the "run" mode.
+
+        It is checked whether the :term:`owner` is in the "run" mode
+        or in the "load" mode here, so that other plugins can avoid
+        overwriting the datastore in the "load" mode.
+
+        """
+        return self.dir and iswritable(self.dir) and not self._should_load()
+
+    # Note: self._should_load() invokes
+    # 1. <owner>.should_load() which in turn MAY invoke...
+    # 2. <owner>.is_loadable() which in turn accesses (by default)...
+    # 3. self.is_loadable
+
+    is_loadable = Link('._is_loadable')
+    """
+    True if `.dir` exists and meta information is stored in there.
+    """
+
+    def _set_is_loadable(self):
+        """
+        Check if `.dir` has enough files for loading.
+        """
+        self._is_loadable = self.exists('params.json')
 
     def prepare(self):
+        self._set_is_loadable()
         if hasattr(self, '_dir'):
             if self._should_load():
                 if not self._dir:
@@ -232,6 +257,7 @@ class SubDataStore(DirectoryDataStore):
     dir = Link('._parent.dir')
     _parent = Link('...datastore')
     _ownername = OwnerName()
+    _should_load = Link('._parent._should_load')
     sep = '-'
 
     def path(self, *args, **kwds):
@@ -302,3 +328,6 @@ class HashDataStore(DirectoryDataStore):
     def prepare(self):
         digest = self.ownerhash()
         self.dir = os.path.join(self.basedir, digest[:2], digest[2:])
+
+        # Now code requiring `.dir` can be executed:
+        self._set_is_loadable()
