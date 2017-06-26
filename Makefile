@@ -20,7 +20,7 @@ clean-pycache:
 	find src -name __pycache__ -o -name '*.pyc' -print0 \
 		| xargs --null rm -rf
 
-## Update files using inject-readme.py
+## Inject content of README.rst to the docstring of __init__.py.
 inject-readme: src/$(PROJECT)/__init__.py
 src/$(PROJECT)/__init__.py: README.rst
 	sed '1,/^"""$$/d' $@ > $@.tail
