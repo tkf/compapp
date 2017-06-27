@@ -120,19 +120,30 @@ class Executable(MixinStrict, Parametric):
         """
 
 
+def iter_plugins(self):
+    from .plugins import PluginWrapper
+    for plugin in props_of(self, Plugin):
+        if isinstance(plugin, PluginWrapper):
+            for subplugin in iter_plugins(plugin):
+                yield subplugin
+        else:
+            yield plugin
+
+
 def call_plugins(self, method):
     from .plugins import DirectoryDataStore, SubDataStore, HashDataStore, \
-        Logger
+        Logger, DumpParameters
     order = {
         DirectoryDataStore: 0,
         SubDataStore: 0,
         HashDataStore: 0,
-        Logger: 1,
+        DumpParameters: 1,
+        Logger: 2,
     }
     # FIXME: Remove sorting or turn this into a public API.  This is a
     # hack to ensure that datastore is available before any .prepare
     # methods, specifically in Logger.prepare.
-    for plugin in sorted(props_of(self, Plugin),
+    for plugin in sorted(iter_plugins(self),
                          key=lambda plugin: order.get(type(plugin), 100)):
         getattr(plugin, method)()
 

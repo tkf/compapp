@@ -136,7 +136,7 @@ def test_force_load_should_not_overwrite_log_file(tmpdir, capsys):
     assert 'Hello from run method.' in logtext
     assert 'Hello from load method.' not in logtext
     assert 'Hello from run method.' in stderr1
-    # assert 'Hello from load method.' in stderr2
+    assert 'Hello from load method.' in stderr2
     assert app2.log.level == app1.log.level
     # FIXME: There is a bug so that the above line of stderr2 fails.
     # Namely, the dumped parameters are not available at the time

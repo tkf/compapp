@@ -311,9 +311,11 @@ class DumpParameters(Plugin):
         with open(owner.datastore.path('params.json'), 'w') as file:
             json.dump(owner.params(nested=True), file)
 
-    def load(self):
+    def prepare(self):
         owner = self._verified_owner()
         if owner is None:
+            return
+        if not owner.should_load():
             return
         with open(owner.datastore.path('params.json')) as file:
             data = json.load(file)
