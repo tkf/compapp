@@ -121,10 +121,12 @@ class Executable(MixinStrict, Parametric):
 
 
 def call_plugins(self, method):
-    from .plugins import BaseDataStore
-    from .plugins import Logger
+    from .plugins import DirectoryDataStore, SubDataStore, HashDataStore, \
+        Logger
     order = {
-        BaseDataStore: 0,
+        DirectoryDataStore: 0,
+        SubDataStore: 0,
+        HashDataStore: 0,
         Logger: 1,
     }
     # FIXME: Remove sorting or turn this into a public API.  This is a

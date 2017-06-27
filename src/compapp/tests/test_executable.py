@@ -29,3 +29,40 @@ def test_load_readonly(tmpdir, chmod):
     app1.mode = 'load'
     app1.execute()
     assert app1.results.data == app0.results.data
+
+
+class RecordRunPath(Assembler):
+
+    runpath = None
+
+    def run(self):
+        self.results.data = {'some': 'data'}
+        self.runpath = 'run'
+
+    def load(self):
+        self.runpath = 'load'
+
+
+def test_auto_run(tmpdir):
+    app = RecordRunPath()
+    app.mode = 'auto'
+    app.datastore.dir = str(tmpdir)
+    app.execute()
+
+    assert set(str(p.basename) for p in tmpdir.listdir()) == \
+        {'params.json', 'meta.json', 'run.log', 'results.json'}
+    assert app.runpath == 'run'
+
+
+def test_auto_load(tmpdir):
+    app1 = RecordRunPath()
+    app1.datastore.dir = str(tmpdir)
+    app1.execute()
+
+    app2 = RecordRunPath()
+    app2.datastore.dir = str(tmpdir)
+    app2.mode = 'load'
+    app2.execute()
+
+    assert app2.runpath == 'load'
+    assert app2.results.data == app1.results.data
