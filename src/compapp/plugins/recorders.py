@@ -2,6 +2,7 @@ import itertools
 import json
 import os
 import sys
+import warnings
 
 from ..base import MultiException
 from ..core import basic_types, private
@@ -174,10 +175,44 @@ class DumpResults(Plugin):
 
     @staticmethod
     def save_results_hdf5(data, path):
+        """
+        Save pandas objects in `data` to a HDFStore at `path`.
+
+        **Implementation notes**
+
+        It is important to note that repeatedly overwrite the same HDF
+        file is a bad practice, since deleting objects in HDF does
+        **not** free the space:
+
+          Can you delete objects in an HDF5 file ? If yes, how ?
+
+          Yes, you can use the H5Ldelete function to delete objects in
+          an HDF5 file (for HDF5 1.6, use H5Gunlink).  Currently,
+          however, **the space where the object was located in the
+          file does not get re-used**.  Therefore the size of the file
+          will remain the same. You can get rid of this unused space
+          in a file by writing the contents of the HDF5 file to a new
+          file.
+
+          --- http://ns1.hdfgroup.org/hdf5-quest.html#del
+
+          found via `HDFStore file size mysteriously increases -
+          Issue #2132 - pandas-dev/pandas
+          <https://github.com/pandas-dev/pandas/issues/2132>`_
+
+        That's why this function first creates a new HDF file at
+        ``path + '.new'`` and then move it to `path`.
+
+        """
         import pandas
-        with pandas.HDFStore(path) as store:
+        new_path = path + '.new'
+        if os.path.exists(new_path):
+            warnings.warn('{} exists. deleting...'.format(new_path))
+            os.remove(new_path)
+        with pandas.HDFStore(new_path) as store:
             for key, value in data.items():
                 store[key] = value
+        os.rename(new_path, path)
     # http://pandas.pydata.org/pandas-docs/stable/io.html#hdf5-pytables
 
     def load(self):
