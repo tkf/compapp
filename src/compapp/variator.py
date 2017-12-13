@@ -1,3 +1,4 @@
+from collections import Counter
 import itertools
 
 from .base import dotted_to_nested, deepmixdicts
@@ -26,6 +27,12 @@ class ParamBuilder(Parametric):
         for key, args in self.logspaces.items():
             names.append(key)
             values.append(numpy.logspace(*args))
+        if len(set(names)) != len(names):
+            counts = Counter(names)
+            raise ValueError('Duplicated keys are found: ' + ', '.join(
+                '{} ({} found)'.format(k, c)
+                for k, c in counts.items() if c > 1
+            ))
         return (dotted_to_nested(dict(zip(names, xs)))
                 for xs in itertools.product(*values))
 

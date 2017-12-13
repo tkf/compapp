@@ -1,7 +1,7 @@
 import pytest
 
 from ..apps import Computer
-from ..variator import Variator
+from ..variator import Variator, ParamBuilder
 
 # executor_choices = Variator.executor.choices
 executor_choices = ['thread', 'dumb', pytest.mark.skip('process')]
@@ -59,3 +59,12 @@ def test_nested(executor):
     )
     app.execute()
     assert [v.x.results.c for v in app.variants] == list(range(2, 12))
+
+
+def test_duplicate_key():
+    builder = ParamBuilder()
+    builder.choices = {'x': [0]}
+    builder.ranges = {'x': [1]}
+    with pytest.raises(ValueError) as record:
+        builder.build_params()
+    assert str(record.value) == 'Duplicated keys are found: x (2 found)'
