@@ -336,7 +336,10 @@ def run_apidoc(_):
     http://www.sphinx-doc.org/en/stable/extdev/appapi.html
     https://github.com/rtfd/readthedocs.org/issues/1139
     """
-    from sphinx.apidoc import main
+    try:
+        from sphinx.ext.apidoc import main
+    except ImportError:
+        from sphinx.apidoc import main
     here = os.path.dirname(os.path.abspath(__file__))
     root = os.path.dirname(os.path.dirname(here))
     main(['--force', '--separate', '--private',
