@@ -314,7 +314,7 @@ class Figure(Plugin):
     figure.
 
     >>> figure()                                       # doctest: +ELLIPSIS
-    <matplotlib.figure.Figure object at ...>
+    <Figure size ... with 0 Axes>
 
     It also has `.subplots` which is just a thin wrapper around
     `matplotlib.pyplot.subplots`:
